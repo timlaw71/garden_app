@@ -1,2 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Square Foot Garden Planner</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --color-bg:#ffffff;--color-bg2:#f8f8f6;--color-bg3:#f1efe8;
+  --color-text:#1a1a18;--color-text2:#5f5e5a;--color-text3:#888780;
+  --color-border:#e0ded6;--color-border2:#c8c6be;
+  --color-green-bg:#eaf3de;--color-green:#3b6d11;--color-green-border:#c0dd97;
+  --color-blue-bg:#e6f1fb;--color-blue:#185fa5;--color-blue-border:#b5d4f4;
+  --color-warn-bg:#faeeda;--color-warn:#633806;
+  --color-danger-bg:#fcebeb;--color-danger:#791f1f;
+  --color-success-bg:#eaf3de;--color-success:#27500a;
+  --radius:8px;--radius-lg:12px;--font:'Inter',system-ui,sans-serif;
+}
+@media(prefers-color-scheme:dark){:root{
+  --color-bg:#1e1e1c;--color-bg2:#2a2a28;--color-bg3:#121210;
+  --color-text:#f0ede6;--color-text2:#b4b2a9;--color-text3:#888780;
+  --color-border:#3a3a38;--color-border2:#505050;
+  --color-green-bg:#173404;--color-green:#c0dd97;--color-green-border:#3b6d11;
+  --color-blue-bg:#042c53;--color-blue:#85b7eb;--color-blue-border:#185fa5;
+  --color-warn-bg:#412402;--color-warn:#fac775;
+  --color-danger-bg:#501313;--color-danger:#f09595;
+  --color-success-bg:#173404;--color-success:#c0dd97;
+}}
+body{font-family:var(--font);background:var(--color-bg3);color:var(--color-text);min-height:100vh}
+.shell{max-width:780px;margin:0 auto;padding:1.5rem 1rem 4rem}
+header{margin-bottom:1.5rem}
+header h1{font-size:22px;font-weight:500;color:var(--color-text)}
+header p{font-size:13px;color:var(--color-text2);margin-top:4px}
+.step-nav{display:flex;gap:0;margin-bottom:1.25rem;border:0.5px solid var(--color-border);border-radius:var(--radius-lg);overflow:hidden;background:var(--color-bg)}
+.step-tab{flex:1;padding:.6rem .5rem;font-size:13px;font-weight:500;color:var(--color-text2);background:transparent;border:none;cursor:pointer;text-align:center;border-right:0.5px solid var(--color-border);font-family:var(--font);transition:background .15s}
+.step-tab:last-child{border-right:none}
+.step-tab.active{background:var(--color-bg2);color:var(--color-text)}
+.step-tab.done{color:var(--color-success)}
+.step-tab .num{display:inline-block;width:18px;height:18px;border-radius:50%;font-size:11px;line-height:18px;text-align:center;border:0.5px solid var(--color-border2);margin-right:5px}
+.step-tab.active .num{background:var(--color-text);color:var(--color-bg);border-color:transparent}
+.step-tab.done .num{background:var(--color-success-bg);color:var(--color-success);border-color:transparent}
+.panel{display:none}.panel.active{display:block}
+.card{background:var(--color-bg);border:0.5px solid var(--color-border);border-radius:var(--radius-lg);padding:1rem 1.25rem;margin-bottom:.75rem}
+.card-title{font-size:13px;font-weight:500;color:var(--color-text);margin-bottom:.75rem}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.field{display:flex;flex-direction:column;gap:4px;flex:1;min-width:100px}
+.field label{font-size:12px;color:var(--color-text2)}
+.sec-label{font-size:11px;font-weight:500;color:var(--color-text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.5rem}
+select,input[type=number],input[type=date],input[type=text]{
+  height:34px;padding:0 10px;border-radius:var(--radius);
+  border:0.5px solid var(--color-border2);background:var(--color-bg);
+  color:var(--color-text);font-size:13px;width:100%;font-family:var(--font)}
+select:focus,input:focus{outline:2px solid var(--color-blue);outline-offset:1px}
+.btn{height:34px;padding:0 14px;border-radius:var(--radius);border:0.5px solid var(--color-border2);background:transparent;cursor:pointer;font-size:13px;color:var(--color-text);font-weight:500;font-family:var(--font);transition:background .12s}
+.btn:hover{background:var(--color-bg2)}
+.btn-primary{background:var(--color-bg2)}
+.btn-green{background:var(--color-green-bg);color:var(--color-green);border-color:var(--color-green-border)}
+.btn-green:hover{opacity:.85}
+.nav-row{display:flex;justify-content:flex-end;gap:8px;margin-top:1rem}
+.bed-entry{display:flex;gap:8px;align-items:center;margin-bottom:.5rem;flex-wrap:wrap}
+.bed-lbl{font-size:12px;color:var(--color-text2);white-space:nowrap}
+.icon-btn{width:28px;height:28px;border-radius:var(--radius);border:0.5px solid var(--color-border);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--color-text2);font-family:var(--font)}
+.icon-btn:hover{background:var(--color-bg2)}
+.frost-result{font-size:12px;margin-top:5px;min-height:14px;color:var(--color-text2)}
+.mode-toggle{display:flex;border:0.5px solid var(--color-border2);border-radius:var(--radius);overflow:hidden;margin-bottom:.875rem;width:fit-content}
+.mode-btn{padding:.4rem 1rem;font-size:12px;font-weight:500;border:none;cursor:pointer;background:transparent;color:var(--color-text2);font-family:var(--font)}
+.mode-btn.active{background:var(--color-bg2);color:var(--color-text)}
+.wiz-q{margin-bottom:.875rem}
+.wiz-label{font-size:13px;font-weight:500;color:var(--color-text);margin-bottom:.5rem}
+.wiz-opts{display:flex;flex-wrap:wrap;gap:6px}
+.wiz-opt{padding:.35rem .9rem;border-radius:20px;border:0.5px solid var(--color-border2);cursor:pointer;font-size:12px;color:var(--color-text2);background:var(--color-bg);font-family:var(--font);transition:background .12s}
+.wiz-opt:hover{background:var(--color-bg2)}
+.wiz-opt.sel{border-color:var(--color-blue);background:var(--color-blue-bg);color:var(--color-blue)}
+.cat-label{font-size:11px;font-weight:500;color:var(--color-text3);text-transform:uppercase;letter-spacing:.05em;margin:.75rem 0 .3rem}
+.plant-check-row{display:flex;align-items:center;gap:8px;padding:.35rem 0;border-bottom:0.5px solid var(--color-border)}
+.plant-check-row:last-child{border-bottom:none}
+.plant-check-row input[type=checkbox]{width:15px;height:15px;cursor:pointer;flex-shrink:0;accent-color:var(--color-blue)}
+.pcr-name{font-size:13px;font-weight:500;color:var(--color-text);flex:1}
+.pcr-meta{font-size:11px;color:var(--color-text3)}
+.qty-ctrl{display:flex;align-items:center;gap:4px;margin-left:auto;flex-shrink:0}
+.qbtn{width:24px;height:24px;border-radius:var(--radius);border:0.5px solid var(--color-border2);background:transparent;cursor:pointer;font-size:14px;color:var(--color-text);display:flex;align-items:center;justify-content:center;font-family:var(--font)}
+.qbtn:hover{background:var(--color-bg2)}
+.qty-val{font-size:12px;font-weight:500;min-width:16px;text-align:center;color:var(--color-text)}
+.bed-tabs{display:flex;gap:5px;margin-bottom:.75rem;flex-wrap:wrap}
+.bed-tab-btn{padding:.35rem .9rem;border-radius:var(--radius);border:0.5px solid var(--color-border);background:transparent;cursor:pointer;font-size:12px;color:var(--color-text2);font-family:var(--font);transition:background .12s}
+.bed-tab-btn.active{background:var(--color-bg2);color:var(--color-text);border-color:var(--color-border2)}
+.bed-grid-panel{display:none}.bed-grid-panel.active{display:block}
+.bed-wrap{overflow-x:auto;margin-bottom:.75rem;padding-bottom:4px}
+.bed-frame{display:inline-block;border:2px solid var(--color-border2);border-radius:10px;padding:6px;background:var(--color-bg2)}
+.bed-grid{display:grid;gap:3px}
+.sq{border-radius:5px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1.5px solid transparent;transition:transform .1s;user-select:none}
+.sq:hover{transform:scale(1.06);z-index:2}
+.sq.empty{background:var(--color-bg3);border-color:var(--color-border)}
+.sq.conflict{outline:2px solid #E24B4A;outline-offset:-2px}
+.sq-label{font-size:9px;font-weight:500;text-align:center;line-height:1.2;padding:2px;pointer-events:none}
+.sq-count{font-size:8px;opacity:.75;pointer-events:none}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:.75rem}
+.stat{background:var(--color-bg2);border-radius:var(--radius);padding:.6rem .9rem}
+.stat-label{font-size:11px;color:var(--color-text2);margin-bottom:2px}
+.stat-val{font-size:18px;font-weight:500;color:var(--color-text)}
+.stat-sub{font-size:10px;color:var(--color-text3);margin-top:1px}
+.legend{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:.75rem}
+.leg-item{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--color-text2);cursor:pointer;padding:3px 8px;border-radius:20px;border:0.5px solid transparent}
+.leg-item:hover{border-color:var(--color-border2);background:var(--color-bg2)}
+.leg-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.warn{background:var(--color-warn-bg);border-radius:var(--radius);padding:.5rem .8rem;font-size:12px;color:var(--color-warn);margin-bottom:.6rem}
+.conflict-warn{background:var(--color-danger-bg);border-radius:var(--radius);padding:.5rem .8rem;font-size:12px;color:var(--color-danger);margin-bottom:.6rem}
+.plant-selector{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:.6rem}
+.pbtn{font-size:12px;padding:4px 10px;border-radius:20px;border:0.5px solid var(--color-border2);cursor:pointer;background:transparent;color:var(--color-text);display:flex;align-items:center;gap:5px;font-family:var(--font)}
+.pbtn:hover{background:var(--color-bg2)}
+.pbtn.active{border-width:1.5px}
+.pbtn .dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.waves-ctrl{display:flex;align-items:center;gap:6px}
+.wbtn{width:24px;height:24px;border-radius:var(--radius);border:0.5px solid var(--color-border2);background:transparent;cursor:pointer;font-size:14px;color:var(--color-text);display:flex;align-items:center;justify-content:center;font-family:var(--font)}
+.wbtn:hover{background:var(--color-bg2)}
+.frost-tag{font-size:10px;padding:1px 6px;border-radius:20px;margin-left:5px;font-weight:500}
+.ft-hardy{background:var(--color-blue-bg);color:var(--color-blue)}
+.ft-semi{background:var(--color-success-bg);color:var(--color-success)}
+.ft-tender{background:var(--color-warn-bg);color:var(--color-warn)}
+.wave{display:flex;align-items:flex-start;gap:10px;padding:.45rem 0;border-bottom:0.5px solid var(--color-border)}
+.wave:last-child{border-bottom:none}
+.wave-dot{width:10px;height:10px;border-radius:50%;margin-top:3px;flex-shrink:0}
+.wave-date{font-size:13px;font-weight:500;color:var(--color-text)}
+.wave-detail{font-size:12px;color:var(--color-text2);margin-top:2px}
+.shop-row{display:flex;justify-content:space-between;align-items:center;padding:.4rem 0;border-bottom:0.5px solid var(--color-border);font-size:13px}
+.shop-row:last-child{border-bottom:none}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <h1><i class="ti ti-plant-2" aria-hidden="true"></i> Square Foot Garden Planner</h1>
+    <p>Plan your raised beds using square foot gardening principles — with auto-fill, succession planting, and frost-date scheduling.</p>
+  </header>
 
-Hello
+  <div class="step-nav">
+    <button class="step-tab active" id="tab0" onclick="goStep(0)"><span class="num">1</span>Setup</button>
+    <button class="step-tab" id="tab1" onclick="goStep(1)"><span class="num">2</span>Plants</button>
+    <button class="step-tab" id="tab2" onclick="goStep(2)"><span class="num">3</span>Grid</button>
+    <button class="step-tab" id="tab3" onclick="goStep(3)"><span class="num">4</span>Calendar</button>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="panel active" id="panel0">
+    <div class="card">
+      <div class="card-title">Household</div>
+      <div class="row">
+        <div class="field"><label>Household size</label>
+          <select id="hh">
+            <option value="1">1 person</option><option value="2">2 people</option>
+            <option value="3">3 people</option><option value="4" selected>4 people</option>
+            <option value="6">6 people</option>
+          </select>
+        </div>
+        <div class="field"><label>ZIP code</label>
+          <input type="text" id="zip" placeholder="e.g. 30040" maxlength="5" oninput="if(this.value.length===5)lookupFrost()">
+        </div>
+      </div>
+      <div id="frost-result" class="frost-result"></div>
+      <div class="row" style="margin-top:.6rem">
+        <div class="field"><label>Last frost date</label><input type="date" id="last-frost"></div>
+        <div class="field"><label>First fall frost</label><input type="date" id="first-fall-frost"></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Raised beds</div>
+      <div id="bed-list"></div>
+      <button class="btn" style="margin-top:.5rem" onclick="addBed()"><i class="ti ti-plus" aria-hidden="true"></i> Add bed</button>
+    </div>
+    <div class="nav-row"><button class="btn btn-primary" onclick="goStep(1)">Next: select plants <i class="ti ti-arrow-right" aria-hidden="true"></i></button></div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="panel" id="panel1">
+    <div class="mode-toggle">
+      <button class="mode-btn active" id="mode-wiz" onclick="setMode('wizard')"><i class="ti ti-wand" aria-hidden="true"></i> Wizard</button>
+      <button class="mode-btn" id="mode-chk" onclick="setMode('checklist')"><i class="ti ti-list-check" aria-hidden="true"></i> Checklist</button>
+    </div>
+    <div id="wizard-panel">
+      <div class="card">
+        <div class="wiz-q">
+          <div class="wiz-label">What are your main goals? (pick all that apply)</div>
+          <div class="wiz-opts" id="wg-goals">
+            <button class="wiz-opt" data-g="salads" onclick="wizToggle(this)">Fresh salads</button>
+            <button class="wiz-opt" data-g="cooking" onclick="wizToggle(this)">Cooking ingredients</button>
+            <button class="wiz-opt" data-g="snacking" onclick="wizToggle(this)">Snacking &amp; fresh eating</button>
+            <button class="wiz-opt" data-g="preserving" onclick="wizToggle(this)">Preserving &amp; canning</button>
+            <button class="wiz-opt" data-g="herbs" onclick="wizToggle(this)">Fresh herbs</button>
+          </div>
+        </div>
+        <div class="wiz-q">
+          <div class="wiz-label">How much time per week?</div>
+          <div class="wiz-opts" id="wg-time">
+            <button class="wiz-opt" data-g="low" onclick="wizSingle('wg-time',this)">Under 1 hour</button>
+            <button class="wiz-opt sel" data-g="med" onclick="wizSingle('wg-time',this)">1–3 hours</button>
+            <button class="wiz-opt" data-g="high" onclick="wizSingle('wg-time',this)">3+ hours</button>
+          </div>
+        </div>
+        <div class="wiz-q">
+          <div class="wiz-label">Experience level?</div>
+          <div class="wiz-opts" id="wg-exp">
+            <button class="wiz-opt" data-g="beginner" onclick="wizSingle('wg-exp',this)">First garden</button>
+            <button class="wiz-opt sel" data-g="some" onclick="wizSingle('wg-exp',this)">Grown before</button>
+            <button class="wiz-opt" data-g="exp" onclick="wizSingle('wg-exp',this)">Experienced</button>
+          </div>
+        </div>
+        <button class="btn btn-green" onclick="runWizard()"><i class="ti ti-sparkles" aria-hidden="true"></i> Suggest plants for me</button>
+      </div>
+      <div id="wiz-results"></div>
+    </div>
+    <div id="checklist-panel" style="display:none"><div id="plant-checklist"></div></div>
+    <div class="card" style="margin-top:.5rem">
+      <div class="card-title" style="margin-bottom:.4rem">Selected <span id="sel-count" style="font-size:12px;color:var(--color-text3);font-weight:400"></span></div>
+      <div id="sel-summary" style="font-size:12px;color:var(--color-text3)">No plants selected yet.</div>
+    </div>
+    <div class="nav-row">
+      <button class="btn" onclick="goStep(0)"><i class="ti ti-arrow-left" aria-hidden="true"></i> Back</button>
+      <button class="btn btn-primary" onclick="goStep(2)">Next: grid <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="panel" id="panel2">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:.75rem;flex-wrap:wrap">
+      <div class="bed-tabs" id="bed-tabs" style="margin-bottom:0;flex:1"></div>
+      <button class="btn btn-green" onclick="autoPopulate()"><i class="ti ti-wand" aria-hidden="true"></i> Auto-fill</button>
+      <button class="btn" onclick="clearCurrentBed()"><i class="ti ti-trash" aria-hidden="true"></i> Clear</button>
+    </div>
+    <div id="bed-grid-panels"></div>
+    <div id="conflict-area"></div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:.5rem;flex-wrap:wrap">
+      <span style="font-size:12px;color:var(--color-text2)">Paint:</span>
+      <div class="plant-selector" id="plant-selector" style="margin-bottom:0"></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:.75rem;flex-wrap:wrap">
+      <span style="font-size:12px;color:var(--color-text2)">Waves for selected:</span>
+      <div class="waves-ctrl">
+        <button class="wbtn" onclick="adjWaves(-1)">−</button>
+        <span id="wave-count" style="font-size:13px;font-weight:500;min-width:16px;text-align:center;color:var(--color-text)">1</span>
+        <button class="wbtn" onclick="adjWaves(1)">+</button>
+      </div>
+      <span id="wave-hint" style="font-size:11px;color:var(--color-text3)"></span>
+    </div>
+    <div class="stats-row" id="grid-stats"></div>
+    <div class="sec-label">Legend</div>
+    <div class="legend" id="legend"></div>
+    <div class="nav-row">
+      <button class="btn" onclick="goStep(1)"><i class="ti ti-arrow-left" aria-hidden="true"></i> Back</button>
+      <button class="btn btn-primary" onclick="goStep(3)">Next: calendar <i class="ti ti-arrow-right" aria-hidden="true"></i></button>
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="panel" id="panel3">
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:.75rem">
+      <span class="frost-tag ft-hardy">Cold-hardy: before last frost</span>
+      <span class="frost-tag ft-semi">Semi-hardy: ~2 wks before</span>
+      <span class="frost-tag ft-tender">Warm-season: wait for warm soil</span>
+    </div>
+    <div class="stats-row" id="cal-summary"></div>
+    <div class="card"><div class="sec-label" style="margin-bottom:.6rem">Succession schedule</div><div id="timeline"></div></div>
+    <div class="card"><div class="sec-label" style="margin-bottom:.6rem">What to buy</div><div id="shopping"></div></div>
+    <div class="nav-row"><button class="btn" onclick="goStep(2)"><i class="ti ti-arrow-left" aria-hidden="true"></i> Back to grid</button></div>
+  </div>
+</div>
+
+<script>
+const PLANTS=[
+  {id:'tomato',  name:'Tomato',     cat:'Vegetables',perSqFt:1, dtm:75, harvest:30,waves:1,color:'#D85A30',tc:'#712B13',note:'transplant', frostOffset:70, frostType:'tender',warmNote:'after soil warms (~May)',    companions:['basil','carrot','marigold'],enemies:['potato'],          goals:['cooking','snacking','preserving'],ease:1,northEdge:true, recSq:{1:1,2:2,3:2,4:3,6:4}},
+  {id:'pepper',  name:'Pepper',     cat:'Vegetables',perSqFt:1, dtm:70, harvest:45,waves:1,color:'#993C1D',tc:'#4A1B0C',note:'transplant', frostOffset:77, frostType:'tender',warmNote:'after soil warms (~mid May)',companions:['basil','carrot'],           enemies:[],                   goals:['cooking','snacking'],             ease:1,northEdge:true, recSq:{1:1,2:1,3:1,4:2,6:3}},
+  {id:'cucumber',name:'Cucumber',   cat:'Vegetables',perSqFt:1, dtm:55, harvest:21,waves:2,color:'#1D9E75',tc:'#085041',note:'transplant', frostOffset:63, frostType:'tender',warmNote:'after soil warms (~May)',    companions:['beans','romaine'],          enemies:['potato'],           goals:['snacking','cooking'],             ease:1,northEdge:true, recSq:{1:1,2:2,3:2,4:3,6:4}},
+  {id:'zucchini',name:'Zucchini',   cat:'Vegetables',perSqFt:1, dtm:50, harvest:21,waves:1,color:'#0F6E56',tc:'#04342C',note:'transplant', frostOffset:63, frostType:'tender',warmNote:'after soil warms (~May)',    companions:[],                           enemies:[],                   goals:['cooking'],                        ease:1,northEdge:true, recSq:{1:1,2:1,3:1,4:2,6:2}},
+  {id:'squash',  name:'Squash',     cat:'Vegetables',perSqFt:1, dtm:50, harvest:21,waves:1,color:'#EF9F27',tc:'#633806',note:'transplant', frostOffset:63, frostType:'tender',warmNote:'after soil warms (~May)',    companions:[],                           enemies:[],                   goals:['cooking'],                        ease:1,northEdge:true, recSq:{1:1,2:1,3:1,4:2,6:2}},
+  {id:'broccoli',name:'Broccoli',   cat:'Vegetables',perSqFt:1, dtm:80, harvest:14,waves:2,color:'#085041',tc:'#E1F5EE',note:'transplant', frostOffset:-28,frostType:'hardy', warmNote:'4 wks before last frost',   companions:['onion'],                    enemies:[],                   goals:['cooking'],                        ease:2,northEdge:false,recSq:{1:1,2:1,3:2,4:2,6:3}},
+  {id:'romaine', name:'Romaine',    cat:'Greens',    perSqFt:4, dtm:60, harvest:14,waves:4,color:'#639922',tc:'#27500A',note:'seed',       frostOffset:-28,frostType:'hardy', warmNote:'4 wks before last frost',   companions:['carrot','cucumber'],        enemies:[],                   goals:['salads'],                         ease:1,northEdge:false,recSq:{1:1,2:2,3:3,4:4,6:6}},
+  {id:'spinach', name:'Spinach',    cat:'Greens',    perSqFt:9, dtm:40, harvest:10,waves:5,color:'#3B6D11',tc:'#EAF3DE',note:'seed',       frostOffset:-42,frostType:'hardy', warmNote:'6 wks before last frost',   companions:[],                           enemies:[],                   goals:['salads','cooking'],               ease:1,northEdge:false,recSq:{1:1,2:1,3:2,4:2,6:3}},
+  {id:'kale',    name:'Kale',       cat:'Greens',    perSqFt:1, dtm:55, harvest:60,waves:2,color:'#5DCAA5',tc:'#04342C',note:'transplant', frostOffset:-28,frostType:'hardy', warmNote:'4 wks before last frost',   companions:[],                           enemies:[],                   goals:['salads','cooking'],               ease:1,northEdge:false,recSq:{1:1,2:1,3:2,4:2,6:3}},
+  {id:'arugula', name:'Arugula',    cat:'Greens',    perSqFt:4, dtm:40, harvest:14,waves:5,color:'#97C459',tc:'#173404',note:'seed',       frostOffset:-35,frostType:'hardy', warmNote:'5 wks before last frost',   companions:[],                           enemies:[],                   goals:['salads'],                         ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:2,6:2}},
+  {id:'chard',   name:'Swiss chard',cat:'Greens',    perSqFt:4, dtm:50, harvest:21,waves:3,color:'#D4537E',tc:'#4B1528',note:'seed',       frostOffset:-21,frostType:'hardy', warmNote:'3 wks before last frost',   companions:[],                           enemies:[],                   goals:['cooking','salads'],               ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:2,6:2}},
+  {id:'collards',name:'Collards',   cat:'Greens',    perSqFt:1, dtm:60, harvest:60,waves:2,color:'#0F6E56',tc:'#E1F5EE',note:'transplant', frostOffset:-28,frostType:'hardy', warmNote:'4 wks before last frost',   companions:[],                           enemies:[],                   goals:['cooking'],                        ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:2,6:3}},
+  {id:'carrot',  name:'Carrot',     cat:'Root veg',  perSqFt:16,dtm:70, harvest:14,waves:2,color:'#BA7517',tc:'#412402',note:'seed',       frostOffset:-21,frostType:'hardy', warmNote:'3 wks before last frost',   companions:['tomato','romaine'],         enemies:[],                   goals:['snacking','cooking'],             ease:1,northEdge:false,recSq:{1:1,2:1,3:2,4:2,6:3}},
+  {id:'radish',  name:'Radish',     cat:'Root veg',  perSqFt:16,dtm:25, harvest:7, waves:6,color:'#E24B4A',tc:'#501313',note:'seed',       frostOffset:-35,frostType:'hardy', warmNote:'5 wks before last frost',   companions:['carrot','spinach'],         enemies:[],                   goals:['snacking','salads'],              ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:1,6:2}},
+  {id:'beet',    name:'Beet',       cat:'Root veg',  perSqFt:9, dtm:60, harvest:14,waves:2,color:'#791F1F',tc:'#FCEBEB',note:'seed',       frostOffset:-21,frostType:'hardy', warmNote:'3 wks before last frost',   companions:[],                           enemies:[],                   goals:['cooking','preserving'],           ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:2,6:2}},
+  {id:'potato',  name:'Potato',     cat:'Root veg',  perSqFt:1, dtm:90, harvest:0, waves:1,color:'#888780',tc:'#2C2C2A',note:'seed potato',frostOffset:-14,frostType:'semi',  warmNote:'2 wks before last frost',   companions:[],                           enemies:['cucumber','tomato'],goals:['cooking','preserving'],           ease:1,northEdge:false,recSq:{1:2,2:4,3:6,4:8,6:12}},
+  {id:'onion',   name:'Onion',      cat:'Root veg',  perSqFt:16,dtm:100,harvest:0, waves:1,color:'#AFA9EC',tc:'#26215C',note:'transplant', frostOffset:-28,frostType:'hardy', warmNote:'4 wks before last frost',   companions:['carrot','tomato'],          enemies:[],                   goals:['cooking','preserving'],           ease:1,northEdge:false,recSq:{1:1,2:1,3:2,4:2,6:3}},
+  {id:'garlic',  name:'Garlic',     cat:'Root veg',  perSqFt:9, dtm:240,harvest:0, waves:1,color:'#D3D1C7',tc:'#2C2C2A',note:'clove',      frostOffset:-210,frostType:'hardy',warmNote:'fall planting',              companions:['tomato','pepper'],          enemies:[],                   goals:['cooking'],                        ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:2,6:2}},
+  {id:'beans',   name:'Bush beans', cat:'Legumes',   perSqFt:9, dtm:50, harvest:14,waves:3,color:'#D4537E',tc:'#4B1528',note:'seed',       frostOffset:63, frostType:'tender',warmNote:'after soil warms (~May)',    companions:['cucumber'],                 enemies:[],                   goals:['cooking','preserving','snacking'],ease:1,northEdge:false,recSq:{1:1,2:2,3:2,4:3,6:4}},
+  {id:'peas',    name:'Snap peas',  cat:'Legumes',   perSqFt:8, dtm:60, harvest:14,waves:2,color:'#C0DD97',tc:'#173404',note:'seed',       frostOffset:-28,frostType:'hardy', warmNote:'4 wks before last frost',   companions:['carrot','spinach'],         enemies:[],                   goals:['snacking'],                       ease:1,northEdge:true, recSq:{1:1,2:1,3:2,4:2,6:3}},
+  {id:'basil',   name:'Basil',      cat:'Herbs',     perSqFt:4, dtm:30, harvest:60,waves:2,color:'#7F77DD',tc:'#26215C',note:'transplant', frostOffset:70, frostType:'tender',warmNote:'after soil warms (~May)',    companions:['tomato','pepper'],          enemies:[],                   goals:['cooking','herbs'],                ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:2,6:2}},
+  {id:'parsley', name:'Parsley',    cat:'Herbs',     perSqFt:4, dtm:70, harvest:90,waves:1,color:'#639922',tc:'#173404',note:'transplant', frostOffset:-14,frostType:'hardy', warmNote:'2 wks before last frost',   companions:[],                           enemies:[],                   goals:['cooking','herbs'],                ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:1,6:2}},
+  {id:'cilantro',name:'Cilantro',   cat:'Herbs',     perSqFt:4, dtm:45, harvest:21,waves:4,color:'#5DCAA5',tc:'#085041',note:'seed',       frostOffset:-21,frostType:'hardy', warmNote:'3 wks before last frost',   companions:[],                           enemies:[],                   goals:['cooking','herbs'],                ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:1,6:2}},
+  {id:'dill',    name:'Dill',       cat:'Herbs',     perSqFt:4, dtm:40, harvest:30,waves:3,color:'#97C459',tc:'#27500A',note:'seed',       frostOffset:-14,frostType:'hardy', warmNote:'2 wks before last frost',   companions:['cucumber'],                 enemies:['tomato'],           goals:['cooking','herbs','preserving'],   ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:1,6:2}},
+  {id:'oregano', name:'Oregano',    cat:'Herbs',     perSqFt:4, dtm:90, harvest:90,waves:1,color:'#BA7517',tc:'#412402',note:'transplant', frostOffset:7,  frostType:'tender',warmNote:'after last frost',           companions:['tomato','pepper'],          enemies:[],                   goals:['cooking','herbs'],                ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:1,6:1}},
+  {id:'thyme',   name:'Thyme',      cat:'Herbs',     perSqFt:4, dtm:90, harvest:90,waves:1,color:'#888780',tc:'#2C2C2A',note:'transplant', frostOffset:7,  frostType:'tender',warmNote:'after last frost',           companions:[],                           enemies:[],                   goals:['cooking','herbs'],                ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:1,6:1}},
+  {id:'chives',  name:'Chives',     cat:'Herbs',     perSqFt:16,dtm:90, harvest:90,waves:1,color:'#AFA9EC',tc:'#26215C',note:'transplant', frostOffset:-14,frostType:'hardy', warmNote:'2 wks before last frost',   companions:['carrot','tomato'],          enemies:[],                   goals:['cooking','herbs'],                ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:1,6:1}},
+  {id:'marigold',name:'Marigold',   cat:'Flowers',   perSqFt:4, dtm:50, harvest:120,waves:1,color:'#EF9F27',tc:'#412402',note:'transplant',frostOffset:21, frostType:'tender',warmNote:'after last frost',           companions:['tomato','pepper','beans'],  enemies:[],                   goals:['salads','snacking','cooking'],    ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:2,6:2}},
+];
+
+const CATS=[...new Set(PLANTS.map(function(x){return x.cat;}))];
+const ZIP_ZONES={'040':'5b','041':'5b','042':'5b','043':'5a','044':'4b','045':'5a','046':'5b','047':'5a','048':'5b','049':'5b','030':'5b','031':'5b','032':'5b','033':'5b','034':'4b','035':'5b','036':'5b','037':'5b','038':'6a','050':'5a','051':'5a','052':'5a','053':'5a','054':'4b','056':'5a','057':'5a','058':'5a','059':'5b','010':'6a','011':'6a','012':'5b','013':'6a','014':'6a','015':'6a','016':'6a','017':'6a','018':'6b','019':'6b','020':'7a','021':'7a','022':'7a','023':'6b','024':'7a','025':'7a','026':'7a','027':'7a','028':'6b','029':'7a','060':'6b','061':'6b','062':'6b','063':'6b','064':'7a','065':'6a','066':'6b','067':'6b','068':'7a','069':'7a','100':'7b','101':'7b','102':'7b','103':'7a','104':'7a','105':'6b','106':'7a','107':'7a','108':'7a','109':'7a','110':'7a','111':'7a','112':'7a','113':'7a','114':'7a','115':'7a','116':'7a','117':'7a','118':'7a','119':'7a','120':'5b','121':'6a','122':'5b','123':'5b','124':'6b','125':'6b','126':'6b','127':'5b','128':'5a','129':'5b','130':'5b','131':'5b','132':'5b','133':'5a','134':'5a','135':'5a','136':'5a','137':'5b','138':'5b','139':'5b','140':'6a','141':'6a','142':'6a','143':'6a','144':'6a','145':'6a','146':'6a','147':'6a','148':'6a','149':'5b','070':'7a','071':'7a','072':'7a','073':'7a','074':'6b','075':'6b','076':'7a','077':'7a','078':'6b','079':'6b','080':'7a','081':'7a','082':'7a','083':'7a','084':'7a','085':'7a','086':'7a','087':'7a','088':'7a','089':'7a','150':'6a','151':'6a','152':'6a','153':'6a','154':'6a','155':'6a','156':'6a','157':'6a','158':'6a','159':'6a','160':'6a','161':'6a','162':'6a','163':'6a','164':'6a','165':'6a','166':'6a','167':'5b','168':'6a','169':'6a','170':'6b','171':'6b','172':'6b','173':'6b','174':'6b','175':'6b','176':'6b','177':'6a','178':'6b','179':'6b','180':'6a','181':'7a','182':'6b','183':'6b','184':'6a','185':'6a','186':'6a','187':'6a','188':'6b','189':'7a','190':'7a','191':'7a','192':'7a','193':'7a','194':'7a','195':'7a','196':'7a','197':'7a','198':'7a','199':'7a','206':'7a','207':'7a','208':'7a','209':'7a','210':'7a','211':'7a','212':'7a','214':'7a','215':'6b','216':'6b','217':'7a','218':'6b','219':'7a','220':'7a','221':'7a','222':'7a','223':'7a','224':'6b','225':'7a','226':'6b','227':'7a','228':'6b','229':'7a','230':'7b','231':'7b','232':'7b','233':'7b','234':'7b','235':'7b','236':'7b','237':'7b','238':'7a','239':'7b','240':'6a','241':'6a','242':'6a','243':'6b','244':'6b','245':'6b','246':'6b','247':'6a','248':'6a','249':'6a','250':'6b','251':'6b','252':'6b','253':'6b','254':'6a','255':'6a','256':'6a','257':'6a','258':'6a','259':'6a','260':'6a','261':'6a','262':'6a','263':'6a','264':'6a','265':'6a','266':'6a','267':'6a','268':'6a','270':'7b','271':'7b','272':'7b','273':'7b','274':'7b','275':'7b','276':'7b','277':'7b','278':'7b','279':'7b','280':'8a','281':'8a','282':'8a','283':'8a','284':'8a','285':'8a','286':'7a','287':'7a','288':'7a','289':'7a','290':'8a','291':'8a','292':'8a','293':'8a','294':'8a','295':'8a','296':'7b','297':'7b','298':'8a','299':'8b','300':'8a','301':'8a','302':'8a','303':'8a','304':'7b','305':'8a','306':'8a','307':'7b','308':'8b','309':'8b','310':'8b','311':'8b','312':'8b','313':'8b','314':'8b','315':'8b','316':'8a','317':'8a','318':'8b','319':'8b','320':'9a','321':'9b','322':'8b','323':'8b','324':'8b','325':'8b','326':'8b','327':'9b','328':'9b','329':'9b','330':'10b','331':'10b','332':'10a','333':'10a','334':'9b','335':'9b','336':'9b','337':'9b','338':'9b','339':'10a','340':'9a','341':'9a','342':'9a','344':'9a','346':'9a','347':'9a','349':'9b','350':'8a','351':'8a','352':'8a','354':'8a','355':'8a','356':'7b','357':'7b','358':'7b','359':'8a','360':'8b','361':'8b','362':'8b','363':'8b','364':'8b','365':'8b','366':'8b','367':'8b','368':'8b','369':'8b','386':'8a','387':'8a','388':'8a','389':'8b','390':'8b','391':'8b','392':'8b','393':'8b','394':'8b','395':'8b','396':'8b','397':'8a','370':'7a','371':'7a','372':'7a','373':'7a','374':'7a','375':'7b','376':'7a','377':'7a','378':'7a','379':'7a','380':'7b','381':'7b','382':'7b','383':'7a','384':'7a','385':'7a','400':'6b','401':'6b','402':'6b','403':'6b','404':'6a','405':'6b','406':'6b','407':'6a','408':'6a','409':'6a','410':'6b','411':'6a','412':'6a','413':'6a','414':'6a','415':'6a','416':'6a','417':'6b','418':'6a','430':'6a','431':'6a','432':'6a','433':'6a','434':'6a','435':'6a','436':'6a','437':'6a','438':'6a','439':'6a','440':'6b','441':'6b','442':'6b','443':'6b','444':'6a','445':'6a','446':'6a','447':'6a','448':'6a','449':'6a','450':'6a','451':'6a','452':'6a','453':'6a','454':'6a','455':'6a','456':'6a','457':'6a','458':'6a','460':'6a','461':'6a','462':'6a','463':'6a','464':'6a','465':'6a','466':'6a','467':'6a','468':'6a','469':'6a','470':'6a','471':'6a','472':'6a','473':'6a','474':'6a','475':'6a','476':'6a','477':'6a','478':'6a','479':'6a','480':'6a','481':'6a','482':'6a','483':'6a','484':'6a','485':'5b','486':'5b','487':'5b','488':'5b','489':'6a','490':'5b','491':'5b','492':'5b','493':'5b','494':'5b','495':'5a','496':'5a','497':'5a','498':'5a','499':'5a','530':'5b','531':'5b','532':'5b','534':'5b','535':'5a','537':'5a','538':'5a','539':'5a','540':'5a','541':'5a','542':'5a','543':'4b','544':'4b','545':'4b','546':'4b','547':'5a','548':'5a','549':'5a','600':'6a','601':'6a','602':'6a','603':'6a','604':'6a','605':'6a','606':'6a','607':'6a','608':'5b','609':'5b','610':'5b','611':'5b','612':'5b','613':'5b','614':'5b','615':'5b','616':'5b','617':'5b','618':'6a','619':'6a','620':'6a','622':'6a','623':'6a','624':'6a','625':'6a','626':'6a','627':'6a','628':'6a','629':'6a','630':'6b','631':'6b','633':'6b','634':'6a','635':'6a','636':'6b','637':'6b','638':'6b','639':'6b','640':'6a','641':'6a','644':'6a','645':'6a','646':'6a','647':'6a','648':'6a','650':'6b','651':'6b','652':'6b','653':'6b','654':'6b','655':'6b','656':'6b','657':'6b','658':'6b','500':'5b','501':'5b','502':'5b','503':'5b','504':'5b','505':'5b','506':'5a','507':'5a','508':'5a','510':'5a','511':'5a','512':'5b','513':'5b','514':'5b','515':'5b','516':'5b','520':'5b','521':'5b','522':'5b','523':'5b','524':'5b','525':'5b','526':'5b','527':'5b','528':'5b','550':'4b','551':'4b','553':'4b','554':'4b','555':'4b','556':'4a','557':'4a','558':'4a','559':'4b','560':'4b','561':'4b','562':'4b','563':'4b','564':'4a','565':'4a','566':'4a','567':'4a','580':'4a','581':'4a','582':'4a','583':'4a','584':'3b','585':'4a','586':'4a','587':'3b','588':'3b','570':'4b','571':'4b','572':'4b','573':'4b','574':'4b','575':'4b','576':'4b','577':'4b','680':'5b','681':'5b','683':'5b','684':'5b','685':'5b','686':'5a','687':'5a','688':'4b','689':'4b','690':'5a','691':'5a','692':'5a','693':'5a','660':'6a','661':'6a','662':'6a','664':'6a','665':'6a','666':'6a','667':'6a','668':'5b','669':'5b','670':'6a','671':'6a','672':'6a','673':'6a','674':'6a','675':'6a','676':'6a','677':'6a','678':'6a','679':'6a','716':'7b','717':'7b','718':'7b','719':'7b','720':'7b','721':'7b','722':'7b','723':'7a','724':'7a','725':'7a','726':'7a','727':'7a','728':'7a','729':'7b','700':'9a','701':'9a','703':'9a','704':'8b','705':'8b','706':'8b','707':'9a','708':'9a','710':'8b','711':'8b','712':'8b','713':'8b','714':'8b','730':'7a','731':'7a','733':'7a','734':'7a','735':'7a','736':'7a','737':'7a','738':'7a','739':'7a','740':'7a','741':'7a','743':'7a','744':'7a','745':'7a','746':'7a','747':'7a','748':'7a','749':'7a','750':'8a','751':'8a','752':'8a','753':'8a','754':'8a','755':'8a','756':'8a','757':'8a','758':'7b','759':'7b','760':'8a','761':'8a','762':'8a','763':'8a','764':'8a','765':'8a','766':'8a','767':'8a','768':'8a','769':'8a','770':'9a','771':'9a','772':'9a','773':'9a','774':'9a','775':'9a','776':'9a','777':'9a','778':'9a','779':'9a','780':'8b','781':'8b','782':'8b','783':'8b','784':'9a','785':'8a','786':'8b','787':'8b','788':'8b','789':'8b','790':'7a','791':'7a','792':'7a','793':'7a','794':'7a','795':'7a','796':'7a','797':'7a','798':'8a','799':'8a','800':'5b','801':'5b','802':'5b','803':'5b','804':'5b','805':'5b','806':'5b','807':'5b','808':'4b','809':'5a','810':'6a','811':'6a','812':'6a','813':'5b','814':'5b','815':'5a','816':'5b','820':'4b','821':'4b','822':'4b','823':'4b','824':'4b','825':'4b','826':'4b','827':'4b','828':'5a','829':'5a','830':'5a','831':'5a','590':'4b','591':'4b','592':'4b','593':'4b','594':'4b','595':'4b','596':'4b','597':'4b','598':'4b','599':'5a','832':'6a','833':'6a','834':'5b','835':'6a','836':'6a','837':'6a','838':'5b','840':'6b','841':'6b','842':'6b','843':'5b','844':'5b','845':'5b','846':'6a','847':'6a','889':'8b','890':'9a','891':'8b','893':'6b','894':'7a','895':'8a','897':'7a','898':'6a','850':'9b','851':'9b','852':'9b','853':'9b','855':'9b','856':'8b','857':'8b','859':'9b','860':'7a','862':'5b','863':'8a','864':'5b','865':'7a','870':'7b','871':'7b','872':'7b','873':'6b','874':'7a','875':'7b','877':'6a','878':'7a','879':'7a','880':'7b','881':'7b','882':'7b','883':'6b','884':'6b','900':'10b','901':'10b','902':'10a','903':'10a','904':'10a','905':'10b','906':'10a','907':'10a','908':'10b','910':'10a','911':'10a','912':'10a','913':'10a','914':'10a','915':'10a','916':'9b','917':'9b','918':'9b','919':'10a','920':'10a','921':'10a','922':'10a','923':'10a','924':'10a','925':'10a','926':'10a','927':'10a','928':'10a','930':'9b','931':'9b','932':'9b','933':'9b','934':'9b','935':'9b','936':'9b','937':'9b','938':'9b','939':'9b','940':'9b','941':'9b','942':'9b','943':'9a','944':'9a','945':'9b','946':'9b','947':'9b','948':'9b','949':'9b','950':'9b','951':'9b','952':'9b','953':'9a','954':'9b','955':'9a','956':'9b','957':'9b','958':'9b','959':'9a','960':'8a','961':'8a','970':'8b','971':'8b','972':'8b','973':'8a','974':'8a','975':'8a','976':'8a','977':'8a','978':'7b','979':'8b','980':'8b','981':'8b','982':'8b','983':'8a','984':'8a','985':'8a','986':'8b','988':'6a','989':'6a','990':'6a','991':'6a','992':'6a','993':'6a','994':'5b','995':'4a','996':'4a','997':'3b','998':'3a','999':'2b','967':'12','968':'12'};
+const ZONE_FROST={'2b':{lf:'Jun 15',ff:'Aug 15'},'3a':{lf:'Jun 1',ff:'Sep 1'},'3b':{lf:'May 15',ff:'Sep 15'},'4a':{lf:'May 15',ff:'Sep 15'},'4b':{lf:'May 1',ff:'Oct 1'},'5a':{lf:'Apr 15',ff:'Oct 15'},'5b':{lf:'Apr 1',ff:'Oct 31'},'6a':{lf:'Apr 1',ff:'Oct 31'},'6b':{lf:'Mar 15',ff:'Nov 15'},'7a':{lf:'Mar 15',ff:'Nov 15'},'7b':{lf:'Mar 1',ff:'Nov 30'},'8a':{lf:'Feb 15',ff:'Dec 1'},'8b':{lf:'Feb 1',ff:'Dec 15'},'9a':{lf:'Jan 30',ff:'Dec 15'},'9b':{lf:'Jan 15',ff:'Dec 31'},'10a':{lf:'Jan 1',ff:'Dec 31'},'10b':{lf:'Jan 1',ff:'Dec 31'},'12':{lf:'Jan 1',ff:'Dec 31'}};
+
+var beds=[{id:0,name:'Bed 1',L:8,W:4,grid:[]}];
+var bedIdCtr=1;
+var selPlants={};
+var selPlant='tomato';
+var activeBed=0;
+var painting=false;
+var lastIdx=null;
+
+function pl(id){return PLANTS.find(function(x){return x.id===id;});}
+function activeBedObj(){return beds.find(function(b){return b.id===activeBed;})||beds[0];}
+function getHH(){return parseInt(document.getElementById('hh').value)||4;}
+
+function renderBedList(){
+  document.getElementById('bed-list').innerHTML=beds.map(function(b){
+    return'<div class="bed-entry">'+
+      '<input type="text" value="'+b.name+'" style="width:100px;flex:none" onchange="bedName('+b.id+',this.value)">'+
+      '<span class="bed-lbl">L:</span>'+
+      '<input type="number" value="'+b.L+'" min="2" max="20" step="1" style="width:52px;flex:none" onchange="bedDim('+b.id+',\'L\',this.value)">'+
+      '<span class="bed-lbl">W:</span>'+
+      '<input type="number" value="'+b.W+'" min="2" max="8" step="1" style="width:52px;flex:none" onchange="bedDim('+b.id+',\'W\',this.value)">'+
+      '<span class="bed-lbl" style="font-size:11px;color:var(--color-text3)">'+b.L*b.W+' sq ft</span>'+
+      (beds.length>1?'<button class="icon-btn" onclick="removeBed('+b.id+')" aria-label="Remove"><i class="ti ti-x" style="font-size:12px"></i></button>':'')+
+    '</div>';
+  }).join('');
+}
+function bedName(id,v){var b=beds.find(function(x){return x.id===id;});if(b)b.name=v;}
+function bedDim(id,dim,v){
+  var b=beds.find(function(x){return x.id===id;});if(!b)return;
+  b[dim]=Math.max(2,parseInt(v)||2);
+  b.grid=Array(b.L*b.W).fill(null);renderBedList();
+}
+function addBed(){beds.push({id:bedIdCtr++,name:'Bed '+(beds.length+1),L:8,W:4,grid:Array(32).fill(null)});renderBedList();}
+function removeBed(id){beds=beds.filter(function(b){return b.id!==id;});if(activeBed===id)activeBed=beds[0].id;renderBedList();}
+
+function lookupFrost(){
+  var zip=document.getElementById('zip').value.trim();
+  var el=document.getElementById('frost-result');
+  if(zip.length!==5||!/^\d{5}$/.test(zip)){el.textContent='Enter valid 5-digit ZIP.';return;}
+  var zone=ZIP_ZONES[zip.slice(0,3)];
+  if(!zone){el.textContent='ZIP not found — enter dates manually.';return;}
+  var frost=ZONE_FROST[zone];if(!frost){el.textContent='Zone '+zone+' — enter manually.';return;}
+  var yr=new Date().getFullYear();
+  function parse(s){var d=new Date(s+' '+yr);return isNaN(d)?null:d;}
+  var sd=parse(frost.lf),ed=parse(frost.ff);
+  if(sd)document.getElementById('last-frost').value=sd.toISOString().slice(0,10);
+  if(ed)document.getElementById('first-fall-frost').value=ed.toISOString().slice(0,10);
+  el.innerHTML='<span style="color:#27500a"><i class="ti ti-check" aria-hidden="true"></i> Zone '+zone+' — last frost ~'+frost.lf+', fall frost ~'+frost.ff+'</span>';
+}
+
+function wizToggle(btn){btn.classList.toggle('sel');}
+function wizSingle(gid,btn){
+  document.querySelectorAll('#'+gid+' .wiz-opt').forEach(function(b){b.classList.remove('sel');});
+  btn.classList.add('sel');
+}
+
+function runWizard(){
+  var goals=[];
+  document.querySelectorAll('#wg-goals .wiz-opt.sel').forEach(function(b){goals.push(b.getAttribute('data-g'));});
+  var timeEl=document.querySelector('#wg-time .wiz-opt.sel');
+  var expEl=document.querySelector('#wg-exp .wiz-opt.sel');
+  var expVal=expEl?expEl.getAttribute('data-g'):'some';
+  var hh=getHH();
+  var totalSqFt=beds.reduce(function(s,b){return s+b.L*b.W;},0);
+  var scored=PLANTS.map(function(plant){
+    var score=0;
+    if(goals.length===0||plant.goals.some(function(g){return goals.indexOf(g)>=0;}))score+=3;
+    if(expVal==='beginner'&&plant.ease>1)score-=2;
+    if(plant.id==='garlic'&&expVal==='beginner')score-=3;
+    score+=plant.recSq[hh]||1;
+    return{plant:plant,score:score};
+  }).filter(function(x){return x.score>0;}).sort(function(a,b){return b.score-a.score;});
+  var sqLeft=Math.floor(totalSqFt*0.85);
+  var suggested=[];
+  for(var i=0;i<scored.length;i++){
+    var item=scored[i];var sq=item.plant.recSq[hh]||1;
+    if(sq<=sqLeft){suggested.push(item.plant.id);sqLeft-=sq;}
+    if(sqLeft<=0)break;
+  }
+  suggested.forEach(function(id){if(!selPlants[id])selPlants[id]={waves:pl(id).waves};});
+  var html='<div class="card"><div class="card-title"><i class="ti ti-sparkles" aria-hidden="true"></i> Suggested plants</div>';
+  suggested.forEach(function(id){
+    var plant=pl(id);var waves=selPlants[id]?selPlants[id].waves:plant.waves;
+    html+='<div class="plant-check-row">'+
+      '<input type="checkbox" checked id="wr-'+id+'" onchange="toggleSel(\''+id+'\',this.checked)">'+
+      '<label for="wr-'+id+'" class="pcr-name">'+plant.name+'</label>'+
+      '<span class="pcr-meta">'+plant.perSqFt+'/ft² · '+plant.cat+'</span>'+
+      '<div class="qty-ctrl">'+
+        '<button class="qbtn" onclick="adjSelWaves(\''+id+'\',-1,\'wv\')">−</button>'+
+        '<span class="qty-val" id="wv-'+id+'">'+waves+'</span>'+
+        '<button class="qbtn" onclick="adjSelWaves(\''+id+'\',1,\'wv\')">+</button>'+
+        '<span style="font-size:10px;color:var(--color-text3);margin-left:3px">waves</span>'+
+      '</div></div>';
+  });
+  html+='</div>';
+  document.getElementById('wiz-results').innerHTML=html;
+  updateSelSummary();
+}
+
+function renderChecklist(){
+  var hh=getHH();var html='';
+  CATS.forEach(function(cat){
+    html+='<div class="cat-label">'+cat+'</div><div class="card" style="padding:.5rem 1rem">';
+    PLANTS.filter(function(plant){return plant.cat===cat;}).forEach(function(plant){
+      var checked=selPlants[plant.id]?'checked':'';
+      var waves=selPlants[plant.id]?selPlants[plant.id].waves:plant.waves;
+      html+='<div class="plant-check-row">'+
+        '<input type="checkbox" '+checked+' id="cl-'+plant.id+'" onchange="toggleSel(\''+plant.id+'\',this.checked)">'+
+        '<label for="cl-'+plant.id+'" class="pcr-name">'+plant.name+'</label>'+
+        '<span class="pcr-meta">'+plant.perSqFt+'/ft² · rec '+(plant.recSq[hh]||1)+' sq</span>'+
+        '<div class="qty-ctrl">'+
+          '<button class="qbtn" onclick="adjSelWaves(\''+plant.id+'\',-1,\'cv\')">−</button>'+
+          '<span class="qty-val" id="cv-'+plant.id+'">'+waves+'</span>'+
+          '<button class="qbtn" onclick="adjSelWaves(\''+plant.id+'\',1,\'cv\')">+</button>'+
+          '<span style="font-size:10px;color:var(--color-text3);margin-left:3px">waves</span>'+
+        '</div></div>';
+    });
+    html+='</div>';
+  });
+  document.getElementById('plant-checklist').innerHTML=html;
+}
+
+function toggleSel(id,checked){
+  if(checked)selPlants[id]={waves:pl(id).waves};else delete selPlants[id];
+  updateSelSummary();
+}
+function adjSelWaves(id,d,prefix){
+  if(!selPlants[id])selPlants[id]={waves:pl(id)?pl(id).waves:1};
+  selPlants[id].waves=Math.max(1,Math.min(6,selPlants[id].waves+d));
+  var el=document.getElementById(prefix+'-'+id);if(el)el.textContent=selPlants[id].waves;
+}
+function updateSelSummary(){
+  var ids=Object.keys(selPlants);
+  document.getElementById('sel-count').textContent=ids.length?'('+ids.length+' crops)':'';
+  document.getElementById('sel-summary').innerHTML=ids.length
+    ?ids.map(function(id){var plant=pl(id);return'<span style="display:inline-flex;align-items:center;gap:4px;margin-right:8px;margin-bottom:4px"><span style="width:8px;height:8px;border-radius:2px;background:'+plant.color+';display:inline-block"></span>'+plant.name+'</span>';}).join('')
+    :'<span>No plants selected yet.</span>';
+}
+function setMode(m){
+  document.getElementById('wizard-panel').style.display=m==='wizard'?'block':'none';
+  document.getElementById('checklist-panel').style.display=m==='checklist'?'block':'none';
+  document.getElementById('mode-wiz').classList.toggle('active',m==='wizard');
+  document.getElementById('mode-chk').classList.toggle('active',m==='checklist');
+  if(m==='checklist')renderChecklist();
+}
+
+function goStep(s){
+  if(s===2){beds.forEach(function(b){if(!b.grid||b.grid.length!==b.L*b.W)b.grid=Array(b.L*b.W).fill(null);});renderBedTabs();renderActiveBed();renderPlantSelector();}
+  if(s===3)buildCalendar();
+  document.querySelectorAll('.panel').forEach(function(el,i){el.classList.toggle('active',i===s);});
+  document.querySelectorAll('.step-tab').forEach(function(el,i){el.classList.toggle('active',i===s);if(i<s)el.classList.add('done');else el.classList.remove('done');});
+}
+
+function renderBedTabs(){
+  document.getElementById('bed-tabs').innerHTML=beds.map(function(b){
+    return'<button class="bed-tab-btn'+(b.id===activeBed?' active':'')+'" onclick="switchBed('+b.id+')">'+b.name+' <span style="font-size:10px;color:var(--color-text3)">'+b.L+'×'+b.W+'</span></button>';
+  }).join('');
+  document.getElementById('bed-grid-panels').innerHTML=beds.map(function(b){
+    return'<div class="bed-grid-panel'+(b.id===activeBed?' active':'')+'" id="bgp-'+b.id+'"><div class="bed-wrap"><div class="bed-frame"><div class="bed-grid" id="bg-'+b.id+'"></div></div></div></div>';
+  }).join('');
+}
+function switchBed(id){
+  activeBed=id;
+  document.querySelectorAll('.bed-tab-btn').forEach(function(btn,i){btn.classList.toggle('active',beds[i]&&beds[i].id===id);});
+  document.querySelectorAll('.bed-grid-panel').forEach(function(p){p.classList.remove('active');});
+  var panel=document.getElementById('bgp-'+id);if(panel)panel.classList.add('active');
+  renderActiveBed();
+}
+function sqSz(L){return Math.max(36,Math.min(64,Math.floor((720-L*3)/L)));}
+
+function renderActiveBed(){
+  var b=activeBedObj();
+  if(!b.grid||b.grid.length!==b.L*b.W)b.grid=Array(b.L*b.W).fill(null);
+  var sz=sqSz(b.L);
+  var el=document.getElementById('bg-'+b.id);if(!el)return;
+  el.style.gridTemplateColumns='repeat('+b.L+','+sz+'px)';el.innerHTML='';
+  var cf=getConflicts(b);
+  document.getElementById('conflict-area').innerHTML=cf.msgs.length?cf.msgs.map(function(m){return'<div class="conflict-warn"><i class="ti ti-alert-triangle" aria-hidden="true"></i> '+m+'</div>';}).join(''):'';
+  for(var i=0;i<b.W*b.L;i++){
+    (function(idx){
+      var id=b.grid[idx];var plant=id?pl(id):null;
+      var div=document.createElement('div');
+      div.className='sq'+(plant?'':' empty')+(cf.bad.has(idx)?' conflict':'');
+      div.style.width=sz+'px';div.style.height=sz+'px';
+      if(plant){div.style.background=plant.color+'22';div.style.borderColor=plant.color;}
+      if(sz>=48&&plant)div.innerHTML='<span class="sq-label" style="color:'+plant.tc+'">'+plant.name+'</span><span class="sq-count" style="color:'+plant.tc+'">'+plant.perSqFt+'/ft²</span>';
+      else if(plant)div.innerHTML='<span class="sq-label" style="color:'+plant.tc+';font-size:8px">'+plant.name.slice(0,5)+'</span>';
+      div.addEventListener('mousedown',function(e){e.preventDefault();painting=true;doPaint(b,idx);});
+      div.addEventListener('mouseenter',function(){if(painting)doPaint(b,idx);});
+      div.addEventListener('mouseup',function(){painting=false;lastIdx=null;});
+      div.addEventListener('contextmenu',function(e){e.preventDefault();b.grid[idx]=null;renderActiveBed();});
+      el.appendChild(div);
+    })(i);
+  }
+  document.removeEventListener('mouseup',endPaint);document.addEventListener('mouseup',endPaint);
+  renderGridStats();renderLegend();updateWaveUI();
+}
+function endPaint(){painting=false;lastIdx=null;}
+function doPaint(b,i){if(lastIdx===i)return;lastIdx=i;if(selPlant&&!selPlants[selPlant])selPlants[selPlant]={waves:pl(selPlant)?pl(selPlant).waves:1};b.grid[i]=selPlant;renderActiveBed();}
+
+function getConflicts(b){
+  var bad=new Set(),msgs=new Set();
+  b.grid.forEach(function(id,i){
+    if(!id)return;var plant=pl(id);
+    var r=Math.floor(i/b.L),c=i%b.L,nb=[];
+    if(r>0)nb.push(i-b.L);if(r<b.W-1)nb.push(i+b.L);if(c>0)nb.push(i-1);if(c<b.L-1)nb.push(i+1);
+    nb.forEach(function(j){var nid=b.grid[j];if(!nid)return;if(plant.enemies.indexOf(nid)>=0){bad.add(i);bad.add(j);msgs.add([plant.name,pl(nid).name].sort().join(' and ')+' are bad neighbors');}});
+  });
+  return{bad:bad,msgs:[...msgs]};
+}
+function clearCurrentBed(){var b=activeBedObj();b.grid=Array(b.L*b.W).fill(null);renderActiveBed();}
+
+function autoPopulate(){
+  var hh=getHH();var ids=Object.keys(selPlants);
+  if(!ids.length){document.getElementById('conflict-area').innerHTML='<div class="warn">Select plants in step 2 first.</div>';return;}
+  var sorted=ids.slice().sort(function(a,b){var pa=pl(a),pb=pl(b);if(pa.northEdge&&!pb.northEdge)return -1;if(!pa.northEdge&&pb.northEdge)return 1;return(pb.recSq[hh]||1)-(pa.recSq[hh]||1);});
+  var remaining={};sorted.forEach(function(id){remaining[id]=pl(id).recSq[hh]||1;});
+  beds.forEach(function(b){
+    b.grid=Array(b.L*b.W).fill(null);
+    sorted.forEach(function(id){
+      if(remaining[id]<=0)return;var plant=pl(id);var placed=0;
+      for(var i=0;i<b.grid.length&&placed<remaining[id];i++){
+        var row=Math.floor(i/b.L);
+        if(plant.northEdge&&row>1)continue;if(!plant.northEdge&&row===0)continue;
+        if(b.grid[i]!==null)continue;
+        var r=Math.floor(i/b.L),c=i%b.L,nb=[];
+        if(r>0)nb.push(i-b.L);if(r<b.W-1)nb.push(i+b.L);if(c>0)nb.push(i-1);if(c<b.L-1)nb.push(i+1);
+        if(nb.some(function(j){return b.grid[j]&&plant.enemies.indexOf(b.grid[j])>=0;}))continue;
+        b.grid[i]=id;placed++;
+      }
+      if(placed<remaining[id]){
+        for(var i=0;i<b.grid.length&&placed<remaining[id];i++){
+          if(b.grid[i]!==null)continue;
+          var r=Math.floor(i/b.L),c=i%b.L,nb=[];
+          if(r>0)nb.push(i-b.L);if(r<b.W-1)nb.push(i+b.L);if(c>0)nb.push(i-1);if(c<b.L-1)nb.push(i+1);
+          if(nb.some(function(j){return b.grid[j]&&plant.enemies.indexOf(b.grid[j])>=0;}))continue;
+          b.grid[i]=id;placed++;
+        }
+      }
+      remaining[id]-=placed;
+    });
+  });
+  renderActiveBed();
+}
+
+function renderPlantSelector(){
+  var ids=Object.keys(selPlants);
+  if(!ids.length){document.getElementById('plant-selector').innerHTML='<span style="font-size:12px;color:var(--color-text3)">No plants selected — go back to step 2</span>';return;}
+  if(ids.indexOf(selPlant)<0)selPlant=ids[0];
+  document.getElementById('plant-selector').innerHTML=ids.map(function(id){
+    var plant=pl(id);
+    return'<button class="pbtn'+(selPlant===id?' active':'')+'" id="pbtn-'+id+'" onclick="selPlant=\''+id+'\';highlightBtn()" style="'+(selPlant===id?'border-color:'+plant.color+';background:'+plant.color+'18':'')+'">'+'<span class="dot" style="background:'+plant.color+'"></span>'+plant.name+'</button>';
+  }).join('');
+  updateWaveUI();
+}
+function highlightBtn(){
+  document.querySelectorAll('.pbtn').forEach(function(b){b.classList.remove('active');b.style.cssText='';});
+  var plant=pl(selPlant);var btn=document.getElementById('pbtn-'+selPlant);
+  if(btn&&plant){btn.classList.add('active');btn.style.borderColor=plant.color;btn.style.background=plant.color+'18';}
+  updateWaveUI();
+}
+function adjWaves(d){
+  if(!selPlants[selPlant])selPlants[selPlant]={waves:pl(selPlant)?pl(selPlant).waves:1};
+  selPlants[selPlant].waves=Math.max(1,Math.min(6,selPlants[selPlant].waves+d));
+  document.getElementById('wave-count').textContent=selPlants[selPlant].waves;
+}
+function updateWaveUI(){
+  var plant=pl(selPlant);if(!plant)return;
+  var w=selPlants[selPlant]?selPlants[selPlant].waves:plant.waves;
+  document.getElementById('wave-count').textContent=w;
+  document.getElementById('wave-hint').textContent=plant.warmNote+' · every '+(plant.harvest||Math.round(plant.dtm*.3))+'d';
+}
+function renderGridStats(){
+  var totalSq=beds.reduce(function(s,b){return s+b.L*b.W;},0);
+  var usedSq=beds.reduce(function(s,b){return s+b.grid.filter(Boolean).length;},0);
+  var counts={};beds.forEach(function(b){b.grid.forEach(function(id){if(id)counts[id]=(counts[id]||0)+1;});});
+  var totalPlants=Object.keys(counts).reduce(function(s,id){return s+counts[id]*pl(id).perSqFt;},0);
+  document.getElementById('grid-stats').innerHTML=
+    '<div class="stat"><div class="stat-label">Total sq ft</div><div class="stat-val">'+totalSq+'</div><div class="stat-sub">'+beds.length+' bed'+(beds.length>1?'s':'')+'</div></div>'+
+    '<div class="stat"><div class="stat-label">Planted</div><div class="stat-val">'+usedSq+'</div><div class="stat-sub">'+Math.round(usedSq/totalSq*100)+'% used</div></div>'+
+    '<div class="stat"><div class="stat-label">Open</div><div class="stat-val">'+(totalSq-usedSq)+'</div><div class="stat-sub">sq ft free</div></div>'+
+    '<div class="stat"><div class="stat-label">Total plants</div><div class="stat-val">'+totalPlants+'</div><div class="stat-sub">to source</div></div>';
+}
+function renderLegend(){
+  var ids=[...new Set(beds.reduce(function(a,b){return a.concat(b.grid.filter(Boolean));},[])) ];
+  document.getElementById('legend').innerHTML=ids.length
+    ?ids.map(function(id){var plant=pl(id);return'<div class="leg-item" onclick="selPlant=\''+id+'\';highlightBtn()"><div class="leg-dot" style="background:'+plant.color+'"></div>'+plant.name+' ('+plant.perSqFt+'/ft²)</div>';}).join('')
+    :'<span style="font-size:12px;color:var(--color-text3)">Paint squares or auto-fill to see legend</span>';
+}
+
+function addDays(d,n){var r=new Date(d);r.setDate(r.getDate()+n);return r;}
+function fmtDate(d){return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});}
+function buildCalendar(){
+  var lfStr=document.getElementById('last-frost').value;
+  var ffStr=document.getElementById('first-fall-frost').value;
+  var lf=lfStr?new Date(lfStr):new Date();var ff=ffStr?new Date(ffStr):null;
+  var counts={};beds.forEach(function(b){b.grid.forEach(function(id){if(id)counts[id]=(counts[id]||0)+1;});});
+  if(!Object.keys(counts).length){document.getElementById('timeline').innerHTML='<div style="font-size:13px;color:var(--color-text3)">Fill the grid first.</div>';document.getElementById('shopping').innerHTML='';document.getElementById('cal-summary').innerHTML='';return;}
+  var allWaves=[],shopRows=[];
+  Object.keys(counts).forEach(function(id){
+    var sqFt=counts[id];var plant=pl(id);var waves=selPlants[id]?selPlants[id].waves:plant.waves;
+    var interval=plant.harvest||Math.round(plant.dtm*.3);var firstPlant=addDays(lf,plant.frostOffset);var total=0;
+    for(var w=0;w<waves;w++){
+      var pd=addDays(firstPlant,w*interval);if(ff&&pd>ff)break;
+      var ppw=Math.ceil(sqFt/waves)*plant.perSqFt;
+      allWaves.push({plant:plant,pd:pd,hd:addDays(pd,plant.dtm),sqFt:Math.ceil(sqFt/waves),plantsPerWave:ppw,w:w,waves:waves});total+=ppw;
+    }
+    shopRows.push({plant:plant,total:total,sqFt:sqFt,waves:waves});
+  });
+  allWaves.sort(function(a,b){return a.pd-b.pd;});
+  var span=allWaves.length?Math.round((allWaves[allWaves.length-1].hd-lf)/864e5):0;
+  var tc={hardy:'ft-hardy',semi:'ft-semi',tender:'ft-tender'};
+  document.getElementById('cal-summary').innerHTML=
+    '<div class="stat"><div class="stat-label">Crops</div><div class="stat-val">'+Object.keys(counts).length+'</div><div class="stat-sub">varieties</div></div>'+
+    '<div class="stat"><div class="stat-label">Plantings</div><div class="stat-val">'+allWaves.length+'</div><div class="stat-sub">total waves</div></div>'+
+    '<div class="stat"><div class="stat-label">Season span</div><div class="stat-val">'+span+'d</div><div class="stat-sub">from last frost</div></div>'+
+    '<div class="stat"><div class="stat-label">Total plants</div><div class="stat-val">'+shopRows.reduce(function(s,r){return s+r.total;},0)+'</div><div class="stat-sub">to source</div></div>';
+  document.getElementById('timeline').innerHTML=allWaves.map(function(w){
+    return'<div class="wave"><div class="wave-dot" style="background:'+w.plant.color+'"></div>'+
+    '<div><div class="wave-date">'+fmtDate(w.pd)+' — '+w.plant.name+(w.waves>1?' (wave '+(w.w+1)+'/'+w.waves+')':'')+
+    '<span class="frost-tag '+tc[w.plant.frostType]+'">'+w.plant.warmNote+'</span></div>'+
+    '<div class="wave-detail">Plant '+w.plantsPerWave+' '+w.plant.note+'s in '+w.sqFt+' sq ft · harvest ~'+fmtDate(w.hd)+'</div></div></div>';
+  }).join('');
+  document.getElementById('shopping').innerHTML=shopRows.map(function(r){
+    return'<div class="shop-row"><div><span style="font-weight:500;color:'+r.plant.color+'">'+r.plant.name+'</span>'+
+    '<span style="font-size:12px;color:var(--color-text2);margin-left:8px">'+r.sqFt+' sq ft · '+r.waves+' wave'+(r.waves>1?'s':'')+'</span></div>'+
+    '<div style="font-weight:500">'+r.total+' '+r.plant.note+'s</div></div>';
+  }).join('');
+}
+
+var today=new Date(),later=new Date(today);later.setMonth(later.getMonth()+6);
+document.getElementById('last-frost').value=today.toISOString().slice(0,10);
+document.getElementById('first-fall-frost').value=later.toISOString().slice(0,10);
+beds[0].grid=Array(32).fill(null);
+renderBedList();
+</script>
+</body>
+</html>
