@@ -121,6 +121,15 @@ select:focus,input:focus{outline:2px solid var(--color-blue);outline-offset:1px}
 .waves-ctrl{display:flex;align-items:center;gap:6px}
 .wbtn{width:24px;height:24px;border-radius:var(--radius);border:0.5px solid var(--color-border2);background:transparent;cursor:pointer;font-size:14px;color:var(--color-text);display:flex;align-items:center;justify-content:center;font-family:var(--font)}
 .wbtn:hover{background:var(--color-bg2)}
+.plant-cal{width:100%;border-collapse:collapse;font-size:11px;table-layout:fixed}
+.plant-cal th{font-size:10px;font-weight:500;color:var(--color-text2);text-align:center;padding:3px 2px;border-bottom:0.5px solid var(--color-border);white-space:nowrap;overflow:hidden}
+.plant-cal td{padding:2px 0;vertical-align:middle}
+.plant-cal .pname{font-size:11px;font-weight:500;color:var(--color-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:6px;width:80px}
+.cal-bar-cell{position:relative;height:18px}
+.cal-bar{position:absolute;height:10px;top:4px;border-radius:3px;opacity:.85}
+.cal-legend{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:.75rem}
+.cal-legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--color-text2)}
+.cal-legend-dot{width:20px;height:8px;border-radius:2px}
 .frost-tag{font-size:10px;padding:1px 6px;border-radius:20px;margin-left:5px;font-weight:500}
 .ft-hardy{background:var(--color-blue-bg);color:var(--color-blue)}
 .ft-semi{background:var(--color-success-bg);color:var(--color-success)}
@@ -884,6 +893,90 @@ function renderLegend(){
     :'<span style="font-size:12px;color:var(--color-text3)">Paint squares or auto-fill to see legend</span>';
 }
 
+function buildPlantCalendar(counts, lf, ff){
+  var el=document.getElementById('plant-calendar');
+  if(!el)return;
+  if(!Object.keys(counts).length){el.innerHTML='<div style="font-size:12px;color:var(--color-text3)">Fill the grid first.</div>';return;}
+
+  var yr=lf.getFullYear();
+  var yearStart=new Date(yr,0,1);
+  var yearEnd=new Date(yr,11,31);
+  var totalDays=366;
+
+  function dayOfYear(d){return Math.round((d-yearStart)/864e5);}
+  function pct(d){return Math.max(0,Math.min(100,dayOfYear(d)/totalDays*100));}
+  function pctSpan(d1,d2){return Math.max(0,Math.min(100-pct(d1),(d2-d1)/864e5/totalDays*100));}
+
+  // Month headers
+  var months=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  var monthPcts=months.map(function(m,i){return new Date(yr,i,1);}).map(function(d){return dayOfYear(d)/totalDays*100;});
+
+  var html='<table class="plant-cal"><thead><tr>';
+  html+='<th class="pname"></th>';
+  months.forEach(function(m,i){
+    var w=(i<11?(monthPcts[i+1]-monthPcts[i]):(100-monthPcts[i])).toFixed(2);
+    html+='<th style="width:'+w+'%">'+m+'</th>';
+  });
+  html+='</tr></thead><tbody>';
+
+  // Frost date markers
+  var lfPct=pct(lf).toFixed(2);
+  var ffPct=ff?pct(ff).toFixed(2):null;
+
+  Object.keys(counts).forEach(function(id){
+    var plant=pl(id);if(!plant)return;
+    var isTransplant=['transplant','set/transplant'].indexOf(plant.note)>=0;
+    var waves=selPlants[id]?selPlants[id].waves:plant.waves;
+    var interval=plant.harvest||Math.round(plant.dtm*.3);
+    var firstOutdoor=addDays(lf,plant.frostOffset);
+    var indoorStart=isTransplant?addDays(firstOutdoor,-49):null;// ~7 wks before transplant
+
+    html+='<tr><td class="pname" title="'+plant.name+'">'+plant.name+'</td>';
+    html+='<td colspan="'+months.length+'" style="position:relative;padding:0">';
+    html+='<div class="cal-bar-cell" style="width:100%;position:relative">';
+
+    // Frost line markers
+    html+='<div style="position:absolute;top:0;bottom:0;left:'+lfPct+'%;width:1px;background:rgba(100,100,200,.3);z-index:1"></div>';
+    if(ffPct)html+='<div style="position:absolute;top:0;bottom:0;left:'+ffPct+'%;width:1px;background:rgba(200,100,100,.3);z-index:1"></div>';
+
+    // Start indoors bar
+    if(indoorStart&&indoorStart>=yearStart&&indoorStart<=firstOutdoor){
+      var left=pct(indoorStart).toFixed(2);
+      var width=pctSpan(indoorStart,firstOutdoor).toFixed(2);
+      if(parseFloat(width)>0.2)html+='<div class="cal-bar" style="left:'+left+'%;width:'+width+'%;background:#185fa5;opacity:.7"></div>';
+    }
+
+    // Each succession wave — outdoor sow/transplant bar
+    for(var w=0;w<waves;w++){
+      var pd=addDays(firstOutdoor,w*interval);
+      if(pd>yearEnd||pd<yearStart)continue;
+      var hd=addDays(pd,plant.dtm);
+      var sowLeft=pct(pd).toFixed(2);
+      var sowW=Math.max(0.5,(interval>0&&w<waves-1?pctSpan(pd,addDays(pd,Math.min(interval,14))):pctSpan(pd,addDays(pd,14)))).toFixed(2);
+      html+='<div class="cal-bar" style="left:'+sowLeft+'%;width:'+sowW+'%;background:#27500a"></div>';
+      // Harvest bar
+      if(plant.harvest>0&&hd>=yearStart&&hd<=yearEnd){
+        var harvLeft=pct(hd).toFixed(2);
+        var harvEnd=addDays(hd,plant.harvest);
+        var harvW=pctSpan(hd,harvEnd).toFixed(2);
+        if(parseFloat(harvW)>0.3)html+='<div class="cal-bar" style="left:'+harvLeft+'%;width:'+harvW+'%;background:#ba7517"></div>';
+      }
+    }
+
+    html+='</div></td></tr>';
+  });
+
+  html+='</tbody></table>';
+
+  // Frost date legend below
+  html+='<div style="display:flex;gap:12px;margin-top:.4rem;font-size:10px;color:var(--color-text3)">';
+  html+='<span style="display:flex;align-items:center;gap:4px"><span style="display:inline-block;width:1px;height:12px;background:rgba(100,100,200,.5)"></span>Last frost ('+fmtDate(lf)+')</span>';
+  if(ff)html+='<span style="display:flex;align-items:center;gap:4px"><span style="display:inline-block;width:1px;height:12px;background:rgba(200,100,100,.5)"></span>Fall frost ('+fmtDate(ff)+')</span>';
+  html+='</div>';
+
+  el.innerHTML=html;
+}
+
 function addDays(d,n){var r=new Date(d);r.setDate(r.getDate()+n);return r;}
 function fmtDate(d){return d.toLocaleDateString('en-US',{month:'short',day:'numeric'});}
 function buildCalendar(){
@@ -906,6 +999,7 @@ function buildCalendar(){
   allWaves.sort(function(a,b){return a.pd-b.pd;});
   var span=allWaves.length?Math.round((allWaves[allWaves.length-1].hd-lf)/864e5):0;
   var tc={hardy:'ft-hardy',semi:'ft-semi',tender:'ft-tender'};
+  buildPlantCalendar(counts,lf,ff);
   document.getElementById('cal-summary').innerHTML=
     '<div class="stat"><div class="stat-label">Crops</div><div class="stat-val">'+Object.keys(counts).length+'</div><div class="stat-sub">varieties</div></div>'+
     '<div class="stat"><div class="stat-label">Plantings</div><div class="stat-val">'+allWaves.length+'</div><div class="stat-sub">total waves</div></div>'+
