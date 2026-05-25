@@ -88,10 +88,7 @@ select:focus,input:focus{outline:2px solid var(--color-blue);outline-offset:1px}
 .bed-tabs{display:flex;gap:5px;margin-bottom:.75rem;flex-wrap:wrap}
 .bed-tab-btn{padding:.35rem .9rem;border-radius:var(--radius);border:0.5px solid var(--color-border);background:transparent;cursor:pointer;font-size:12px;color:var(--color-text2);font-family:var(--font);transition:background .12s}
 .bed-tab-btn.active{background:var(--color-bg2);color:var(--color-text);border-color:var(--color-border2)}
-.beds-container{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:1rem;margin-bottom:.75rem}
-.bed-grid-panel{display:block}
-.bed-panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.4rem}
-.bed-panel-title{font-size:13px;font-weight:500;color:var(--color-text)}
+.bed-grid-panel{display:none}.bed-grid-panel.active{display:block}
 .bed-panel-active{outline:2px solid var(--color-blue);border-radius:12px;padding:4px}
 .bed-wrap{overflow-x:auto;margin-bottom:0;padding-bottom:4px}
 .bed-frame{display:inline-block;border:2px solid var(--color-border2);border-radius:10px;padding:5px;background:var(--color-bg2)}
@@ -253,7 +250,7 @@ select:focus,input:focus{outline:2px solid var(--color-blue);outline-offset:1px}
       <button class="btn btn-green" onclick="autoPopulate()"><i class="ti ti-wand" aria-hidden="true"></i> Auto-fill</button>
       <button class="btn" onclick="clearCurrentBed()"><i class="ti ti-trash" aria-hidden="true"></i> Clear</button>
     </div>
-    <div class="beds-container" id="bed-grid-panels"></div>
+    <div id="bed-grid-panels"></div>
     <div id="conflict-area"></div>
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:.5rem;flex-wrap:wrap">
       <span style="font-size:12px;color:var(--color-text2)">Paint:</span>
@@ -540,7 +537,7 @@ function setMode(m){
 
 function goStep(s){
   if(s===1){updateSeasonHint();}
-  if(s===2){beds.forEach(function(b){if(!b.grid||b.grid.length!==b.L*b.W)b.grid=Array(b.L*b.W).fill(null);});renderBedTabs();setTimeout(function(){renderAllBeds();renderPlantSelector();},50);}
+  if(s===2){beds.forEach(function(b){if(!b.grid||b.grid.length!==b.L*b.W)b.grid=Array(b.L*b.W).fill(null);});renderBedTabs();setTimeout(function(){renderActiveBed();renderPlantSelector();},50);}
   if(s===3)buildCalendar();
   document.querySelectorAll('.panel').forEach(function(el,i){el.classList.toggle('active',i===s);});
   document.querySelectorAll('.step-tab').forEach(function(el,i){el.classList.toggle('active',i===s);if(i<s)el.classList.add('done');else el.classList.remove('done');});
@@ -587,18 +584,23 @@ function updateBedTabBadges(){
 function renderBedTabs(){
   document.getElementById('bed-tabs').innerHTML=beds.map(function(b){
     var conflicts=getBedEnemyConflicts(b);
-    var badge=conflicts.length?'<span class="conflict-badge" style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:#fcebeb;color:#791f1f;font-size:10px;font-weight:500;margin-left:4px">'+conflicts.length+'</span>':'';
+    var softConflicts=getBedSoftConflicts(b);
+    var badge=conflicts.length
+      ?'<span class="conflict-badge" style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:#fcebeb;color:#791f1f;font-size:10px;font-weight:500;margin-left:4px">'+conflicts.length+'</span>'
+      :softConflicts.length
+        ?'<span class="soft-badge" style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:#e6f1fb;color:#185fa5;font-size:10px;font-weight:500;margin-left:4px">i</span>'
+        :'';
     return'<button class="bed-tab-btn'+(b.id===activeBed?' active':'')+'" onclick="switchBed('+b.id+')">'+b.name+' <span style="font-size:10px;color:var(--color-text3)">'+b.L+'×'+b.W+'</span>'+badge+'</button>';
   }).join('');
   document.getElementById('bed-grid-panels').innerHTML=beds.map(function(b){
-    return'<div class="bed-grid-panel'+(b.id===activeBed?' active':'')+'" id="bgp-'+b.id+'"><div class="bed-wrap"><div class="bed-frame"><div class="bed-grid" id="bg-'+b.id+'"></div></div></div></div>';
+    return'<div class="bed-grid-panel'+(b.id===activeBed?' active':'')+'" id="bgp-'+b.id+'"><div class="bed-wrap"><div class="bed-frame" id="bframe-'+b.id+'"><div class="bed-grid" id="bg-'+b.id+'"></div></div></div></div>';
   }).join('');
 }
 function selectActiveBed(id){
   activeBed=id;
   document.querySelectorAll('.bed-tab-btn').forEach(function(btn,i){btn.classList.toggle('active',beds[i]&&beds[i].id===id);});
-  document.querySelectorAll('.bed-frame').forEach(function(f){f.classList.remove('bed-panel-active');});
-  var frame=document.getElementById('bframe-'+id);if(frame)frame.classList.add('bed-panel-active');
+  document.querySelectorAll('.bed-grid-panel').forEach(function(p){p.classList.remove('active');});
+  var panel=document.getElementById('bgp-'+id);if(panel)panel.classList.add('active');
   renderActiveBed();
 }
 function switchBed(id){selectActiveBed(id);}
@@ -607,8 +609,6 @@ function sqSz(L){return Math.max(36,Math.min(64,Math.floor((720-L*3)/L)));}
 function renderAllBeds(){
   beds.forEach(function(b){renderBedById(b.id);});
   renderGridStats();renderLegend();updateWaveUI();updateBedTabBadges();
-  document.querySelectorAll('.bed-frame').forEach(function(f){f.classList.remove('bed-panel-active');});
-  var frame=document.getElementById('bframe-'+activeBed);if(frame)frame.classList.add('bed-panel-active');
 }
 
 function renderActiveBed(){renderBedById(activeBed);}
@@ -646,8 +646,7 @@ function renderBedById(bid){
   }
   document.removeEventListener('mouseup',endPaint);document.addEventListener('mouseup',endPaint);
   renderGridStats();renderLegend();updateWaveUI();updateBedTabBadges();
-  document.querySelectorAll('.bed-frame').forEach(function(f){f.classList.remove('bed-panel-active');});
-  var frame=document.getElementById('bframe-'+activeBed);if(frame)frame.classList.add('bed-panel-active');
+
 }
 function endPaint(){painting=false;lastIdx=null;}
 function doPaint(b,i){if(lastIdx===i)return;lastIdx=i;if(selPlant&&!selPlants[selPlant])selPlants[selPlant]={waves:pl(selPlant)?pl(selPlant).waves:1};b.grid[i]=selPlant;renderActiveBed();}
