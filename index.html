@@ -896,6 +896,7 @@ function buildPlantCalendar(counts, lf, ff){
   var el=document.getElementById('plant-calendar');
   if(!el)return;
   if(!Object.keys(counts).length){el.innerHTML='<div style="font-size:12px;color:var(--color-text3)">Fill the grid first.</div>';return;}
+  if(!lf||isNaN(lf.getTime())){el.innerHTML='<div class="warn">Enter frost dates in step 1 first.</div>';return;}
 
   var yr=lf.getFullYear();
   var yearStart=new Date(yr,0,1);
@@ -981,7 +982,12 @@ function fmtDate(d){return d.toLocaleDateString('en-US',{month:'short',day:'nume
 function buildCalendar(){
   var lfStr=document.getElementById('last-frost').value;
   var ffStr=document.getElementById('first-fall-frost').value;
-  var lf=lfStr?new Date(lfStr):new Date();var ff=ffStr?new Date(ffStr):null;
+  if(!lfStr){
+    document.getElementById('plant-calendar').innerHTML='<div class="warn"><i class="ti ti-alert-triangle" aria-hidden="true"></i> Enter your ZIP code or frost dates in step 1 to generate accurate planting dates.</div>';
+    document.getElementById('timeline').innerHTML='<div class="warn"><i class="ti ti-alert-triangle" aria-hidden="true"></i> Enter your ZIP code or frost dates in step 1 first.</div>';
+    document.getElementById('shopping').innerHTML='';document.getElementById('cal-summary').innerHTML='';return;
+  }
+  var lf=new Date(lfStr);var ff=ffStr?new Date(ffStr):null;
   var counts={};beds.forEach(function(b){b.grid.forEach(function(id){if(id)counts[id]=(counts[id]||0)+1;});});
   if(!Object.keys(counts).length){document.getElementById('timeline').innerHTML='<div style="font-size:13px;color:var(--color-text3)">Fill the grid first.</div>';document.getElementById('shopping').innerHTML='';document.getElementById('cal-summary').innerHTML='';return;}
   var allWaves=[],shopRows=[];
@@ -993,7 +999,7 @@ function buildCalendar(){
       var ppw=Math.ceil(sqFt/waves)*plant.perSqFt;
       allWaves.push({plant:plant,pd:pd,hd:addDays(pd,plant.dtm),sqFt:Math.ceil(sqFt/waves),plantsPerWave:ppw,w:w,waves:waves});total+=ppw;
     }
-    shopRows.push({plant:plant,total:total,sqFt:sqFt,waves:waves});
+    if(total>0)shopRows.push({plant:plant,total:total,sqFt:sqFt,waves:waves});
   });
   allWaves.sort(function(a,b){return a.pd-b.pd;});
   var span=allWaves.length?Math.round((allWaves[allWaves.length-1].hd-lf)/864e5):0;
