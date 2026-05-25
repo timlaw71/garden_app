@@ -469,10 +469,26 @@ function getBedEnemyConflicts(b){
   return pairs;
 }
 
+function updateBedTabBadges(){
+  document.querySelectorAll('.bed-tab-btn').forEach(function(btn,i){
+    var b=beds[i];if(!b)return;
+    var conflicts=getBedEnemyConflicts(b);
+    var existing=btn.querySelector('.conflict-badge');
+    if(existing)btn.removeChild(existing);
+    if(conflicts.length){
+      var badge=document.createElement('span');
+      badge.className='conflict-badge';
+      badge.style.cssText='display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:#fcebeb;color:#791f1f;font-size:10px;font-weight:500;margin-left:4px';
+      badge.textContent=conflicts.length;
+      btn.appendChild(badge);
+    }
+  });
+}
+
 function renderBedTabs(){
   document.getElementById('bed-tabs').innerHTML=beds.map(function(b){
     var conflicts=getBedEnemyConflicts(b);
-    var badge=conflicts.length?'<span style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:#fcebeb;color:#791f1f;font-size:10px;font-weight:500;margin-left:4px">'+conflicts.length+'</span>':'';
+    var badge=conflicts.length?'<span class="conflict-badge" style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:#fcebeb;color:#791f1f;font-size:10px;font-weight:500;margin-left:4px">'+conflicts.length+'</span>':'';
     return'<button class="bed-tab-btn'+(b.id===activeBed?' active':'')+'" onclick="switchBed('+b.id+')">'+b.name+' <span style="font-size:10px;color:var(--color-text3)">'+b.L+'×'+b.W+'</span>'+badge+'</button>';
   }).join('');
   document.getElementById('bed-grid-panels').innerHTML=beds.map(function(b){
@@ -517,7 +533,7 @@ function renderActiveBed(){
     })(i);
   }
   document.removeEventListener('mouseup',endPaint);document.addEventListener('mouseup',endPaint);
-  renderGridStats();renderLegend();updateWaveUI();renderBedTabs();document.querySelectorAll('.bed-grid-panel').forEach(function(p){p.classList.remove('active');});var ap=document.getElementById('bgp-'+activeBed);if(ap)ap.classList.add('active');
+  renderGridStats();renderLegend();updateWaveUI();updateBedTabBadges();
 }
 function endPaint(){painting=false;lastIdx=null;}
 function doPaint(b,i){if(lastIdx===i)return;lastIdx=i;if(selPlant&&!selPlants[selPlant])selPlants[selPlant]={waves:pl(selPlant)?pl(selPlant).waves:1};b.grid[i]=selPlant;renderActiveBed();}
