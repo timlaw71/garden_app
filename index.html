@@ -377,6 +377,62 @@ function seasonDots(plant){
 
 var selectedSeasons=['spring','summer','fall','year-round'];
 
+function detectCurrentSeason(){
+  var today=new Date();
+  var lfStr=document.getElementById('last-frost').value;
+  var ffStr=document.getElementById('first-fall-frost').value;
+  var detected=[];
+
+  if(lfStr&&ffStr){
+    // Accurate detection using frost dates
+    var lf=new Date(lfStr);
+    var ff=new Date(ffStr);
+    // Normalize to current year
+    var yr=today.getFullYear();
+    lf=new Date(lf.toISOString().slice(5)); // month-day only
+    ff=new Date(ff.toISOString().slice(5));
+    var lfThis=new Date(yr+'-'+( lfStr.slice(5)));
+    var ffThis=new Date(yr+'-'+(ffStr.slice(5)));
+    var summerStart=new Date(lfThis);summerStart.setDate(summerStart.getDate()+63);
+    var fallStart=new Date(ffThis);fallStart.setDate(fallStart.getDate()-70);
+    var springStart=new Date(lfThis);springStart.setDate(springStart.getDate()-42);
+
+    if(today>=springStart&&today<lfThis){
+      detected=['spring'];
+    } else if(today>=lfThis&&today<summerStart){
+      detected=['spring','summer'];// transition window
+    } else if(today>=summerStart&&today<fallStart){
+      detected=['summer'];
+    } else if(today>=fallStart&&today<=ffThis){
+      detected=['fall'];
+    } else if(today>ffThis){
+      detected=['spring'];// planning for next year
+    } else {
+      detected=['spring'];
+    }
+  } else {
+    // Fallback: detect by month alone
+    var mo=today.getMonth()+1;// 1-12
+    if(mo<=2)detected=['spring'];// Jan-Feb: start indoors for spring
+    else if(mo<=4)detected=['spring'];// Mar-Apr: spring planting
+    else if(mo<=8)detected=['summer'];// May-Aug: summer
+    else if(mo<=10)detected=['fall'];// Sep-Oct: fall
+    else detected=['spring'];// Nov-Dec: plan for next year
+  }
+  return detected;
+}
+
+function applySeasonDetection(){
+  var detected=detectCurrentSeason();
+  selectedSeasons=detected.concat(['year-round']);// always include year-round
+  // Update pill UI
+  document.querySelectorAll('.season-btn').forEach(function(btn){
+    var s=btn.getAttribute('data-s');
+    btn.classList.toggle('active',selectedSeasons.indexOf(s)>=0);
+  });
+  updateSeasonHint();
+}
+
 function toggleSeason(btn){
   var s=btn.getAttribute('data-s');
   var idx=selectedSeasons.indexOf(s);
@@ -398,6 +454,22 @@ function toggleSeason(btn){
     var wizRes=document.getElementById('wiz-results');
     if(wizRes&&wizRes.children.length>0)runWizard();
   }
+}
+
+function plantNowBadge(plant){
+  var today=new Date();
+  var lfStr=document.getElementById('last-frost').value;
+  var ffStr=document.getElementById('first-fall-frost').value;
+  if(!lfStr)return '';
+  var yr=today.getFullYear();
+  var lf=new Date(yr+'-'+lfStr.slice(5));
+  var ff=ffStr?new Date(yr+'-'+ffStr.slice(5)):null;
+  var firstPlant=new Date(lf);firstPlant.setDate(firstPlant.getDate()+plant.frostOffset);
+  var lastPlant=ff?new Date(ff):new Date(lf);lastPlant.setDate(lastPlant.getDate()+(plant.harvest||30));
+  if(today>=firstPlant&&today<=lastPlant){
+    return'<span style="display:inline-flex;align-items:center;font-size:9px;font-weight:600;padding:1px 6px;border-radius:20px;background:#27500a;color:#c0dd97;margin-left:6px;letter-spacing:.03em">PLANT NOW</span>';
+  }
+  return '';
 }
 
 function plantInSeason(plant){
@@ -547,7 +619,7 @@ function renderChecklist(){
       var waves=selPlants[plant.id]?selPlants[plant.id].waves:plant.waves;
       html+='<div class="plant-check-row">'+
         '<input type="checkbox" '+checked+' id="cl-'+plant.id+'" onchange="toggleSel(\''+plant.id+'\',this.checked)">'+
-        '<label for="cl-'+plant.id+'" class="pcr-name">'+plant.name+seasonDots(plant)+'</label>'+
+        '<label for="cl-'+plant.id+'" class="pcr-name">'+plant.name+seasonDots(plant)+plantNowBadge(plant)+'</label>'+
         '<span class="pcr-meta">'+plant.perSqFt+'/ft² · rec '+(plant.recSq[hh]||1)+' sq</span>'+
         '<span class="pcr-meta" style="display:block;margin-top:1px;font-style:italic">'+plant.warmNote+'</span>'+
         '<div class="qty-ctrl">'+
@@ -589,7 +661,7 @@ function setMode(m){
 }
 
 function goStep(s){
-  if(s===1){updateSeasonHint();}
+  if(s===1){applySeasonDetection();renderChecklist();}
   if(s===2){beds.forEach(function(b){if(!b.grid||b.grid.length!==b.L*b.W)b.grid=Array(b.L*b.W).fill(null);});renderBedTabs();setTimeout(function(){renderActiveBed();renderPlantSelector();},50);}
   if(s===3)buildCalendar();
   document.querySelectorAll('.panel').forEach(function(el,i){el.classList.toggle('active',i===s);});
@@ -1077,6 +1149,7 @@ function buildCalendar(){
 }
 
 var today=new Date(),later=new Date(today);later.setMonth(later.getMonth()+6);
+setTimeout(function(){applySeasonDetection();},100);
 document.getElementById('last-frost').value=today.toISOString().slice(0,10);
 document.getElementById('first-fall-frost').value=later.toISOString().slice(0,10);
 beds[0].grid=Array(32).fill(null);
