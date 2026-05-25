@@ -30,7 +30,11 @@
 }}
 body{font-family:var(--font);background:var(--color-bg3);color:var(--color-text);min-height:100vh}
 .shell{max-width:780px;margin:0 auto;padding:1.5rem 1rem 4rem}
-header{margin-bottom:1.5rem}
+header{margin-bottom:.75rem}
+.app-legend{display:flex;flex-wrap:wrap;gap:14px;padding:.5rem .75rem;background:var(--color-bg);border:0.5px solid var(--color-border);border-radius:var(--radius-lg);margin-bottom:1.25rem;font-size:11px;color:var(--color-text2)}
+.app-legend-section{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.app-legend-divider{width:0.5px;height:16px;background:var(--color-border);margin:0 4px}
+.leg-item-app{display:flex;align-items:center;gap:4px}
 header h1{font-size:22px;font-weight:500;color:var(--color-text)}
 header p{font-size:13px;color:var(--color-text2);margin-top:4px}
 .step-nav{display:flex;gap:0;margin-bottom:1.25rem;border:0.5px solid var(--color-border);border-radius:var(--radius-lg);overflow:hidden;background:var(--color-bg)}
@@ -73,14 +77,18 @@ select:focus,input:focus{outline:2px solid var(--color-blue);outline-offset:1px}
 .wiz-opt{padding:.35rem .9rem;border-radius:20px;border:0.5px solid var(--color-border2);cursor:pointer;font-size:12px;color:var(--color-text2);background:var(--color-bg);font-family:var(--font);transition:background .12s}
 .wiz-opt:hover{background:var(--color-bg2)}
 .wiz-opt.sel{border-color:var(--color-blue);background:var(--color-blue-bg);color:var(--color-blue)}
-.season-btn{padding:.4rem .9rem;border-radius:20px;border:0.5px solid var(--color-border2);cursor:pointer;font-size:13px;font-weight:500;font-family:var(--font);opacity:.45;transition:opacity .15s}
-.season-btn.active{opacity:1}
+.season-btn{padding:.4rem .9rem;border-radius:20px;border:1.5px solid transparent;cursor:pointer;font-size:13px;font-weight:500;font-family:var(--font);transition:opacity .15s,border-color .15s;opacity:.35}
+.season-btn.active{opacity:1;border-width:2px}
 .cat-label{font-size:11px;font-weight:500;color:var(--color-text3);text-transform:uppercase;letter-spacing:.05em;margin:.75rem 0 .3rem}
-.plant-check-row{display:flex;align-items:center;gap:8px;padding:.35rem 0;border-bottom:0.5px solid var(--color-border)}
+.plant-check-row{display:flex;align-items:flex-start;gap:8px;padding:.35rem 0;border-bottom:0.5px solid var(--color-border)}
 .plant-check-row:last-child{border-bottom:none}
 .plant-check-row input[type=checkbox]{width:15px;height:15px;cursor:pointer;flex-shrink:0;accent-color:var(--color-blue)}
-.pcr-name{font-size:13px;font-weight:500;color:var(--color-text);flex:1}
+.pcr-name{font-size:13px;font-weight:500;color:var(--color-text);flex:1;padding-top:1px}
 .pcr-meta{font-size:11px;color:var(--color-text3)}
+.season-dots{display:inline-flex;gap:3px;align-items:center;margin-left:6px;vertical-align:middle}
+.sdot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
+.season-legend-bar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:.75rem;padding:.5rem .75rem;background:var(--color-bg2);border-radius:var(--radius);font-size:11px;color:var(--color-text2)}
+.season-legend-bar span{display:flex;align-items:center;gap:4px}
 .qty-ctrl{display:flex;align-items:center;gap:4px;margin-left:auto;flex-shrink:0}
 .qbtn{width:24px;height:24px;border-radius:var(--radius);border:0.5px solid var(--color-border2);background:transparent;cursor:pointer;font-size:14px;color:var(--color-text);display:flex;align-items:center;justify-content:center;font-family:var(--font)}
 .qbtn:hover{background:var(--color-bg2)}
@@ -147,6 +155,28 @@ select:focus,input:focus{outline:2px solid var(--color-blue);outline-offset:1px}
     <p>Plan your raised beds using square foot gardening principles — with auto-fill, succession planting, and frost-date scheduling.</p>
   </header>
 
+  <div class="app-legend">
+    <div class="app-legend-section">
+      <span style="font-weight:500;color:var(--color-text)">Season</span>
+      <div class="leg-item-app"><span class="sdot" style="background:#185fa5"></span>Spring</div>
+      <div class="leg-item-app"><span class="sdot" style="background:#ba7517"></span>Summer</div>
+      <div class="leg-item-app"><span class="sdot" style="background:#27500a"></span>Fall</div>
+      <div class="leg-item-app"><span class="sdot" style="background:#888780"></span>Year-round</div>
+    </div>
+    <div class="app-legend-divider"></div>
+    <div class="app-legend-section">
+      <span style="font-weight:500;color:var(--color-text)">Planting calendar</span>
+      <div class="leg-item-app"><span style="display:inline-block;width:18px;height:8px;border-radius:2px;background:#185fa5;opacity:.8"></span>Start indoors</div>
+      <div class="leg-item-app"><span style="display:inline-block;width:18px;height:8px;border-radius:2px;background:#27500a"></span>Sow / transplant outside</div>
+      <div class="leg-item-app"><span style="display:inline-block;width:18px;height:8px;border-radius:2px;background:#ba7517"></span>Harvest window</div>
+    </div>
+    <div class="app-legend-divider"></div>
+    <div class="app-legend-section">
+      <span style="font-weight:500;color:var(--color-text)">Bed conflicts</span>
+      <div class="leg-item-app"><span class="sdot" style="background:#791f1f"></span>Hard conflict — separate beds</div>
+      <div class="leg-item-app"><span class="sdot" style="background:#185fa5"></span>Soft conflict — prefer separate</div>
+    </div>
+  </div>
   <div class="step-nav">
     <button class="step-tab active" id="tab0" onclick="goStep(0)"><span class="num">1</span>Setup</button>
     <button class="step-tab" id="tab1" onclick="goStep(1)"><span class="num">2</span>Plants</button>
@@ -187,7 +217,7 @@ select:focus,input:focus{outline:2px solid var(--color-blue);outline-offset:1px}
   <!-- STEP 2 -->
   <div class="panel" id="panel1">
     <div class="card" style="margin-bottom:.75rem">
-      <div class="card-title" style="margin-bottom:.5rem">Which seasons are you planning?</div>
+      <div class="card-title" style="margin-bottom:.5rem">Which seasons are you planning? <span style="font-size:11px;font-weight:400;color:var(--color-text3)">Toggle on/off · at least one required</span></div>
       <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:.5rem">
         <button class="season-btn active" data-s="spring" onclick="toggleSeason(this)" style="background:#e6f1fb;color:#185fa5;border-color:#b5d4f4"><i class="ti ti-seeding" aria-hidden="true"></i> Spring</button>
         <button class="season-btn active" data-s="summer" onclick="toggleSeason(this)" style="background:#faeeda;color:#633806;border-color:#fac775"><i class="ti ti-sun" aria-hidden="true"></i> Summer</button>
@@ -331,6 +361,20 @@ var selPlant='tomato';
 var activeBed=0;
 var painting=false;
 var lastIdx=null;
+var SEASON_COLORS={
+  'spring':'#185fa5',
+  'summer':'#ba7517',
+  'fall':'#27500a',
+  'year-round':'#888780'
+};
+
+function seasonDots(plant){
+  if(!plant.seasons)return '';
+  return '<span class="season-dots">'+plant.seasons.map(function(s){
+    return'<span class="sdot" style="background:'+( SEASON_COLORS[s]||'#888')+'" title="'+s+'"></span>';
+  }).join('')+'</span>';
+}
+
 var selectedSeasons=['spring','summer','fall','year-round'];
 
 function toggleSeason(btn){
@@ -346,8 +390,14 @@ function toggleSeason(btn){
   }
   autoAdjustDates();
   updateSeasonHint();
-  if(document.getElementById('checklist-panel').style.display!=='none')renderChecklist();
-  if(document.getElementById('wiz-results').innerHTML)runWizard();
+  // Always re-render whichever plant view is active
+  if(document.getElementById('checklist-panel').style.display!=='none'){
+    renderChecklist();
+  } else {
+    // Re-run wizard if results are showing, otherwise do nothing
+    var wizRes=document.getElementById('wiz-results');
+    if(wizRes&&wizRes.children.length>0)runWizard();
+  }
 }
 
 function plantInSeason(plant){
@@ -474,8 +524,8 @@ function runWizard(){
     var plant=pl(id);var waves=selPlants[id]?selPlants[id].waves:plant.waves;
     html+='<div class="plant-check-row">'+
       '<input type="checkbox" checked id="wr-'+id+'" onchange="toggleSel(\''+id+'\',this.checked)">'+
-      '<label for="wr-'+id+'" class="pcr-name">'+plant.name+'</label>'+
-      '<span class="pcr-meta">'+plant.perSqFt+'/ft² · '+plant.cat+'</span>'+
+      '<label for="wr-'+id+'" class="pcr-name">'+plant.name+seasonDots(plant)+'</label>'+
+      '<span class="pcr-meta">'+plant.perSqFt+'/ft² · '+plant.cat+' · '+plant.warmNote+'</span>'+
       '<div class="qty-ctrl">'+
         '<button class="qbtn" onclick="adjSelWaves(\''+id+'\',-1,\'wv\')">−</button>'+
         '<span class="qty-val" id="wv-'+id+'">'+waves+'</span>'+
@@ -497,8 +547,9 @@ function renderChecklist(){
       var waves=selPlants[plant.id]?selPlants[plant.id].waves:plant.waves;
       html+='<div class="plant-check-row">'+
         '<input type="checkbox" '+checked+' id="cl-'+plant.id+'" onchange="toggleSel(\''+plant.id+'\',this.checked)">'+
-        '<label for="cl-'+plant.id+'" class="pcr-name">'+plant.name+'</label>'+
+        '<label for="cl-'+plant.id+'" class="pcr-name">'+plant.name+seasonDots(plant)+'</label>'+
         '<span class="pcr-meta">'+plant.perSqFt+'/ft² · rec '+(plant.recSq[hh]||1)+' sq</span>'+
+        '<span class="pcr-meta" style="display:block;margin-top:1px;font-style:italic">'+plant.warmNote+'</span>'+
         '<div class="qty-ctrl">'+
           '<button class="qbtn" onclick="adjSelWaves(\''+plant.id+'\',-1,\'cv\')">−</button>'+
           '<span class="qty-val" id="cv-'+plant.id+'">'+waves+'</span>'+
@@ -533,6 +584,8 @@ function setMode(m){
   document.getElementById('mode-wiz').classList.toggle('active',m==='wizard');
   document.getElementById('mode-chk').classList.toggle('active',m==='checklist');
   if(m==='checklist')renderChecklist();
+  // Update season hint whenever switching modes
+  updateSeasonHint();
 }
 
 function goStep(s){
