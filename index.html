@@ -454,9 +454,26 @@ function goStep(s){
   document.querySelectorAll('.step-tab').forEach(function(el,i){el.classList.toggle('active',i===s);if(i<s)el.classList.add('done');else el.classList.remove('done');});
 }
 
+function getBedEnemyConflicts(b){
+  var inBed=[...new Set(b.grid.filter(Boolean))];
+  var pairs=[];
+  for(var i=0;i<inBed.length;i++){
+    var plant=pl(inBed[i]);
+    for(var j=i+1;j<inBed.length;j++){
+      if(plant.enemies.indexOf(inBed[j])>=0){
+        var key=[plant.name,pl(inBed[j]).name].sort().join(' and ');
+        if(pairs.indexOf(key)<0)pairs.push(key);
+      }
+    }
+  }
+  return pairs;
+}
+
 function renderBedTabs(){
   document.getElementById('bed-tabs').innerHTML=beds.map(function(b){
-    return'<button class="bed-tab-btn'+(b.id===activeBed?' active':'')+'" onclick="switchBed('+b.id+')">'+b.name+' <span style="font-size:10px;color:var(--color-text3)">'+b.L+'×'+b.W+'</span></button>';
+    var conflicts=getBedEnemyConflicts(b);
+    var badge=conflicts.length?'<span style="display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:#fcebeb;color:#791f1f;font-size:10px;font-weight:500;margin-left:4px">'+conflicts.length+'</span>':'';
+    return'<button class="bed-tab-btn'+(b.id===activeBed?' active':'')+'" onclick="switchBed('+b.id+')">'+b.name+' <span style="font-size:10px;color:var(--color-text3)">'+b.L+'×'+b.W+'</span>'+badge+'</button>';
   }).join('');
   document.getElementById('bed-grid-panels').innerHTML=beds.map(function(b){
     return'<div class="bed-grid-panel'+(b.id===activeBed?' active':'')+'" id="bgp-'+b.id+'"><div class="bed-wrap"><div class="bed-frame"><div class="bed-grid" id="bg-'+b.id+'"></div></div></div></div>';
@@ -478,7 +495,11 @@ function renderActiveBed(){
   var el=document.getElementById('bg-'+b.id);if(!el)return;
   el.style.gridTemplateColumns='repeat('+b.L+','+sz+'px)';el.innerHTML='';
   var cf=getConflicts(b);
-  document.getElementById('conflict-area').innerHTML=cf.msgs.length?cf.msgs.map(function(m){return'<div class="conflict-warn"><i class="ti ti-alert-triangle" aria-hidden="true"></i> '+m+'</div>';}).join(''):'';
+  var bedConflicts=getBedEnemyConflicts(b);
+  var conflictHtml='';
+  if(bedConflicts.length){conflictHtml+='<div class="conflict-warn"><i class="ti ti-alert-triangle" aria-hidden="true"></i> <strong>Same-bed conflict'+(bedConflicts.length>1?'s':'')+':</strong> '+bedConflicts.map(function(p){return p+' shouldn\'t share a bed';}).join(' · ')+'</div>';}
+  if(cf.msgs.length){conflictHtml+=cf.msgs.map(function(m){return'<div class="warn"><i class="ti ti-alert-triangle" aria-hidden="true"></i> Neighboring plants: '+m+'</div>';}).join('');}
+  document.getElementById('conflict-area').innerHTML=conflictHtml;
   for(var i=0;i<b.W*b.L;i++){
     (function(idx){
       var id=b.grid[idx];var plant=id?pl(id):null;
@@ -496,7 +517,7 @@ function renderActiveBed(){
     })(i);
   }
   document.removeEventListener('mouseup',endPaint);document.addEventListener('mouseup',endPaint);
-  renderGridStats();renderLegend();updateWaveUI();
+  renderGridStats();renderLegend();updateWaveUI();renderBedTabs();document.querySelectorAll('.bed-grid-panel').forEach(function(p){p.classList.remove('active');});var ap=document.getElementById('bgp-'+activeBed);if(ap)ap.classList.add('active');
 }
 function endPaint(){painting=false;lastIdx=null;}
 function doPaint(b,i){if(lastIdx===i)return;lastIdx=i;if(selPlant&&!selPlants[selPlant])selPlants[selPlant]={waves:pl(selPlant)?pl(selPlant).waves:1};b.grid[i]=selPlant;renderActiveBed();}
