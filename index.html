@@ -146,6 +146,99 @@ select:focus,input:focus{outline:2px solid var(--color-blue);outline-offset:1px}
 .wave-detail{font-size:12px;color:var(--color-text2);margin-top:2px}
 .shop-row{display:flex;justify-content:space-between;align-items:center;padding:.4rem 0;border-bottom:0.5px solid var(--color-border);font-size:13px}
 .shop-row:last-child{border-bottom:none}
+
+/* ============================================
+   MOBILE RESPONSIVE STYLES
+   ============================================ */
+@media(max-width:600px){
+  .shell{padding:1rem .75rem 3rem}
+  header h1{font-size:18px}
+  header p{font-size:12px}
+
+  /* Legend — stack vertically on mobile */
+  .app-legend{flex-direction:column;gap:8px;padding:.5rem}
+  .app-legend-divider{width:100%;height:0.5px;margin:2px 0}
+  .app-legend-section{gap:6px}
+
+  /* Step nav — smaller text */
+  .step-tab{font-size:11px;padding:.5rem .1rem}
+  .step-tab .num{width:14px;height:14px;font-size:9px;line-height:14px;margin-right:3px}
+
+  /* Cards */
+  .card{padding:.75rem}
+  .card-title{font-size:13px}
+
+  /* Form rows — stack on mobile */
+  .row{flex-direction:column;gap:8px}
+  .field{min-width:unset;width:100%}
+
+  /* Bed entries — stack neatly */
+  .bed-entry{flex-wrap:wrap;gap:6px}
+  .bed-entry input[type=text]{width:100%;flex:none}
+
+  /* Season buttons — smaller */
+  .season-btn{font-size:12px;padding:.35rem .7rem}
+
+  /* Mode toggle */
+  .mode-btn{padding:.4rem .75rem;font-size:12px}
+
+  /* Plant checklist rows — stack controls below name */
+  .plant-check-row{flex-wrap:wrap;gap:4px}
+  .pcr-name{flex:100%;order:1}
+  .pcr-meta{flex:100%;order:2;font-size:10px}
+  .qty-ctrl{order:3;margin-left:auto}
+
+  /* Wizard options */
+  .wiz-opt{font-size:11px;padding:.3rem .7rem}
+  .wiz-label{font-size:12px}
+
+  /* Bed tabs */
+  .bed-tabs{gap:4px}
+  .bed-tab-btn{font-size:11px;padding:.3rem .6rem}
+
+  /* Plant selector pills */
+  .pbtn{font-size:11px;padding:3px 7px}
+
+  /* Stats row — 2 columns on mobile */
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+
+  /* Nav row */
+  .nav-row{flex-wrap:wrap;gap:6px}
+  .nav-row .btn{flex:1;justify-content:center;text-align:center}
+
+  /* Calendar timeline — scrollable with min width */
+  .plant-cal{min-width:500px}
+  .plant-cal .pname{width:60px;font-size:10px}
+
+  /* Cal legend */
+  .cal-legend{gap:8px}
+  .cal-legend-item{font-size:10px}
+
+  /* Waves control row */
+  .waves-ctrl-row{flex-direction:column;align-items:flex-start;gap:4px}
+
+  /* Shopping/wave rows */
+  .shop-row{flex-wrap:wrap;gap:4px}
+  .wave{gap:6px}
+  .wave-date{font-size:12px}
+  .wave-detail{font-size:11px}
+
+  /* Frost tags — wrap */
+  .frost-tag{font-size:9px;padding:1px 5px}
+
+  /* Season legend in checklist */
+  .season-legend-bar{gap:8px;font-size:10px}
+
+  /* Summary stats */
+  .stat-val{font-size:16px}
+}
+
+@media(max-width:400px){
+  .step-tab .num{display:none}
+  .step-tab{font-size:10px}
+  .season-btn{font-size:11px;padding:.3rem .5rem}
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+}
 </style>
 </head>
 <body>
@@ -197,7 +290,7 @@ select:focus,input:focus{outline:2px solid var(--color-blue);outline-offset:1px}
           </select>
         </div>
         <div class="field"><label>ZIP code</label>
-          <input type="text" id="zip" placeholder="e.g. 30040" maxlength="5" oninput="if(this.value.length===5)lookupFrost()">
+          <input type="text" id="zip" placeholder="e.g. 30040" maxlength="5" style="max-width:160px" oninput="if(this.value.length===5)lookupFrost()">
         </div>
       </div>
       <div id="frost-result" class="frost-result"></div>
@@ -288,7 +381,7 @@ select:focus,input:focus{outline:2px solid var(--color-blue);outline-offset:1px}
     </div>
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:.75rem;flex-wrap:wrap">
       <span style="font-size:12px;color:var(--color-text2)">Waves for selected:</span>
-      <div class="waves-ctrl">
+      <div class="waves-ctrl waves-ctrl-row">
         <button class="wbtn" onclick="adjWaves(-1)">−</button>
         <span id="wave-count" style="font-size:13px;font-weight:500;min-width:16px;text-align:center;color:var(--color-text)">1</span>
         <button class="wbtn" onclick="adjWaves(1)">+</button>
@@ -729,7 +822,10 @@ function selectActiveBed(id){
   renderActiveBed();
 }
 function switchBed(id){selectActiveBed(id);}
-function sqSz(L){return Math.max(36,Math.min(64,Math.floor((720-L*3)/L)));}
+function sqSz(L){
+  var availW=Math.min(window.innerWidth-60, 720);
+  return Math.max(32,Math.min(64,Math.floor((availW-L*3)/L)));
+}
 
 function renderAllBeds(){
   beds.forEach(function(b){renderBedById(b.id);});
@@ -1149,6 +1245,9 @@ function buildCalendar(){
 }
 
 var today=new Date(),later=new Date(today);later.setMonth(later.getMonth()+6);
+window.addEventListener('resize',function(){
+  if(document.querySelector('#panel2.active'))renderActiveBed();
+});
 setTimeout(function(){applySeasonDetection();},100);
 document.getElementById('last-frost').value=today.toISOString().slice(0,10);
 document.getElementById('first-fall-frost').value=later.toISOString().slice(0,10);
