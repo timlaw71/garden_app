@@ -73,6 +73,8 @@ select:focus,input:focus{outline:2px solid var(--color-blue);outline-offset:1px}
 .wiz-opt{padding:.35rem .9rem;border-radius:20px;border:0.5px solid var(--color-border2);cursor:pointer;font-size:12px;color:var(--color-text2);background:var(--color-bg);font-family:var(--font);transition:background .12s}
 .wiz-opt:hover{background:var(--color-bg2)}
 .wiz-opt.sel{border-color:var(--color-blue);background:var(--color-blue-bg);color:var(--color-blue)}
+.season-btn{padding:.4rem .9rem;border-radius:20px;border:0.5px solid var(--color-border2);cursor:pointer;font-size:13px;font-weight:500;font-family:var(--font);opacity:.45;transition:opacity .15s}
+.season-btn.active{opacity:1}
 .cat-label{font-size:11px;font-weight:500;color:var(--color-text3);text-transform:uppercase;letter-spacing:.05em;margin:.75rem 0 .3rem}
 .plant-check-row{display:flex;align-items:center;gap:8px;padding:.35rem 0;border-bottom:0.5px solid var(--color-border)}
 .plant-check-row:last-child{border-bottom:none}
@@ -86,9 +88,13 @@ select:focus,input:focus{outline:2px solid var(--color-blue);outline-offset:1px}
 .bed-tabs{display:flex;gap:5px;margin-bottom:.75rem;flex-wrap:wrap}
 .bed-tab-btn{padding:.35rem .9rem;border-radius:var(--radius);border:0.5px solid var(--color-border);background:transparent;cursor:pointer;font-size:12px;color:var(--color-text2);font-family:var(--font);transition:background .12s}
 .bed-tab-btn.active{background:var(--color-bg2);color:var(--color-text);border-color:var(--color-border2)}
-.bed-grid-panel{display:none}.bed-grid-panel.active{display:block}
-.bed-wrap{overflow-x:auto;margin-bottom:.75rem;padding-bottom:4px}
-.bed-frame{display:inline-block;border:2px solid var(--color-border2);border-radius:10px;padding:6px;background:var(--color-bg2)}
+.beds-container{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:1rem;margin-bottom:.75rem}
+.bed-grid-panel{display:block}
+.bed-panel-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.4rem}
+.bed-panel-title{font-size:13px;font-weight:500;color:var(--color-text)}
+.bed-panel-active{outline:2px solid var(--color-blue);border-radius:12px;padding:4px}
+.bed-wrap{overflow-x:auto;margin-bottom:0;padding-bottom:4px}
+.bed-frame{display:inline-block;border:2px solid var(--color-border2);border-radius:10px;padding:5px;background:var(--color-bg2)}
 .bed-grid{display:grid;gap:3px}
 .sq{border-radius:5px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1.5px solid transparent;transition:transform .1s;user-select:none}
 .sq:hover{transform:scale(1.06);z-index:2}
@@ -174,6 +180,16 @@ select:focus,input:focus{outline:2px solid var(--color-blue);outline-offset:1px}
 
   <!-- STEP 2 -->
   <div class="panel" id="panel1">
+    <div class="card" style="margin-bottom:.75rem">
+      <div class="card-title" style="margin-bottom:.5rem">Which seasons are you planning?</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:.5rem">
+        <button class="season-btn active" data-s="spring" onclick="toggleSeason(this)" style="background:#e6f1fb;color:#185fa5;border-color:#b5d4f4"><i class="ti ti-seeding" aria-hidden="true"></i> Spring</button>
+        <button class="season-btn active" data-s="summer" onclick="toggleSeason(this)" style="background:#faeeda;color:#633806;border-color:#fac775"><i class="ti ti-sun" aria-hidden="true"></i> Summer</button>
+        <button class="season-btn active" data-s="fall" onclick="toggleSeason(this)" style="background:#eaf3de;color:#27500a;border-color:#c0dd97"><i class="ti ti-leaf" aria-hidden="true"></i> Fall</button>
+        <button class="season-btn active" data-s="year-round" onclick="toggleSeason(this)" style="background:#f1efe8;color:#444441;border-color:#d3d1c7"><i class="ti ti-refresh" aria-hidden="true"></i> Year-round</button>
+      </div>
+      <div id="season-date-hint" style="font-size:12px;color:var(--color-text2)"></div>
+    </div>
     <div class="mode-toggle">
       <button class="mode-btn active" id="mode-wiz" onclick="setMode('wizard')"><i class="ti ti-wand" aria-hidden="true"></i> Wizard</button>
       <button class="mode-btn" id="mode-chk" onclick="setMode('checklist')"><i class="ti ti-list-check" aria-hidden="true"></i> Checklist</button>
@@ -228,7 +244,7 @@ select:focus,input:focus{outline:2px solid var(--color-blue);outline-offset:1px}
       <button class="btn btn-green" onclick="autoPopulate()"><i class="ti ti-wand" aria-hidden="true"></i> Auto-fill</button>
       <button class="btn" onclick="clearCurrentBed()"><i class="ti ti-trash" aria-hidden="true"></i> Clear</button>
     </div>
-    <div id="bed-grid-panels"></div>
+    <div class="beds-container" id="bed-grid-panels"></div>
     <div id="conflict-area"></div>
     <div style="display:flex;align-items:center;gap:8px;margin-bottom:.5rem;flex-wrap:wrap">
       <span style="font-size:12px;color:var(--color-text2)">Paint:</span>
@@ -268,34 +284,34 @@ select:focus,input:focus{outline:2px solid var(--color-blue);outline-offset:1px}
 
 <script>
 const PLANTS=[
-  {id:'tomato',  name:'Tomato',     cat:'Vegetables',perSqFt:1, dtm:75, harvest:30,waves:1,color:'#D85A30',tc:'#712B13',note:'transplant', frostOffset:70, frostType:'tender',warmNote:'after soil warms (~May)',    companions:['basil','carrot','marigold'],enemies:['potato'],          goals:['cooking','snacking','preserving'],ease:1,northEdge:true, recSq:{1:1,2:2,3:2,4:3,6:4}},
-  {id:'pepper',  name:'Pepper',     cat:'Vegetables',perSqFt:1, dtm:70, harvest:45,waves:1,color:'#993C1D',tc:'#4A1B0C',note:'transplant', frostOffset:77, frostType:'tender',warmNote:'after soil warms (~mid May)',companions:['basil','carrot'],           enemies:[],                   goals:['cooking','snacking'],             ease:1,northEdge:true, recSq:{1:1,2:1,3:1,4:2,6:3}},
-  {id:'cucumber',name:'Cucumber',   cat:'Vegetables',perSqFt:1, dtm:55, harvest:21,waves:2,color:'#1D9E75',tc:'#085041',note:'transplant', frostOffset:63, frostType:'tender',warmNote:'after soil warms (~May)',    companions:['beans','romaine'],          enemies:['potato'],           goals:['snacking','cooking'],             ease:1,northEdge:true, recSq:{1:1,2:2,3:2,4:3,6:4}},
-  {id:'zucchini',name:'Zucchini',   cat:'Vegetables',perSqFt:1, dtm:50, harvest:21,waves:1,color:'#0F6E56',tc:'#04342C',note:'transplant', frostOffset:63, frostType:'tender',warmNote:'after soil warms (~May)',    companions:[],                           enemies:[],                   goals:['cooking'],                        ease:1,northEdge:true, recSq:{1:1,2:1,3:1,4:2,6:2}},
-  {id:'squash',  name:'Squash',     cat:'Vegetables',perSqFt:1, dtm:50, harvest:21,waves:1,color:'#EF9F27',tc:'#633806',note:'transplant', frostOffset:63, frostType:'tender',warmNote:'after soil warms (~May)',    companions:[],                           enemies:[],                   goals:['cooking'],                        ease:1,northEdge:true, recSq:{1:1,2:1,3:1,4:2,6:2}},
-  {id:'broccoli',name:'Broccoli',   cat:'Vegetables',perSqFt:1, dtm:80, harvest:14,waves:2,color:'#085041',tc:'#E1F5EE',note:'transplant', frostOffset:-28,frostType:'hardy', warmNote:'4 wks before last frost',   companions:['onion'],                    enemies:[],                   goals:['cooking'],                        ease:2,northEdge:false,recSq:{1:1,2:1,3:2,4:2,6:3}},
-  {id:'romaine', name:'Romaine',    cat:'Greens',    perSqFt:4, dtm:60, harvest:14,waves:4,color:'#639922',tc:'#27500A',note:'seed',       frostOffset:-28,frostType:'hardy', warmNote:'4 wks before last frost',   companions:['carrot','cucumber'],        enemies:[],                   goals:['salads'],                         ease:1,northEdge:false,recSq:{1:1,2:2,3:3,4:4,6:6}},
-  {id:'spinach', name:'Spinach',    cat:'Greens',    perSqFt:9, dtm:40, harvest:10,waves:5,color:'#3B6D11',tc:'#EAF3DE',note:'seed',       frostOffset:-42,frostType:'hardy', warmNote:'6 wks before last frost',   companions:[],                           enemies:[],                   goals:['salads','cooking'],               ease:1,northEdge:false,recSq:{1:1,2:1,3:2,4:2,6:3}},
-  {id:'kale',    name:'Kale',       cat:'Greens',    perSqFt:1, dtm:55, harvest:60,waves:2,color:'#5DCAA5',tc:'#04342C',note:'transplant', frostOffset:-28,frostType:'hardy', warmNote:'4 wks before last frost',   companions:[],                           enemies:[],                   goals:['salads','cooking'],               ease:1,northEdge:false,recSq:{1:1,2:1,3:2,4:2,6:3}},
-  {id:'arugula', name:'Arugula',    cat:'Greens',    perSqFt:4, dtm:40, harvest:14,waves:5,color:'#97C459',tc:'#173404',note:'seed',       frostOffset:-35,frostType:'hardy', warmNote:'5 wks before last frost',   companions:[],                           enemies:[],                   goals:['salads'],                         ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:2,6:2}},
-  {id:'chard',   name:'Swiss chard',cat:'Greens',    perSqFt:4, dtm:50, harvest:21,waves:3,color:'#D4537E',tc:'#4B1528',note:'seed',       frostOffset:-21,frostType:'hardy', warmNote:'3 wks before last frost',   companions:[],                           enemies:[],                   goals:['cooking','salads'],               ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:2,6:2}},
-  {id:'collards',name:'Collards',   cat:'Greens',    perSqFt:1, dtm:60, harvest:60,waves:2,color:'#0F6E56',tc:'#E1F5EE',note:'transplant', frostOffset:-28,frostType:'hardy', warmNote:'4 wks before last frost',   companions:[],                           enemies:[],                   goals:['cooking'],                        ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:2,6:3}},
-  {id:'carrot',  name:'Carrot',     cat:'Root veg',  perSqFt:16,dtm:70, harvest:14,waves:2,color:'#BA7517',tc:'#412402',note:'seed',       frostOffset:-21,frostType:'hardy', warmNote:'3 wks before last frost',   companions:['tomato','romaine'],         enemies:[],                   goals:['snacking','cooking'],             ease:1,northEdge:false,recSq:{1:1,2:1,3:2,4:2,6:3}},
-  {id:'radish',  name:'Radish',     cat:'Root veg',  perSqFt:16,dtm:25, harvest:7, waves:6,color:'#E24B4A',tc:'#501313',note:'seed',       frostOffset:-35,frostType:'hardy', warmNote:'5 wks before last frost',   companions:['carrot','spinach'],         enemies:[],                   goals:['snacking','salads'],              ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:1,6:2}},
-  {id:'beet',    name:'Beet',       cat:'Root veg',  perSqFt:9, dtm:60, harvest:14,waves:2,color:'#791F1F',tc:'#FCEBEB',note:'seed',       frostOffset:-21,frostType:'hardy', warmNote:'3 wks before last frost',   companions:[],                           enemies:[],                   goals:['cooking','preserving'],           ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:2,6:2}},
-  {id:'potato',  name:'Potato',     cat:'Root veg',  perSqFt:1, dtm:90, harvest:0, waves:1,color:'#888780',tc:'#2C2C2A',note:'seed potato',frostOffset:-14,frostType:'semi',  warmNote:'2 wks before last frost',   companions:[],                           enemies:['cucumber','tomato'],goals:['cooking','preserving'],           ease:1,northEdge:false,recSq:{1:2,2:4,3:6,4:8,6:12}},
-  {id:'onion',   name:'Onion',      cat:'Root veg',  perSqFt:16,dtm:100,harvest:0, waves:1,color:'#AFA9EC',tc:'#26215C',note:'transplant', frostOffset:-28,frostType:'hardy', warmNote:'4 wks before last frost',   companions:['carrot','tomato'],          enemies:[],                   goals:['cooking','preserving'],           ease:1,northEdge:false,recSq:{1:1,2:1,3:2,4:2,6:3}},
-  {id:'garlic',  name:'Garlic',     cat:'Root veg',  perSqFt:9, dtm:240,harvest:0, waves:1,color:'#D3D1C7',tc:'#2C2C2A',note:'clove',      frostOffset:-210,frostType:'hardy',warmNote:'fall planting',              companions:['tomato','pepper'],          enemies:[],                   goals:['cooking'],                        ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:2,6:2}},
-  {id:'beans',   name:'Bush beans', cat:'Legumes',   perSqFt:9, dtm:50, harvest:14,waves:3,color:'#D4537E',tc:'#4B1528',note:'seed',       frostOffset:63, frostType:'tender',warmNote:'after soil warms (~May)',    companions:['cucumber'],                 enemies:[],                   goals:['cooking','preserving','snacking'],ease:1,northEdge:false,recSq:{1:1,2:2,3:2,4:3,6:4}},
-  {id:'peas',    name:'Snap peas',  cat:'Legumes',   perSqFt:8, dtm:60, harvest:14,waves:2,color:'#C0DD97',tc:'#173404',note:'seed',       frostOffset:-28,frostType:'hardy', warmNote:'4 wks before last frost',   companions:['carrot','spinach'],         enemies:[],                   goals:['snacking'],                       ease:1,northEdge:true, recSq:{1:1,2:1,3:2,4:2,6:3}},
-  {id:'basil',   name:'Basil',      cat:'Herbs',     perSqFt:4, dtm:30, harvest:60,waves:2,color:'#7F77DD',tc:'#26215C',note:'transplant', frostOffset:70, frostType:'tender',warmNote:'after soil warms (~May)',    companions:['tomato','pepper'],          enemies:[],                   goals:['cooking','herbs'],                ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:2,6:2}},
-  {id:'parsley', name:'Parsley',    cat:'Herbs',     perSqFt:4, dtm:70, harvest:90,waves:1,color:'#639922',tc:'#173404',note:'transplant', frostOffset:-14,frostType:'hardy', warmNote:'2 wks before last frost',   companions:[],                           enemies:[],                   goals:['cooking','herbs'],                ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:1,6:2}},
-  {id:'cilantro',name:'Cilantro',   cat:'Herbs',     perSqFt:4, dtm:45, harvest:21,waves:4,color:'#5DCAA5',tc:'#085041',note:'seed',       frostOffset:-21,frostType:'hardy', warmNote:'3 wks before last frost',   companions:[],                           enemies:[],                   goals:['cooking','herbs'],                ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:1,6:2}},
-  {id:'dill',    name:'Dill',       cat:'Herbs',     perSqFt:4, dtm:40, harvest:30,waves:3,color:'#97C459',tc:'#27500A',note:'seed',       frostOffset:-14,frostType:'hardy', warmNote:'2 wks before last frost',   companions:['cucumber'],                 enemies:['tomato'],           goals:['cooking','herbs','preserving'],   ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:1,6:2}},
-  {id:'oregano', name:'Oregano',    cat:'Herbs',     perSqFt:4, dtm:90, harvest:90,waves:1,color:'#BA7517',tc:'#412402',note:'transplant', frostOffset:7,  frostType:'tender',warmNote:'after last frost',           companions:['tomato','pepper'],          enemies:[],                   goals:['cooking','herbs'],                ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:1,6:1}},
-  {id:'thyme',   name:'Thyme',      cat:'Herbs',     perSqFt:4, dtm:90, harvest:90,waves:1,color:'#888780',tc:'#2C2C2A',note:'transplant', frostOffset:7,  frostType:'tender',warmNote:'after last frost',           companions:[],                           enemies:[],                   goals:['cooking','herbs'],                ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:1,6:1}},
-  {id:'chives',  name:'Chives',     cat:'Herbs',     perSqFt:16,dtm:90, harvest:90,waves:1,color:'#AFA9EC',tc:'#26215C',note:'transplant', frostOffset:-14,frostType:'hardy', warmNote:'2 wks before last frost',   companions:['carrot','tomato'],          enemies:[],                   goals:['cooking','herbs'],                ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:1,6:1}},
-  {id:'marigold',name:'Marigold',   cat:'Flowers',   perSqFt:4, dtm:50, harvest:120,waves:1,color:'#EF9F27',tc:'#412402',note:'transplant',frostOffset:21, frostType:'tender',warmNote:'after last frost',           companions:['tomato','pepper','beans'],  enemies:[],                   goals:['salads','snacking','cooking'],    ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:2,6:2}},
+  {id:'tomato',seasons:['summer'],  name:'Tomato',     cat:'Vegetables',perSqFt:1, dtm:75, harvest:30,waves:1,color:'#D85A30',tc:'#712B13',note:'transplant', frostOffset:70, frostType:'tender',warmNote:'after soil warms (~May)',    companions:['basil','carrot','marigold'],enemies:['potato'],          goals:['cooking','snacking','preserving'],ease:1,northEdge:true, recSq:{1:1,2:2,3:2,4:3,6:4}},
+  {id:'pepper',seasons:['summer'],  name:'Pepper',     cat:'Vegetables',perSqFt:1, dtm:70, harvest:45,waves:1,color:'#993C1D',tc:'#4A1B0C',note:'transplant', frostOffset:77, frostType:'tender',warmNote:'after soil warms (~mid May)',companions:['basil','carrot'],           enemies:[],                   goals:['cooking','snacking'],             ease:1,northEdge:true, recSq:{1:1,2:1,3:1,4:2,6:3}},
+  {id:'cucumber',seasons:['summer'],name:'Cucumber',   cat:'Vegetables',perSqFt:1, dtm:55, harvest:21,waves:2,color:'#1D9E75',tc:'#085041',note:'transplant', frostOffset:63, frostType:'tender',warmNote:'after soil warms (~May)',    companions:['beans','romaine'],          enemies:['potato'],           goals:['snacking','cooking'],             ease:1,northEdge:true, recSq:{1:1,2:2,3:2,4:3,6:4}},
+  {id:'zucchini',seasons:['summer'],name:'Zucchini',   cat:'Vegetables',perSqFt:1, dtm:50, harvest:21,waves:1,color:'#0F6E56',tc:'#04342C',note:'transplant', frostOffset:63, frostType:'tender',warmNote:'after soil warms (~May)',    companions:[],                           enemies:[],                   goals:['cooking'],                        ease:1,northEdge:true, recSq:{1:1,2:1,3:1,4:2,6:2}},
+  {id:'squash',seasons:['summer'],  name:'Squash',     cat:'Vegetables',perSqFt:1, dtm:50, harvest:21,waves:1,color:'#EF9F27',tc:'#633806',note:'transplant', frostOffset:63, frostType:'tender',warmNote:'after soil warms (~May)',    companions:[],                           enemies:[],                   goals:['cooking'],                        ease:1,northEdge:true, recSq:{1:1,2:1,3:1,4:2,6:2}},
+  {id:'broccoli',seasons:['spring','fall'],name:'Broccoli',   cat:'Vegetables',perSqFt:1, dtm:80, harvest:14,waves:2,color:'#085041',tc:'#E1F5EE',note:'transplant', frostOffset:-28,frostType:'hardy', warmNote:'4 wks before last frost',   companions:['onion'],                    enemies:[],                   goals:['cooking'],                        ease:2,northEdge:false,recSq:{1:1,2:1,3:2,4:2,6:3}},
+  {id:'romaine',seasons:['spring','fall'], name:'Romaine',    cat:'Greens',    perSqFt:4, dtm:60, harvest:14,waves:4,color:'#639922',tc:'#27500A',note:'seed',       frostOffset:-28,frostType:'hardy', warmNote:'4 wks before last frost',   companions:['carrot','cucumber'],        enemies:[],                   goals:['salads'],                         ease:1,northEdge:false,recSq:{1:1,2:2,3:3,4:4,6:6}},
+  {id:'spinach',seasons:['spring','fall'], name:'Spinach',    cat:'Greens',    perSqFt:9, dtm:40, harvest:10,waves:5,color:'#3B6D11',tc:'#EAF3DE',note:'seed',       frostOffset:-42,frostType:'hardy', warmNote:'6 wks before last frost',   companions:[],                           enemies:[],                   goals:['salads','cooking'],               ease:1,northEdge:false,recSq:{1:1,2:1,3:2,4:2,6:3}},
+  {id:'kale',seasons:['spring','fall'],    name:'Kale',       cat:'Greens',    perSqFt:1, dtm:55, harvest:60,waves:2,color:'#5DCAA5',tc:'#04342C',note:'transplant', frostOffset:-28,frostType:'hardy', warmNote:'4 wks before last frost',   companions:[],                           enemies:[],                   goals:['salads','cooking'],               ease:1,northEdge:false,recSq:{1:1,2:1,3:2,4:2,6:3}},
+  {id:'arugula',seasons:['spring','fall'], name:'Arugula',    cat:'Greens',    perSqFt:4, dtm:40, harvest:14,waves:5,color:'#97C459',tc:'#173404',note:'seed',       frostOffset:-35,frostType:'hardy', warmNote:'5 wks before last frost',   companions:[],                           enemies:[],                   goals:['salads'],                         ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:2,6:2}},
+  {id:'chard',seasons:['spring','fall'],   name:'Swiss chard',cat:'Greens',    perSqFt:4, dtm:50, harvest:21,waves:3,color:'#D4537E',tc:'#4B1528',note:'seed',       frostOffset:-21,frostType:'hardy', warmNote:'3 wks before last frost',   companions:[],                           enemies:[],                   goals:['cooking','salads'],               ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:2,6:2}},
+  {id:'collards',seasons:['spring','fall'],name:'Collards',   cat:'Greens',    perSqFt:1, dtm:60, harvest:60,waves:2,color:'#0F6E56',tc:'#E1F5EE',note:'transplant', frostOffset:-28,frostType:'hardy', warmNote:'4 wks before last frost',   companions:[],                           enemies:[],                   goals:['cooking'],                        ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:2,6:3}},
+  {id:'carrot',seasons:['spring','fall'],  name:'Carrot',     cat:'Root veg',  perSqFt:16,dtm:70, harvest:14,waves:2,color:'#BA7517',tc:'#412402',note:'seed',       frostOffset:-21,frostType:'hardy', warmNote:'3 wks before last frost',   companions:['tomato','romaine'],         enemies:[],                   goals:['snacking','cooking'],             ease:1,northEdge:false,recSq:{1:1,2:1,3:2,4:2,6:3}},
+  {id:'radish',seasons:['spring','fall'],  name:'Radish',     cat:'Root veg',  perSqFt:16,dtm:25, harvest:7, waves:6,color:'#E24B4A',tc:'#501313',note:'seed',       frostOffset:-35,frostType:'hardy', warmNote:'5 wks before last frost',   companions:['carrot','spinach'],         enemies:[],                   goals:['snacking','salads'],              ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:1,6:2}},
+  {id:'beet',seasons:['spring','fall'],    name:'Beet',       cat:'Root veg',  perSqFt:9, dtm:60, harvest:14,waves:2,color:'#791F1F',tc:'#FCEBEB',note:'seed',       frostOffset:-21,frostType:'hardy', warmNote:'3 wks before last frost',   companions:[],                           enemies:[],                   goals:['cooking','preserving'],           ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:2,6:2}},
+  {id:'potato',seasons:['spring'],  name:'Potato',     cat:'Root veg',  perSqFt:1, dtm:90, harvest:0, waves:1,color:'#888780',tc:'#2C2C2A',note:'seed potato',frostOffset:-14,frostType:'semi',  warmNote:'2 wks before last frost',   companions:[],                           enemies:['cucumber','tomato'],goals:['cooking','preserving'],           ease:1,northEdge:false,recSq:{1:2,2:4,3:6,4:8,6:12}},
+  {id:'onion',seasons:['spring','fall'],   name:'Onion',      cat:'Root veg',  perSqFt:16,dtm:100,harvest:0, waves:1,color:'#AFA9EC',tc:'#26215C',note:'transplant', frostOffset:-28,frostType:'hardy', warmNote:'4 wks before last frost',   companions:['carrot','tomato'],          enemies:[],                   goals:['cooking','preserving'],           ease:1,northEdge:false,recSq:{1:1,2:1,3:2,4:2,6:3}},
+  {id:'garlic',seasons:['fall'],  name:'Garlic',     cat:'Root veg',  perSqFt:9, dtm:240,harvest:0, waves:1,color:'#D3D1C7',tc:'#2C2C2A',note:'clove',      frostOffset:-210,frostType:'hardy',warmNote:'fall planting',              companions:['tomato','pepper'],          enemies:[],                   goals:['cooking'],                        ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:2,6:2}},
+  {id:'beans',seasons:['summer'],   name:'Bush beans', cat:'Legumes',   perSqFt:9, dtm:50, harvest:14,waves:3,color:'#D4537E',tc:'#4B1528',note:'seed',       frostOffset:63, frostType:'tender',warmNote:'after soil warms (~May)',    companions:['cucumber'],                 enemies:[],                   goals:['cooking','preserving','snacking'],ease:1,northEdge:false,recSq:{1:1,2:2,3:2,4:3,6:4}},
+  {id:'peas',seasons:['spring','fall'],    name:'Snap peas',  cat:'Legumes',   perSqFt:8, dtm:60, harvest:14,waves:2,color:'#C0DD97',tc:'#173404',note:'seed',       frostOffset:-28,frostType:'hardy', warmNote:'4 wks before last frost',   companions:['carrot','spinach'],         enemies:[],                   goals:['snacking'],                       ease:1,northEdge:true, recSq:{1:1,2:1,3:2,4:2,6:3}},
+  {id:'basil',seasons:['summer'],   name:'Basil',      cat:'Herbs',     perSqFt:4, dtm:30, harvest:60,waves:2,color:'#7F77DD',tc:'#26215C',note:'transplant', frostOffset:70, frostType:'tender',warmNote:'after soil warms (~May)',    companions:['tomato','pepper'],          enemies:[],                   goals:['cooking','herbs'],                ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:2,6:2}},
+  {id:'parsley',seasons:['spring','summer','fall'], name:'Parsley',    cat:'Herbs',     perSqFt:4, dtm:70, harvest:90,waves:1,color:'#639922',tc:'#173404',note:'transplant', frostOffset:-14,frostType:'hardy', warmNote:'2 wks before last frost',   companions:[],                           enemies:[],                   goals:['cooking','herbs'],                ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:1,6:2}},
+  {id:'cilantro',seasons:['spring','fall'],name:'Cilantro',   cat:'Herbs',     perSqFt:4, dtm:45, harvest:21,waves:4,color:'#5DCAA5',tc:'#085041',note:'seed',       frostOffset:-21,frostType:'hardy', warmNote:'3 wks before last frost',   companions:[],                           enemies:[],                   goals:['cooking','herbs'],                ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:1,6:2}},
+  {id:'dill',seasons:['spring','summer','fall'],    name:'Dill',       cat:'Herbs',     perSqFt:4, dtm:40, harvest:30,waves:3,color:'#97C459',tc:'#27500A',note:'seed',       frostOffset:-14,frostType:'hardy', warmNote:'2 wks before last frost',   companions:['cucumber'],                 enemies:['tomato'],           goals:['cooking','herbs','preserving'],   ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:1,6:2}},
+  {id:'oregano',seasons:['summer','year-round'], name:'Oregano',    cat:'Herbs',     perSqFt:4, dtm:90, harvest:90,waves:1,color:'#BA7517',tc:'#412402',note:'transplant', frostOffset:7,  frostType:'tender',warmNote:'after last frost',           companions:['tomato','pepper'],          enemies:[],                   goals:['cooking','herbs'],                ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:1,6:1}},
+  {id:'thyme',seasons:['summer','year-round'],   name:'Thyme',      cat:'Herbs',     perSqFt:4, dtm:90, harvest:90,waves:1,color:'#888780',tc:'#2C2C2A',note:'transplant', frostOffset:7,  frostType:'tender',warmNote:'after last frost',           companions:[],                           enemies:[],                   goals:['cooking','herbs'],                ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:1,6:1}},
+  {id:'chives',seasons:['spring','summer','fall'],  name:'Chives',     cat:'Herbs',     perSqFt:16,dtm:90, harvest:90,waves:1,color:'#AFA9EC',tc:'#26215C',note:'transplant', frostOffset:-14,frostType:'hardy', warmNote:'2 wks before last frost',   companions:['carrot','tomato'],          enemies:[],                   goals:['cooking','herbs'],                ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:1,6:1}},
+  {id:'marigold',seasons:['summer'],name:'Marigold',   cat:'Flowers',   perSqFt:4, dtm:50, harvest:120,waves:1,color:'#EF9F27',tc:'#412402',note:'transplant',frostOffset:21, frostType:'tender',warmNote:'after last frost',           companions:['tomato','pepper','beans'],  enemies:[],                   goals:['salads','snacking','cooking'],    ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:2,6:2}},
 ];
 
 const CATS=[...new Set(PLANTS.map(function(x){return x.cat;}))];
@@ -309,6 +325,72 @@ var selPlant='tomato';
 var activeBed=0;
 var painting=false;
 var lastIdx=null;
+var selectedSeasons=['spring','summer','fall','year-round'];
+
+function toggleSeason(btn){
+  var s=btn.getAttribute('data-s');
+  var idx=selectedSeasons.indexOf(s);
+  if(idx>=0){
+    if(selectedSeasons.length===1)return;// keep at least one
+    selectedSeasons.splice(idx,1);
+    btn.classList.remove('active');
+  } else {
+    selectedSeasons.push(s);
+    btn.classList.add('active');
+  }
+  autoAdjustDates();
+  updateSeasonHint();
+  if(document.getElementById('checklist-panel').style.display!=='none')renderChecklist();
+  if(document.getElementById('wiz-results').innerHTML)runWizard();
+}
+
+function plantInSeason(plant){
+  if(!plant.seasons)return true;
+  return plant.seasons.some(function(s){return selectedSeasons.indexOf(s)>=0;});
+}
+
+function autoAdjustDates(){
+  var lfStr=document.getElementById('last-frost').value;
+  var ffStr=document.getElementById('first-fall-frost').value;
+  if(!lfStr||!ffStr)return;
+  var lf=new Date(lfStr);
+  var ff=new Date(ffStr);
+  var yr=lf.getFullYear();
+  var hasSummer=selectedSeasons.indexOf('summer')>=0;
+  var hasSpring=selectedSeasons.indexOf('spring')>=0;
+  var hasFall=selectedSeasons.indexOf('fall')>=0;
+
+  // Set start date based on earliest selected season
+  if(hasSpring){
+    // Spring starts ~6 weeks before last frost
+    var start=new Date(lf);start.setDate(start.getDate()-42);
+    document.getElementById('last-frost').value=lf.toISOString().slice(0,10);
+  }
+  if(hasSummer&&!hasSpring){
+    // Summer only — start after last frost + soil warmup
+    var start=new Date(lf);start.setDate(start.getDate()+63);
+    document.getElementById('last-frost').value=lf.toISOString().slice(0,10);
+  }
+  if(hasFall&&!hasSummer&&!hasSpring){
+    // Fall only — count back 10 weeks from first fall frost
+    var start=new Date(ff);start.setDate(start.getDate()-70);
+    document.getElementById('last-frost').value=start.toISOString().slice(0,10);
+    document.getElementById('first-fall-frost').value=ff.toISOString().slice(0,10);
+  }
+  updateSeasonHint();
+}
+
+function updateSeasonHint(){
+  var lfStr=document.getElementById('last-frost').value;
+  var ffStr=document.getElementById('first-fall-frost').value;
+  var el=document.getElementById('season-date-hint');
+  if(!el)return;
+  var parts=[];
+  if(selectedSeasons.indexOf('spring')>=0&&lfStr)parts.push('Spring planting starts ~6 wks before last frost ('+fmtDate(new Date(lfStr))+')');
+  if(selectedSeasons.indexOf('summer')>=0&&lfStr){var d=new Date(lfStr);d.setDate(d.getDate()+63);parts.push('Summer planting starts ~'+fmtDate(d));}
+  if(selectedSeasons.indexOf('fall')>=0&&ffStr){var d=new Date(ffStr);d.setDate(d.getDate()-70);parts.push('Fall planting starts ~'+fmtDate(d)+' (10 wks before fall frost)');}
+  el.textContent=parts.join(' · ');
+}
 
 function pl(id){return PLANTS.find(function(x){return x.id===id;});}
 function activeBedObj(){return beds.find(function(b){return b.id===activeBed;})||beds[0];}
@@ -365,7 +447,7 @@ function runWizard(){
   var expVal=expEl?expEl.getAttribute('data-g'):'some';
   var hh=getHH();
   var totalSqFt=beds.reduce(function(s,b){return s+b.L*b.W;},0);
-  var scored=PLANTS.map(function(plant){
+  var scored=PLANTS.filter(function(plant){return plantInSeason(plant);}).map(function(plant){
     var score=0;
     if(goals.length===0||plant.goals.some(function(g){return goals.indexOf(g)>=0;}))score+=3;
     if(expVal==='beginner'&&plant.ease>1)score-=2;
@@ -404,7 +486,7 @@ function renderChecklist(){
   var hh=getHH();var html='';
   CATS.forEach(function(cat){
     html+='<div class="cat-label">'+cat+'</div><div class="card" style="padding:.5rem 1rem">';
-    PLANTS.filter(function(plant){return plant.cat===cat;}).forEach(function(plant){
+    PLANTS.filter(function(plant){return plant.cat===cat&&plantInSeason(plant);}).forEach(function(plant){
       var checked=selPlants[plant.id]?'checked':'';
       var waves=selPlants[plant.id]?selPlants[plant.id].waves:plant.waves;
       html+='<div class="plant-check-row">'+
@@ -448,7 +530,8 @@ function setMode(m){
 }
 
 function goStep(s){
-  if(s===2){beds.forEach(function(b){if(!b.grid||b.grid.length!==b.L*b.W)b.grid=Array(b.L*b.W).fill(null);});renderBedTabs();renderActiveBed();renderPlantSelector();}
+  if(s===1){updateSeasonHint();}
+  if(s===2){beds.forEach(function(b){if(!b.grid||b.grid.length!==b.L*b.W)b.grid=Array(b.L*b.W).fill(null);});renderBedTabs();setTimeout(function(){renderAllBeds();renderPlantSelector();},50);}
   if(s===3)buildCalendar();
   document.querySelectorAll('.panel').forEach(function(el,i){el.classList.toggle('active',i===s);});
   document.querySelectorAll('.step-tab').forEach(function(el,i){el.classList.toggle('active',i===s);if(i<s)el.classList.add('done');else el.classList.remove('done');});
@@ -473,13 +556,20 @@ function updateBedTabBadges(){
   document.querySelectorAll('.bed-tab-btn').forEach(function(btn,i){
     var b=beds[i];if(!b)return;
     var conflicts=getBedEnemyConflicts(b);
-    var existing=btn.querySelector('.conflict-badge');
-    if(existing)btn.removeChild(existing);
+    var softConflicts=getBedSoftConflicts(b);
+    // Remove old badges
+    btn.querySelectorAll('.conflict-badge,.soft-badge').forEach(function(el){btn.removeChild(el);});
     if(conflicts.length){
       var badge=document.createElement('span');
       badge.className='conflict-badge';
       badge.style.cssText='display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:#fcebeb;color:#791f1f;font-size:10px;font-weight:500;margin-left:4px';
       badge.textContent=conflicts.length;
+      btn.appendChild(badge);
+    } else if(softConflicts.length){
+      var badge=document.createElement('span');
+      badge.className='soft-badge';
+      badge.style.cssText='display:inline-flex;align-items:center;justify-content:center;width:16px;height:16px;border-radius:50%;background:#e6f1fb;color:#185fa5;font-size:10px;font-weight:500;margin-left:4px';
+      badge.textContent='i';
       btn.appendChild(badge);
     }
   });
@@ -495,25 +585,38 @@ function renderBedTabs(){
     return'<div class="bed-grid-panel'+(b.id===activeBed?' active':'')+'" id="bgp-'+b.id+'"><div class="bed-wrap"><div class="bed-frame"><div class="bed-grid" id="bg-'+b.id+'"></div></div></div></div>';
   }).join('');
 }
-function switchBed(id){
+function selectActiveBed(id){
   activeBed=id;
   document.querySelectorAll('.bed-tab-btn').forEach(function(btn,i){btn.classList.toggle('active',beds[i]&&beds[i].id===id);});
-  document.querySelectorAll('.bed-grid-panel').forEach(function(p){p.classList.remove('active');});
-  var panel=document.getElementById('bgp-'+id);if(panel)panel.classList.add('active');
+  document.querySelectorAll('.bed-frame').forEach(function(f){f.classList.remove('bed-panel-active');});
+  var frame=document.getElementById('bframe-'+id);if(frame)frame.classList.add('bed-panel-active');
   renderActiveBed();
 }
+function switchBed(id){selectActiveBed(id);}
 function sqSz(L){return Math.max(36,Math.min(64,Math.floor((720-L*3)/L)));}
 
-function renderActiveBed(){
-  var b=activeBedObj();
+function renderAllBeds(){
+  beds.forEach(function(b){renderBedById(b.id);});
+  renderGridStats();renderLegend();updateWaveUI();updateBedTabBadges();
+  document.querySelectorAll('.bed-frame').forEach(function(f){f.classList.remove('bed-panel-active');});
+  var frame=document.getElementById('bframe-'+activeBed);if(frame)frame.classList.add('bed-panel-active');
+}
+
+function renderActiveBed(){renderBedById(activeBed);}
+
+function renderBedById(bid){
+  var b=beds.find(function(x){return x.id===bid;});
+  if(!b)return;
   if(!b.grid||b.grid.length!==b.L*b.W)b.grid=Array(b.L*b.W).fill(null);
   var sz=sqSz(b.L);
   var el=document.getElementById('bg-'+b.id);if(!el)return;
   el.style.gridTemplateColumns='repeat('+b.L+','+sz+'px)';el.innerHTML='';
   var cf=getConflicts(b);
   var bedConflicts=getBedEnemyConflicts(b);
+  var softConflicts=getBedSoftConflicts(b);
   var conflictHtml='';
-  if(bedConflicts.length){conflictHtml+='<div class="conflict-warn"><i class="ti ti-alert-triangle" aria-hidden="true"></i> <strong>Same-bed conflict'+(bedConflicts.length>1?'s':'')+':</strong> '+bedConflicts.map(function(p){return p+' shouldn\'t share a bed';}).join(' · ')+'</div>';}
+  if(bedConflicts.length){conflictHtml+='<div class="conflict-warn"><i class="ti ti-alert-triangle" aria-hidden="true"></i> <strong>Same-bed conflict'+(bedConflicts.length>1?'s':'')+':</strong> '+bedConflicts.map(function(p){return p+' should not share a bed';}).join(' · ')+'</div>';}
+  if(softConflicts.length){conflictHtml+='<div style="background:var(--color-blue-bg);border-radius:var(--radius);padding:.4rem .7rem;font-size:12px;color:var(--color-blue);margin-bottom:.5rem"><i class="ti ti-info-circle" aria-hidden="true"></i> <strong>Better in separate beds:</strong> '+softConflicts.map(function(p){return p+' compete for nutrients and share disease risk';}).join(' · ')+'</div>';}
   if(cf.msgs.length){conflictHtml+=cf.msgs.map(function(m){return'<div class="warn"><i class="ti ti-alert-triangle" aria-hidden="true"></i> Neighboring plants: '+m+'</div>';}).join('');}
   document.getElementById('conflict-area').innerHTML=conflictHtml;
   for(var i=0;i<b.W*b.L;i++){
@@ -534,6 +637,8 @@ function renderActiveBed(){
   }
   document.removeEventListener('mouseup',endPaint);document.addEventListener('mouseup',endPaint);
   renderGridStats();renderLegend();updateWaveUI();updateBedTabBadges();
+  document.querySelectorAll('.bed-frame').forEach(function(f){f.classList.remove('bed-panel-active');});
+  var frame=document.getElementById('bframe-'+activeBed);if(frame)frame.classList.add('bed-panel-active');
 }
 function endPaint(){painting=false;lastIdx=null;}
 function doPaint(b,i){if(lastIdx===i)return;lastIdx=i;if(selPlant&&!selPlants[selPlant])selPlants[selPlant]={waves:pl(selPlant)?pl(selPlant).waves:1};b.grid[i]=selPlant;renderActiveBed();}
@@ -550,37 +655,188 @@ function getConflicts(b){
 }
 function clearCurrentBed(){var b=activeBedObj();b.grid=Array(b.L*b.W).fill(null);renderActiveBed();}
 
+// Season classification
+function isWarmSeason(plant){return plant.frostType==='tender';}
+function isCoolSeason(plant){return plant.frostType==='hardy'||plant.frostType==='semi';}
+
+// Get neighbors of a square
+function getNeighbors(b,i){
+  var r=Math.floor(i/b.L),c=i%b.L,nb=[];
+  if(r>0)nb.push(i-b.L);if(r<b.W-1)nb.push(i+b.L);
+  if(c>0)nb.push(i-1);if(c<b.L-1)nb.push(i+1);
+  return nb;
+}
+
+// Check if a square is adjacent to a specific plant id
+function adjacentTo(b,i,targetId){
+  return getNeighbors(b,i).some(function(j){return b.grid[j]===targetId;});
+}
+
+// Check if any square in bed is adjacent to a companion
+function hasAdjacentCompanion(b,i,companions){
+  return getNeighbors(b,i).some(function(j){return b.grid[j]&&companions.indexOf(b.grid[j])>=0;});
+}
+
+// Soft conflicts: not enemies but prefer separate beds
+var SOFT_CONFLICTS=[
+  ['tomato','cucumber'],
+  ['tomato','squash'],
+  ['tomato','zucchini'],
+];
+
+function bedHasSoftConflict(b,plantId){
+  var inBed=b.grid.filter(Boolean);
+  return SOFT_CONFLICTS.some(function(pair){
+    if(pair.indexOf(plantId)<0)return false;
+    var other=pair[0]===plantId?pair[1]:pair[0];
+    return inBed.indexOf(other)>=0;
+  });
+}
+
+function getBedSoftConflicts(b){
+  var inBed=[...new Set(b.grid.filter(Boolean))];
+  var found=[];
+  SOFT_CONFLICTS.forEach(function(pair){
+    if(inBed.indexOf(pair[0])>=0&&inBed.indexOf(pair[1])>=0){
+      var key=pair[0]+' and '+pair[1];
+      if(found.indexOf(key)<0)found.push(key);
+    }
+  });
+  return found;
+}
+
+function bedHasEnemy(b,plant){
+  var inBed=b.grid.filter(Boolean);
+  return plant.enemies.some(function(eid){return inBed.indexOf(eid)>=0;});
+}
+
+// Zone rows: warm zone = rows 0..warmRows-1 (north/back), cool zone = warmRows..end
+function getZoneRows(b){
+  var warmRows=Math.max(1,Math.floor(b.W/2));
+  return{warm:[],cool:[]};
+}
+
+function placePlantSmart(b,plant,count,preferZone){
+  // preferZone: 'warm'=rows 0..half, 'cool'=rows half..end, null=anywhere
+  var placed=0;
+  var halfRow=Math.floor(b.W/2);
+
+  function inZone(i){
+    if(!preferZone)return true;
+    var row=Math.floor(i/b.L);
+    if(preferZone==='warm')return row<halfRow;
+    if(preferZone==='cool')return row>=halfRow;
+    return true;
+  }
+
+  function tryPlace(checkZone,checkCompanion,checkNorth){
+    for(var i=0;i<b.grid.length&&placed<count;i++){
+      if(b.grid[i]!==null)continue;
+      if(checkZone&&!inZone(i))continue;
+      var row=Math.floor(i/b.L);
+      if(checkNorth&&plant.northEdge&&row>1)continue;
+      if(checkNorth&&!plant.northEdge&&row===0)continue;
+      var nb=getNeighbors(b,i);
+      if(nb.some(function(j){return b.grid[j]&&plant.enemies.indexOf(b.grid[j])>=0;}))continue;
+      if(checkCompanion&&plant.companions.length&&!hasAdjacentCompanion(b,i,plant.companions)&&placed===0){
+        // prefer companion-adjacent on first pass only
+        var hasComp=nb.some(function(j){return b.grid[j]&&plant.companions.indexOf(b.grid[j])>=0;});
+        if(!hasComp)continue;
+      }
+      b.grid[i]=plant.id;placed++;
+    }
+  }
+
+  // Pass 1: correct zone + companion adjacent + north preference
+  tryPlace(true,true,true);
+  // Pass 2: correct zone + north preference (no companion requirement)
+  tryPlace(true,false,true);
+  // Pass 3: correct zone, anywhere in it
+  tryPlace(true,false,false);
+  // Pass 4: any empty square (zone fallback)
+  tryPlace(false,false,false);
+  return placed;
+}
+
 function autoPopulate(){
   var hh=getHH();var ids=Object.keys(selPlants);
   if(!ids.length){document.getElementById('conflict-area').innerHTML='<div class="warn">Select plants in step 2 first.</div>';return;}
-  var sorted=ids.slice().sort(function(a,b){var pa=pl(a),pb=pl(b);if(pa.northEdge&&!pb.northEdge)return -1;if(!pa.northEdge&&pb.northEdge)return 1;return(pb.recSq[hh]||1)-(pa.recSq[hh]||1);});
-  var remaining={};sorted.forEach(function(id){remaining[id]=pl(id).recSq[hh]||1;});
-  beds.forEach(function(b){
-    b.grid=Array(b.L*b.W).fill(null);
-    sorted.forEach(function(id){
-      if(remaining[id]<=0)return;var plant=pl(id);var placed=0;
-      for(var i=0;i<b.grid.length&&placed<remaining[id];i++){
-        var row=Math.floor(i/b.L);
-        if(plant.northEdge&&row>1)continue;if(!plant.northEdge&&row===0)continue;
-        if(b.grid[i]!==null)continue;
-        var r=Math.floor(i/b.L),c=i%b.L,nb=[];
-        if(r>0)nb.push(i-b.L);if(r<b.W-1)nb.push(i+b.L);if(c>0)nb.push(i-1);if(c<b.L-1)nb.push(i+1);
-        if(nb.some(function(j){return b.grid[j]&&plant.enemies.indexOf(b.grid[j])>=0;}))continue;
-        b.grid[i]=id;placed++;
-      }
-      if(placed<remaining[id]){
-        for(var i=0;i<b.grid.length&&placed<remaining[id];i++){
-          if(b.grid[i]!==null)continue;
-          var r=Math.floor(i/b.L),c=i%b.L,nb=[];
-          if(r>0)nb.push(i-b.L);if(r<b.W-1)nb.push(i+b.L);if(c>0)nb.push(i-1);if(c<b.L-1)nb.push(i+1);
-          if(nb.some(function(j){return b.grid[j]&&plant.enemies.indexOf(b.grid[j])>=0;}))continue;
-          b.grid[i]=id;placed++;
-        }
-      }
-      remaining[id]-=placed;
-    });
+
+  // Clear all beds
+  beds.forEach(function(b){b.grid=Array(b.L*b.W).fill(null);});
+
+  var hasMultiBeds=beds.length>1;
+  var selectedIds=ids.slice();
+  var remaining={};selectedIds.forEach(function(id){remaining[id]=pl(id).recSq[hh]||1;});
+
+  // Determine if potatoes conflict and need isolation
+  var potatoConflict=selectedIds.indexOf('potato')>=0&&
+    (selectedIds.indexOf('tomato')>=0||selectedIds.indexOf('cucumber')>=0);
+
+  // Sort order: anchors first (large warm-season), then cool-season anchors,
+  // then companions, then fillers, then fast-turnaround last
+  var ORDER={anchor:0,companion:1,filler:2,fast:3};
+  function plantRole(id){
+    var p=pl(id);
+    if(['tomato','pepper','squash','zucchini','cucumber','broccoli','peas','potato'].indexOf(id)>=0)return ORDER.anchor;
+    if(['basil','dill','cilantro','marigold','parsley','oregano','thyme','chives'].indexOf(id)>=0)return ORDER.companion;
+    if(['radish','arugula'].indexOf(id)>=0)return ORDER.fast;
+    return ORDER.filler;
+  }
+
+  var sorted=selectedIds.slice().sort(function(a,b){
+    var ra=plantRole(a),rb=plantRole(b);
+    if(ra!==rb)return ra-rb;
+    // Within anchors: warm before cool
+    var pa=pl(a),pb=pl(b);
+    var wa=isWarmSeason(pa)?0:1,wb=isWarmSeason(pb)?0:1;
+    if(wa!==wb)return wa-wb;
+    return(pb.recSq[hh]||1)-(pa.recSq[hh]||1);
   });
-  renderActiveBed();
+
+  sorted.forEach(function(id){
+    if(remaining[id]<=0)return;
+    var plant=pl(id);var need=remaining[id];
+    var zone=isWarmSeason(plant)?'warm':'cool';
+
+    // Potato isolation: find a bed without tomatoes or cucumbers if possible
+    if(id==='potato'&&potatoConflict&&hasMultiBeds){
+      var cleanBed=beds.find(function(b){
+        var inBed=b.grid.filter(Boolean);
+        return inBed.indexOf('tomato')<0&&inBed.indexOf('cucumber')<0;
+      });
+      if(cleanBed){
+        var placed=placePlantSmart(cleanBed,plant,need,zone);
+        remaining[id]-=placed;return;
+      }
+    }
+
+    // Normal placement: prefer beds without enemies, then without soft conflicts
+    for(var bi=0;bi<beds.length&&need>0;bi++){
+      var b=beds[bi];
+      if(hasMultiBeds&&bedHasEnemy(b,plant))continue;
+      if(hasMultiBeds&&bedHasSoftConflict(b,id))continue;
+      var placed=placePlantSmart(b,plant,need,zone);
+      need-=placed;
+    }
+    // Second pass: allow soft conflicts if no clean bed found
+    for(var bi=0;bi<beds.length&&need>0;bi++){
+      var b=beds[bi];
+      if(hasMultiBeds&&bedHasEnemy(b,plant))continue;
+      var placed=placePlantSmart(b,plant,need,zone);
+      need-=placed;
+    }
+    // Fallback: place in any bed (single bed or no clean bed found)
+    if(need>0){
+      for(var bi=0;bi<beds.length&&need>0;bi++){
+        var placed=placePlantSmart(beds[bi],plant,need,zone);
+        need-=placed;
+      }
+    }
+    remaining[id]=need;
+  });
+
+  renderAllBeds();
 }
 
 function renderPlantSelector(){
