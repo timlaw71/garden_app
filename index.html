@@ -1043,35 +1043,10 @@ function detectLocation(){
 
   navigator.geolocation.getCurrentPosition(
     function(pos){
-      var lat=pos.coords.latitude.toFixed(6);
-      var lng=pos.coords.longitude.toFixed(6);
+      var lat=pos.coords.latitude;
+      var lng=pos.coords.longitude;
       resultEl.innerHTML='<span style="color:var(--text3)"><i class="ti ti-map-pin" aria-hidden="true"></i> Found your location — looking up ZIP...</span>';
-
-      // Use nominatim reverse geocode (free, no key needed)
-      fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat='+lat+'&lon='+lng+'&zoom=12&addressdetails=1',{
-        headers:{'Accept-Language':'en-US','User-Agent':'SeedsmithGardenPlanner/1.0'}
-      })
-      .then(function(r){return r.json();})
-      .then(function(data){
-        var zip=data.address&&(data.address.postcode||data.address.postal_code);
-        if(zip){
-          // US ZIPs are 5 digits, strip any +4 extension
-          zip=zip.replace(/[^0-9]/g,'').slice(0,5);
-          document.getElementById('zip').value=zip;
-          btnText.textContent='Use my location';
-          btn.disabled=false;
-          if(zip.length===5)lookupFrost();
-        } else {
-          resultEl.innerHTML='<span style="color:var(--rust)">Could not find ZIP for your location — enter manually.</span>';
-          btnText.textContent='Use my location';
-          btn.disabled=false;
-        }
-      })
-      .catch(function(){
-        resultEl.innerHTML='<span style="color:var(--rust)">Location lookup failed — enter ZIP manually.</span>';
-        btnText.textContent='Use my location';
-        btn.disabled=false;
-      });
+      resolveZipFromCoords(lat,lng,btn,btnText,resultEl);
     },
     function(err){
       var msgs={1:'Location permission denied — enter ZIP manually.',2:'Location unavailable.',3:'Location request timed out.'};
@@ -1079,8 +1054,104 @@ function detectLocation(){
       btnText.textContent='Use my location';
       btn.disabled=false;
     },
-    {timeout:10000,maximumAge:300000}
+    {timeout:10000,maximumAge:300000,enableHighAccuracy:false}
   );
+}
+
+function resolveZipFromCoords(lat,lng,btn,btnText,resultEl){
+  function applyZip(zip){
+    zip=zip.replace(/[^0-9]/g,'').slice(0,5);
+    if(zip.length===5){
+      document.getElementById('zip').value=zip;
+      btnText.textContent='Use my location';
+      btn.disabled=false;
+      lookupFrost();
+    } else {
+      tryFallback();
+    }
+  }
+
+  function tryFallback(){
+    // Fallback: Big Data Cloud reverse geocode (no key, CORS-friendly)
+    fetch('https://api.bigdatacloud.net/data/reverse-geocode-client?latitude='+lat+'&longitude='+lng+'&localityLanguage=en')
+    .then(function(r){return r.json();})
+    .then(function(data){
+      var zip=data.postcode||data.locality;
+      // postcode may be city name on non-US — validate it's numeric
+      if(zip&&/^\d{5}/.test(zip)){
+        applyZipFinal(zip);
+      } else {
+        // Last resort: use our ZIP prefix table to find closest known zone
+        useZoneFromCoords(lat,lng,btn,btnText,resultEl);
+      }
+    })
+    .catch(function(){
+      useZoneFromCoords(lat,lng,btn,btnText,resultEl);
+    });
+  }
+
+  function applyZipFinal(zip){
+    zip=zip.replace(/[^0-9]/g,'').slice(0,5);
+    document.getElementById('zip').value=zip;
+    btnText.textContent='Use my location';
+    btn.disabled=false;
+    lookupFrost();
+  }
+
+  // Primary: Nominatim — check all known postcode fields
+  fetch('https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat='+lat+'&lon='+lng+'&zoom=14&addressdetails=1',{
+    headers:{'Accept-Language':'en-US','User-Agent':'SeedsmithGardenPlanner/1.0'}
+  })
+  .then(function(r){return r.json();})
+  .then(function(data){
+    var addr=data.address||{};
+    // Try every field that might hold a US ZIP
+    var zip=addr.postcode||addr.postal_code||addr['ISO3166-2-lvl4']||'';
+    // Also check the display_name for a 5-digit sequence near the end
+    if(!zip||!/^\d{5}/.test(zip)){
+      var dn=data.display_name||'';
+      var m=dn.match(/(\d{5})/);
+      if(m)zip=m[1];
+    }
+    if(zip&&/^\d{5}/.test(zip)){
+      applyZipFinal(zip);
+    } else {
+      tryFallback();
+    }
+  })
+  .catch(function(){
+    tryFallback();
+  });
+}
+
+function useZoneFromCoords(lat,lng,btn,btnText,resultEl){
+  // Estimate hardiness zone from lat/lng when ZIP lookup fails
+  // Rough US zone estimate: warmer as you go south and toward coasts
+  var zone;
+  if(lat>49)zone='3b';
+  else if(lat>45)zone='4b';
+  else if(lat>42)zone='5b';
+  else if(lat>39)zone='6b';
+  else if(lat>36)zone='7b';
+  else if(lat>33)zone='8a';
+  else if(lat>30)zone='8b';
+  else if(lat>27)zone='9b';
+  else zone='10a';
+
+  var ZONE_FROST={'2b':{lf:'Jun 15',ff:'Aug 15'},'3a':{lf:'Jun 1',ff:'Sep 1'},'3b':{lf:'May 15',ff:'Sep 15'},'4a':{lf:'May 15',ff:'Sep 15'},'4b':{lf:'May 1',ff:'Oct 1'},'5a':{lf:'Apr 15',ff:'Oct 15'},'5b':{lf:'Apr 1',ff:'Oct 31'},'6a':{lf:'Apr 1',ff:'Oct 31'},'6b':{lf:'Mar 15',ff:'Nov 15'},'7a':{lf:'Mar 15',ff:'Nov 15'},'7b':{lf:'Mar 1',ff:'Nov 30'},'8a':{lf:'Feb 15',ff:'Dec 1'},'8b':{lf:'Feb 1',ff:'Dec 15'},'9a':{lf:'Jan 30',ff:'Dec 15'},'9b':{lf:'Jan 15',ff:'Dec 31'},'10a':{lf:'Jan 1',ff:'Dec 31'},'10b':{lf:'Jan 1',ff:'Dec 31'}};
+  var frost=ZONE_FROST[zone];
+  if(frost){
+    var yr=new Date().getFullYear();
+    function parse(s){var d=new Date(s+' '+yr);return isNaN(d)?null:d;}
+    var sd=parse(frost.lf),ed=parse(frost.ff);
+    if(sd)document.getElementById('last-frost').value=sd.toISOString().slice(0,10);
+    if(ed)document.getElementById('first-fall-frost').value=ed.toISOString().slice(0,10);
+    resultEl.innerHTML='<div class="frost-success"><i class="ti ti-check"></i> Estimated Zone '+zone+' from GPS coordinates — last frost ~'+frost.lf+', fall frost ~'+frost.ff+'</div>';
+  } else {
+    resultEl.innerHTML='<span style="color:var(--rust)">Could not determine zone from location — enter ZIP manually.</span>';
+  }
+  btnText.textContent='Use my location';
+  btn.disabled=false;
 }
 
 function lookupFrost(){
