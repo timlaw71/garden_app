@@ -643,7 +643,13 @@ select:focus,input:focus{outline:none;border-color:var(--leaf);box-shadow:0 0 0 
           </select>
         </div>
         <div class="field"><label>ZIP code</label>
-          <input type="text" id="zip" placeholder="e.g. 30040" maxlength="5" style="max-width:160px" oninput="if(this.value.length===5)lookupFrost()">
+          <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+            <input type="text" id="zip" placeholder="e.g. 30040" maxlength="5" style="max-width:140px;flex:none" oninput="if(this.value.length===5)lookupFrost()">
+            <button class="btn btn-sm" onclick="detectLocation()" id="loc-btn" title="Use my location" style="flex:none;gap:5px">
+              <i class="ti ti-current-location" aria-hidden="true"></i>
+              <span id="loc-btn-text">Use my location</span>
+            </button>
+          </div>
         </div>
       </div>
       <div id="frost-result" class="frost-result"></div>
@@ -1021,6 +1027,61 @@ function bedDim(id,dim,v){
 }
 function addBed(){beds.push({id:bedIdCtr++,name:'Bed '+(beds.length+1),L:8,W:4,grid:Array(32).fill(null)});renderBedList();}
 function removeBed(id){beds=beds.filter(function(b){return b.id!==id;});if(activeBed===id)activeBed=beds[0].id;renderBedList();}
+
+function detectLocation(){
+  var btn=document.getElementById('loc-btn');
+  var btnText=document.getElementById('loc-btn-text');
+  var resultEl=document.getElementById('frost-result');
+
+  if(!navigator.geolocation){
+    resultEl.innerHTML='<span style="color:var(--rust)">Geolocation not supported by your browser.</span>';
+    return;
+  }
+
+  btnText.textContent='Locating...';
+  btn.disabled=true;
+
+  navigator.geolocation.getCurrentPosition(
+    function(pos){
+      var lat=pos.coords.latitude.toFixed(6);
+      var lng=pos.coords.longitude.toFixed(6);
+      resultEl.innerHTML='<span style="color:var(--text3)"><i class="ti ti-map-pin" aria-hidden="true"></i> Found your location — looking up ZIP...</span>';
+
+      // Use nominatim reverse geocode (free, no key needed)
+      fetch('https://nominatim.openstreetmap.org/reverse?format=json&lat='+lat+'&lon='+lng+'&zoom=12&addressdetails=1',{
+        headers:{'Accept-Language':'en-US','User-Agent':'SeedsmithGardenPlanner/1.0'}
+      })
+      .then(function(r){return r.json();})
+      .then(function(data){
+        var zip=data.address&&(data.address.postcode||data.address.postal_code);
+        if(zip){
+          // US ZIPs are 5 digits, strip any +4 extension
+          zip=zip.replace(/[^0-9]/g,'').slice(0,5);
+          document.getElementById('zip').value=zip;
+          btnText.textContent='Use my location';
+          btn.disabled=false;
+          if(zip.length===5)lookupFrost();
+        } else {
+          resultEl.innerHTML='<span style="color:var(--rust)">Could not find ZIP for your location — enter manually.</span>';
+          btnText.textContent='Use my location';
+          btn.disabled=false;
+        }
+      })
+      .catch(function(){
+        resultEl.innerHTML='<span style="color:var(--rust)">Location lookup failed — enter ZIP manually.</span>';
+        btnText.textContent='Use my location';
+        btn.disabled=false;
+      });
+    },
+    function(err){
+      var msgs={1:'Location permission denied — enter ZIP manually.',2:'Location unavailable.',3:'Location request timed out.'};
+      resultEl.innerHTML='<span style="color:var(--rust)">'+(msgs[err.code]||'Location error.')+'</span>';
+      btnText.textContent='Use my location';
+      btn.disabled=false;
+    },
+    {timeout:10000,maximumAge:300000}
+  );
+}
 
 function lookupFrost(){
   var zip=document.getElementById('zip').value.trim();
