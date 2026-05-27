@@ -585,6 +585,116 @@ select:focus,input:focus{outline:none;border-color:var(--leaf);box-shadow:0 0 0 
   .app-logo{width:36px;height:36px;font-size:18px}
   .app-title{font-size:19px}
 }
+
+/* =============================================
+   PLANT GUIDE
+   ============================================= */
+.guide-filter-btn{
+  padding:.3rem .875rem;border-radius:30px;
+  border:1.5px solid var(--border2);background:var(--surface);
+  cursor:pointer;font-size:12px;font-weight:500;font-family:var(--font);
+  color:var(--text2);transition:all .15s;
+}
+.guide-filter-btn.active{background:var(--bark);color:var(--cream);border-color:var(--bark)}
+.guide-filter-btn:hover:not(.active){border-color:var(--clay)}
+
+.guide-cat-header{
+  font-family:var(--font-serif);font-size:20px;color:var(--text);
+  display:flex;align-items:center;gap:8px;
+  margin:1.5rem 0 .5rem;padding-bottom:.5rem;
+  border-bottom:2px solid var(--border);
+}
+.guide-cat-header i{color:var(--harvest)}
+.guide-cat-header:first-child{margin-top:0}
+
+.guide-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r-lg);margin-bottom:.625rem;
+  overflow:hidden;box-shadow:var(--shadow);
+  transition:box-shadow .15s,transform .15s;
+}
+.guide-card:hover{box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.guide-card-header{
+  display:flex;align-items:center;gap:12px;
+  padding:.875rem 1.25rem;cursor:pointer;
+}
+.guide-color-bar{width:5px;border-radius:3px;align-self:stretch;flex-shrink:0;min-height:40px}
+.guide-name{font-size:15px;font-weight:500;color:var(--text);flex:1}
+.guide-cat-tag{font-size:11px;color:var(--text3);font-weight:300}
+.guide-season-dots{display:flex;gap:4px;align-items:center;margin-left:auto;flex-shrink:0}
+.guide-body{
+  padding:0 1.25rem .875rem 2.5rem;
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:.5rem;
+}
+.guide-stat{display:flex;flex-direction:column;gap:2px}
+.guide-stat-label{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em}
+.guide-stat-val{font-size:13px;color:var(--text);font-weight:500}
+.guide-warn{
+  font-size:12px;color:var(--harvest);
+  margin-top:.375rem;padding:.375rem .75rem;
+  background:rgba(196,122,30,.07);border-radius:var(--r);
+  display:flex;gap:5px;align-items:flex-start;
+}
+.guide-companions{font-size:12px;color:var(--leaf);margin-top:.375rem}
+.guide-enemies{font-size:12px;color:var(--rust);margin-top:.25rem}
+.guide-empty{
+  text-align:center;padding:3rem 1rem;color:var(--text3);font-size:14px;
+}
+
+/* =============================================
+   MY PLANTS
+   ============================================= */
+.myplant-chip{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--surface);border:1.5px solid var(--border2);
+  border-radius:30px;padding:5px 8px 5px 12px;
+  font-size:13px;font-weight:500;color:var(--text);
+  margin:3px;transition:all .12s;
+}
+.myplant-chip:hover{box-shadow:var(--shadow)}
+.myplant-chip-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.myplant-chip-remove{
+  width:20px;height:20px;border-radius:50%;border:none;
+  background:var(--surface2);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text3);font-size:12px;margin-left:2px;
+  transition:all .12s;font-family:var(--font);
+}
+.myplant-chip-remove:hover{background:var(--tomato);color:#fff}
+.myplant-waves{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:11px;color:var(--text3);margin-left:2px;
+}
+.myplant-wbtn{
+  width:18px;height:18px;border-radius:5px;border:1px solid var(--border2);
+  background:var(--surface2);cursor:pointer;font-size:12px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text);font-family:var(--font);transition:all .1s;
+}
+.myplant-wbtn:hover{background:var(--leaf);color:#fff;border-color:var(--leaf)}
+
+/* Library grid */
+.lib-cat-label{
+  font-family:var(--font-serif);font-size:16px;color:var(--text);
+  margin:.875rem 0 .4rem;display:flex;align-items:center;gap:6px;
+}
+.lib-cat-label i{color:var(--harvest);font-size:15px}
+.lib-cat-label:first-child{margin-top:0}
+.lib-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:.25rem}
+.lib-chip{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:5px 12px;border-radius:30px;cursor:pointer;
+  font-size:13px;font-weight:500;font-family:var(--font);
+  border:1.5px solid var(--border2);background:var(--surface2);
+  color:var(--text2);transition:all .15s;
+}
+.lib-chip:hover{border-color:var(--clay);box-shadow:var(--shadow);transform:translateY(-1px)}
+.lib-chip.in-list{
+  background:var(--leaf);color:#fff;
+  border-color:var(--leaf);box-shadow:0 2px 8px rgba(58,107,42,.25);
+}
+.lib-chip .lib-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -628,6 +738,7 @@ select:focus,input:focus{outline:none;border-color:var(--leaf);box-shadow:0 0 0 
     <button class="step-tab" id="tab1" onclick="goStep(1)"><span class="num">2</span>Plants</button>
     <button class="step-tab" id="tab2" onclick="goStep(2)"><span class="num">3</span>Grid</button>
     <button class="step-tab" id="tab3" onclick="goStep(3)"><span class="num">4</span>Calendar</button>
+    <button class="step-tab" id="tab4" onclick="goStep(4)"><i class="ti ti-book-2" style="font-size:13px"></i> Guide</button>
   </div>
 
   <!-- STEP 1: SETUP -->
@@ -667,11 +778,13 @@ select:focus,input:focus{outline:none;border-color:var(--leaf);box-shadow:0 0 0 
     <div class="nav-row"><button class="btn btn-green" onclick="goStep(1)">Choose your plants <i class="ti ti-arrow-right" aria-hidden="true"></i></button></div>
   </div>
 
-  <!-- STEP 2: PLANTS -->
+  <!-- STEP 2: MY PLANTS -->
   <div class="panel" id="panel1">
+
+    <!-- Season selector -->
     <div class="season-card">
       <div class="season-card-title">Which seasons are you planning?</div>
-      <div class="season-card-hint">Toggle on/off — at least one required · detected automatically from today's date</div>
+      <div class="season-card-hint">Toggle on/off · detected automatically from today's date</div>
       <div class="season-pills">
         <button class="season-btn active" data-s="spring" onclick="toggleSeason(this)" style="background:#E6F1FB;color:#185fa5;border-color:#AED6F1"><i class="ti ti-seeding"></i> Spring</button>
         <button class="season-btn active" data-s="summer" onclick="toggleSeason(this)" style="background:#FEF3E2;color:#C47A1E;border-color:#F5D07A"><i class="ti ti-sun"></i> Summer</button>
@@ -681,50 +794,59 @@ select:focus,input:focus{outline:none;border-color:var(--leaf);box-shadow:0 0 0 
       <div class="season-hint" id="season-date-hint"></div>
     </div>
 
-    <div class="mode-toggle">
-      <button class="mode-btn active" id="mode-wiz" onclick="setMode('wizard')"><i class="ti ti-wand"></i> Wizard</button>
-      <button class="mode-btn" id="mode-chk" onclick="setMode('checklist')"><i class="ti ti-list-check"></i> Checklist</button>
-    </div>
-
-    <div id="wizard-panel">
-      <div class="card">
-        <div class="card-title"><i class="ti ti-sparkles"></i>Tell us about your garden</div>
-        <div class="wiz-q">
-          <div class="wiz-label">What are your main goals? <span style="font-size:12px;font-weight:300;color:var(--text3)">(pick all that apply)</span></div>
-          <div class="wiz-opts" id="wg-goals">
-            <button class="wiz-opt" data-g="salads" onclick="wizToggle(this)">🥗 Fresh salads</button>
-            <button class="wiz-opt" data-g="cooking" onclick="wizToggle(this)">🍳 Cooking ingredients</button>
-            <button class="wiz-opt" data-g="snacking" onclick="wizToggle(this)">🍅 Snacking &amp; fresh eating</button>
-            <button class="wiz-opt" data-g="preserving" onclick="wizToggle(this)">🫙 Preserving &amp; canning</button>
-            <button class="wiz-opt" data-g="herbs" onclick="wizToggle(this)">🌿 Fresh herbs</button>
-          </div>
-        </div>
-        <div class="wiz-q">
-          <div class="wiz-label">How much time per week?</div>
-          <div class="wiz-opts" id="wg-time">
-            <button class="wiz-opt" data-g="low" onclick="wizSingle('wg-time',this)">Under 1 hour</button>
-            <button class="wiz-opt sel" data-g="med" onclick="wizSingle('wg-time',this)">1–3 hours</button>
-            <button class="wiz-opt" data-g="high" onclick="wizSingle('wg-time',this)">3+ hours</button>
-          </div>
-        </div>
-        <div class="wiz-q">
-          <div class="wiz-label">Experience level?</div>
-          <div class="wiz-opts" id="wg-exp">
-            <button class="wiz-opt" data-g="beginner" onclick="wizSingle('wg-exp',this)">First garden</button>
-            <button class="wiz-opt sel" data-g="some" onclick="wizSingle('wg-exp',this)">Grown before</button>
-            <button class="wiz-opt" data-g="exp" onclick="wizSingle('wg-exp',this)">Experienced</button>
-          </div>
-        </div>
-        <button class="btn btn-green" onclick="runWizard()"><i class="ti ti-sparkles"></i> Suggest plants for me</button>
+    <!-- My Plants list -->
+    <div class="card">
+      <div class="card-title"><i class="ti ti-heart"></i>My Plants
+        <span id="myplants-count" style="font-size:13px;font-weight:400;color:var(--text3);margin-left:6px"></span>
+        <button class="btn btn-sm" onclick="clearMyPlants()" style="margin-left:auto;color:var(--text3);font-size:12px">
+          <i class="ti ti-trash" style="font-size:12px"></i> Clear all
+        </button>
       </div>
-      <div id="wiz-results"></div>
+      <div id="myplants-list" style="min-height:48px">
+        <div style="font-size:13px;color:var(--text3);font-style:italic">No plants added yet — pick from the library below or add a custom plant.</div>
+      </div>
     </div>
 
-    <div id="checklist-panel" style="display:none"><div id="plant-checklist"></div></div>
+    <!-- Add custom plant -->
+    <div class="card">
+      <div class="card-title"><i class="ti ti-plus"></i>Add a custom plant</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
+        <div class="field" style="min-width:140px"><label>Plant name</label>
+          <input type="text" id="custom-name" placeholder="e.g. Lemon Basil" maxlength="40">
+        </div>
+        <div class="field" style="min-width:120px"><label>Season</label>
+          <select id="custom-season">
+            <option value="spring">Spring</option>
+            <option value="summer" selected>Summer</option>
+            <option value="fall">Fall</option>
+            <option value="year-round">Year-round</option>
+          </select>
+        </div>
+        <div class="field" style="max-width:100px"><label>Per sq ft</label>
+          <select id="custom-persqft">
+            <option value="1">1 plant</option>
+            <option value="4" selected>4 plants</option>
+            <option value="9">9 plants</option>
+            <option value="16">16 plants</option>
+          </select>
+        </div>
+        <div class="field" style="max-width:100px"><label>DTM (days)</label>
+          <input type="number" id="custom-dtm" value="60" min="14" max="365" step="1">
+        </div>
+        <button class="btn btn-green" onclick="addCustomPlant()" style="align-self:flex-end">
+          <i class="ti ti-plus"></i> Add
+        </button>
+      </div>
+    </div>
 
-    <div class="sel-summary-card">
-      <div class="sel-summary-title"><i class="ti ti-check" style="font-size:12px"></i> Selected plants <span id="sel-count" style="font-weight:300;text-transform:none;letter-spacing:0;font-size:12px;color:var(--text3)"></span></div>
-      <div id="sel-summary" style="font-size:13px;color:var(--text3)">No plants selected yet — use the wizard or checklist above.</div>
+    <!-- Library picker -->
+    <div class="card">
+      <div class="card-title"><i class="ti ti-books"></i>Plant library</div>
+      <div style="position:relative;margin-bottom:.875rem">
+        <i class="ti ti-search" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:14px;pointer-events:none"></i>
+        <input type="text" id="lib-search" placeholder="Search library..." style="padding-left:32px" oninput="renderLibrary()">
+      </div>
+      <div id="library-grid"></div>
     </div>
 
     <div class="nav-row">
@@ -733,7 +855,7 @@ select:focus,input:focus{outline:none;border-color:var(--leaf);box-shadow:0 0 0 
     </div>
   </div>
 
-  <!-- STEP 3: GRID -->
+<!-- STEP 3: GRID -->
   <div class="panel" id="panel2">
     <div class="grid-toolbar">
       <div class="bed-tabs" id="bed-tabs"></div>
@@ -792,6 +914,28 @@ select:focus,input:focus{outline:none;border-color:var(--leaf);box-shadow:0 0 0 
     <div class="nav-row"><button class="btn" onclick="goStep(2)"><i class="ti ti-arrow-left"></i> Back to grid</button></div>
   </div>
 
+  <!-- STEP 5: PLANT GUIDE -->
+  <div class="panel" id="panel4">
+    <div class="card" style="margin-bottom:1.25rem">
+      <div class="card-title"><i class="ti ti-book-2"></i>Plant Reference Guide</div>
+      <div class="card-subtitle">Every plant in Seedsmith — when to plant, how many per square foot, and what to watch for</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:.75rem">
+        <div style="position:relative;flex:1;min-width:180px">
+          <i class="ti ti-search" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:14px;pointer-events:none"></i>
+          <input type="text" id="guide-search" placeholder="Search plants..." style="padding-left:32px" oninput="renderGuide()">
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="guide-filter-btn active" data-f="all" onclick="setGuideFilter(this)">All</button>
+          <button class="guide-filter-btn" data-f="spring" onclick="setGuideFilter(this)" style="color:#185fa5;border-color:#AED6F1">🌱 Spring</button>
+          <button class="guide-filter-btn" data-f="summer" onclick="setGuideFilter(this)" style="color:#C47A1E;border-color:#F5D07A">☀️ Summer</button>
+          <button class="guide-filter-btn" data-f="fall" onclick="setGuideFilter(this)" style="color:#3A6B2A;border-color:#C8DFB8">🍂 Fall</button>
+          <button class="guide-filter-btn" data-f="year-round" onclick="setGuideFilter(this)" style="color:#7A5C42;border-color:#C9A876">🔄 Year-round</button>
+        </div>
+      </div>
+    </div>
+    <div id="guide-list"></div>
+  </div>
+
 </div>
 
 <script>
@@ -801,12 +945,12 @@ const PLANTS=[
   {id:'pepper',     seasons:['summer'],name:'Bell pepper',   cat:'Vegetables',perSqFt:1, dtm:70, harvest:45,waves:1,color:'#993C1D',tc:'#4A1B0C',note:'transplant', frostOffset:77, frostType:'tender',warmNote:'after soil warms (~mid May)',companions:['basil','carrot'],           enemies:[],goals:['cooking','snacking'],             ease:1,northEdge:true, recSq:{1:1,2:1,3:1,4:2,6:3}},
   {id:'hotpepper',   seasons:['summer'],name:'Hot pepper',     cat:'Vegetables',perSqFt:1, dtm:80, harvest:45,waves:1,color:'#CC2200',tc:'#FFFFFF',note:'transplant', frostOffset:77, frostType:'tender',warmNote:'after soil warms (~mid May)',companions:['basil','carrot','tomato'],  enemies:[],goals:['cooking','preserving'],           ease:1,northEdge:true, recSq:{1:1,2:1,3:1,4:2,6:3}},
   {id:'bananapepper',seasons:['summer'],name:'Banana pepper',  cat:'Vegetables',perSqFt:1, dtm:65, harvest:45,waves:1,color:'#E8B84B',tc:'#412402',note:'transplant', frostOffset:77, frostType:'tender',warmNote:'after soil warms (~mid May)',companions:['basil','carrot','tomato'],  enemies:[],goals:['cooking','snacking','preserving'],ease:1,northEdge:true, recSq:{1:1,2:1,3:1,4:2,6:3}},
-  {id:'cucumber',seasons:['summer'],name:'Cucumber',   cat:'Vegetables',perSqFt:1, dtm:55, harvest:21,waves:2,color:'#1D9E75',tc:'#085041',note:'transplant', frostOffset:63, frostType:'tender',warmNote:'after soil warms (~May)',    companions:['beans','romaine'],          enemies:['potato'],           goals:['snacking','cooking'],             ease:1,northEdge:true, recSq:{1:1,2:2,3:2,4:3,6:4}},
-  {id:'zucchini',seasons:['summer'],name:'Zucchini',   cat:'Vegetables',perSqFt:1, dtm:50, harvest:21,waves:1,color:'#0F6E56',tc:'#04342C',note:'transplant',sizeWarn:'Choose bush variety — vining types will take over the bed', frostOffset:63, frostType:'tender',warmNote:'after soil warms (~May)',    companions:[],                           enemies:[],                   goals:['cooking'],                        ease:1,northEdge:true, recSq:{1:1,2:1,3:1,4:2,6:2}},
-  {id:'squash',seasons:['summer'],  name:'Squash',     cat:'Vegetables',perSqFt:1, dtm:50, harvest:21,waves:1,color:'#EF9F27',tc:'#633806',note:'transplant',sizeWarn:'Bush varieties work best in SFG — avoid vining types', frostOffset:63, frostType:'tender',warmNote:'after soil warms (~May)',    companions:[],                           enemies:[],                   goals:['cooking'],                        ease:1,northEdge:true, recSq:{1:1,2:1,3:1,4:2,6:2}},
-  {id:'pumpkin',    seasons:['summer'],name:'Pumpkin',    cat:'Vegetables',perSqFt:1, dtm:100,harvest:0, waves:1,color:'#D85A1A',tc:'#FFFFFF',note:'transplant',sizeWarn:'Vining plant — trellis or plant at bed edge so vines run outside', frostOffset:63,frostType:'tender',warmNote:'after soil warms (~May)',companions:['marigold'],enemies:[],goals:['cooking','preserving'],           ease:1,northEdge:true,recSq:{1:1,2:2,3:2,4:3,6:4}},
-  {id:'watermelon', seasons:['summer'],name:'Watermelon', cat:'Vegetables',perSqFt:1, dtm:90, harvest:14,waves:1,color:'#3B7A2A',tc:'#FFFFFF',note:'transplant',sizeWarn:'Large vining plant — trellis or allow vines to run outside the bed', frostOffset:70,frostType:'tender',warmNote:'after soil warms (~May)',companions:['marigold'],enemies:[],goals:['snacking'],                       ease:1,northEdge:true,recSq:{1:1,2:1,3:2,4:2,6:3}},
-  {id:'cantaloupe', seasons:['summer'],name:'Cantaloupe', cat:'Vegetables',perSqFt:1, dtm:85, harvest:14,waves:1,color:'#C8974A',tc:'#FFFFFF',note:'transplant',sizeWarn:'Vining plant — trellis or plant at bed edge so vines run outside', frostOffset:70,frostType:'tender',warmNote:'after soil warms (~May)',companions:['marigold'],enemies:[],goals:['snacking'],                       ease:1,northEdge:true,recSq:{1:1,2:1,3:2,4:2,6:3}},
+  {id:'cucumber',seasons:['summer'],name:'Cucumber',   cat:'Vegetables',perSqFt:1, dtm:55, harvest:21,waves:2,color:'#1D9E75',tc:'#085041',note:'transplant', frostOffset:63, frostType:'tender',warmNote:'after soil warms (~May)',    companions:['beans','romaine'],          enemies:['potato'],           goals:['snacking','cooking'],             ease:1,northEdge:true,edgePlant:true, recSq:{1:1,2:2,3:2,4:3,6:4}},
+  {id:'zucchini',seasons:['summer'],name:'Zucchini',   cat:'Vegetables',perSqFt:1, dtm:50, harvest:21,waves:1,color:'#0F6E56',tc:'#04342C',note:'transplant',sizeWarn:'Choose bush variety — vining types will take over the bed', frostOffset:63, frostType:'tender',warmNote:'after soil warms (~May)',    companions:[],                           enemies:[],                   goals:['cooking'],                        ease:1,northEdge:true,edgePlant:true, recSq:{1:1,2:1,3:1,4:2,6:2}},
+  {id:'squash',seasons:['summer'],  name:'Squash',     cat:'Vegetables',perSqFt:1, dtm:50, harvest:21,waves:1,color:'#EF9F27',tc:'#633806',note:'transplant',sizeWarn:'Bush varieties work best in SFG — avoid vining types', frostOffset:63, frostType:'tender',warmNote:'after soil warms (~May)',    companions:[],                           enemies:[],                   goals:['cooking'],                        ease:1,northEdge:true,edgePlant:true, recSq:{1:1,2:1,3:1,4:2,6:2}},
+  {id:'pumpkin',    seasons:['summer'],name:'Pumpkin',    cat:'Vegetables',perSqFt:1, dtm:100,harvest:0, waves:1,color:'#D85A1A',tc:'#FFFFFF',note:'transplant',sizeWarn:'Vining plant — trellis or plant at bed edge so vines run outside', frostOffset:63,frostType:'tender',warmNote:'after soil warms (~May)',companions:['marigold'],enemies:[],goals:['cooking','preserving'],           ease:1,northEdge:true,edgePlant:true,recSq:{1:1,2:2,3:2,4:3,6:4}},
+  {id:'watermelon', seasons:['summer'],name:'Watermelon', cat:'Vegetables',perSqFt:1, dtm:90, harvest:14,waves:1,color:'#3B7A2A',tc:'#FFFFFF',note:'transplant',sizeWarn:'Large vining plant — trellis or allow vines to run outside the bed', frostOffset:70,frostType:'tender',warmNote:'after soil warms (~May)',companions:['marigold'],enemies:[],goals:['snacking'],                       ease:1,northEdge:true,edgePlant:true,recSq:{1:1,2:1,3:2,4:2,6:3}},
+  {id:'cantaloupe', seasons:['summer'],name:'Cantaloupe', cat:'Vegetables',perSqFt:1, dtm:85, harvest:14,waves:1,color:'#C8974A',tc:'#FFFFFF',note:'transplant',sizeWarn:'Vining plant — trellis or plant at bed edge so vines run outside', frostOffset:70,frostType:'tender',warmNote:'after soil warms (~May)',companions:['marigold'],enemies:[],goals:['snacking'],                       ease:1,northEdge:true,edgePlant:true,recSq:{1:1,2:1,3:2,4:2,6:3}},
   {id:'broccoli',seasons:['spring','fall'],name:'Broccoli',   cat:'Vegetables',perSqFt:1, dtm:80, harvest:14,waves:2,color:'#085041',tc:'#E1F5EE',note:'transplant', frostOffset:-28,frostType:'hardy', warmNote:'4 wks before last frost',   companions:['onion'],                    enemies:[],                   goals:['cooking'],                        ease:2,northEdge:false,recSq:{1:1,2:1,3:2,4:2,6:3}},
   {id:'romaine',seasons:['spring','fall'], name:'Romaine',    cat:'Greens',    perSqFt:4, dtm:60, harvest:14,waves:4,color:'#639922',tc:'#27500A',note:'seed',       frostOffset:-28,frostType:'hardy', warmNote:'4 wks before last frost',   companions:['carrot','cucumber'],        enemies:[],                   goals:['salads'],                         ease:1,northEdge:false,recSq:{1:1,2:2,3:3,4:4,6:6}},
   {id:'spinach',seasons:['spring','fall'], name:'Spinach',    cat:'Greens',    perSqFt:9, dtm:40, harvest:10,waves:5,color:'#3B6D11',tc:'#EAF3DE',note:'seed',       frostOffset:-42,frostType:'hardy', warmNote:'6 wks before last frost',   companions:[],                           enemies:[],                   goals:['salads','cooking'],               ease:1,northEdge:false,recSq:{1:1,2:1,3:2,4:2,6:3}},
@@ -855,6 +999,165 @@ function seasonDots(plant){
   return '<span class="season-dots">'+plant.seasons.map(function(s){
     return'<span class="sdot" style="background:'+( SEASON_COLORS[s]||'#888')+'" title="'+s+'"></span>';
   }).join('')+'</span>';
+}
+
+
+/* =============================================
+   MY PLANTS — persistent plant list
+   ============================================= */
+var MY_PLANTS_KEY='seedsmith_myplants_v1';
+
+// myPlantList: array of {id, waves, custom?:{name,color,seasons,perSqFt,dtm,warmNote,frostOffset,frostType,note}}
+var myPlantList=[];
+
+function loadMyPlants(){
+  try{
+    var saved=localStorage.getItem(MY_PLANTS_KEY);
+    if(saved){
+      myPlantList=JSON.parse(saved);
+      // Register any custom plants back into PLANTS array
+      myPlantList.forEach(function(entry){
+        if(entry.custom&&!PLANTS.find(function(p){return p.id===entry.id;})){
+          PLANTS.push(entry.custom);
+        }
+      });
+    }
+  }catch(e){myPlantList=[];}
+}
+
+function saveMyPlants(){
+  try{localStorage.setItem(MY_PLANTS_KEY,JSON.stringify(myPlantList));}catch(e){}
+  // Keep selPlants in sync
+  selPlants={};
+  myPlantList.forEach(function(entry){selPlants[entry.id]={waves:entry.waves||1};});
+}
+
+function addToMyPlants(id){
+  if(myPlantList.find(function(e){return e.id===id;}))return;
+  var plant=pl(id);if(!plant)return;
+  myPlantList.push({id:id,waves:plant.waves||1});
+  saveMyPlants();
+  renderMyPlants();
+  renderLibrary();
+}
+
+function removeFromMyPlants(id){
+  myPlantList=myPlantList.filter(function(e){return e.id!==id;});
+  saveMyPlants();
+  renderMyPlants();
+  renderLibrary();
+}
+
+function adjMyPlantWaves(id,d){
+  var entry=myPlantList.find(function(e){return e.id===id;});
+  if(!entry)return;
+  entry.waves=Math.max(1,Math.min(6,(entry.waves||1)+d));
+  saveMyPlants();
+  renderMyPlants();
+}
+
+function clearMyPlants(){
+  if(!myPlantList.length)return;
+  if(!confirm('Clear all plants from your list?'))return;
+  myPlantList=[];saveMyPlants();renderMyPlants();renderLibrary();
+}
+
+function addCustomPlant(){
+  var name=document.getElementById('custom-name').value.trim();
+  if(!name){document.getElementById('custom-name').focus();return;}
+  var season=document.getElementById('custom-season').value;
+  var perSqFt=parseInt(document.getElementById('custom-persqft').value)||4;
+  var dtm=parseInt(document.getElementById('custom-dtm').value)||60;
+  var SEASON_COLORS_MAP={'spring':'#185fa5','summer':'#C47A1E','fall':'#3A6B2A','year-round':'#9A8070'};
+  var colors=['#7F77DD','#5DCAA5','#D4537E','#BA7517','#639922','#1D9E75','#EF9F27'];
+  var color=colors[Math.floor(Math.random()*colors.length)];
+  var frostOffset=season==='summer'?63:season==='fall'?-28:-21;
+  var frostType=season==='summer'?'tender':'hardy';
+  var warmNote=season==='summer'?'after soil warms (~May)':season==='fall'?'4 wks before fall frost':'before last frost';
+  var id='custom_'+Date.now();
+  var customPlant={
+    id:id,name:name,cat:'Custom',perSqFt:perSqFt,dtm:dtm,harvest:Math.round(dtm*.3),
+    waves:1,color:color,tc:'#fff',note:'transplant',
+    frostOffset:frostOffset,frostType:frostType,warmNote:warmNote,
+    companions:[],enemies:[],goals:['cooking','snacking'],
+    ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:1,6:2},
+    seasons:[season]
+  };
+  PLANTS.push(customPlant);
+  myPlantList.push({id:id,waves:1,custom:customPlant});
+  saveMyPlants();
+  document.getElementById('custom-name').value='';
+  renderMyPlants();
+  renderLibrary();
+}
+
+function renderMyPlants(){
+  var el=document.getElementById('myplants-list');
+  var countEl=document.getElementById('myplants-count');
+  if(!el)return;
+  var SEASON_COLORS_MAP={'spring':'#185fa5','summer':'#C47A1E','fall':'#3A6B2A','year-round':'#9A8070'};
+  countEl.textContent=myPlantList.length?'('+myPlantList.length+' plants)':'';
+  if(!myPlantList.length){
+    el.innerHTML='<div style="font-size:13px;color:var(--text3);font-style:italic">No plants added yet — pick from the library below or add a custom plant.</div>';
+    return;
+  }
+  el.innerHTML=myPlantList.map(function(entry){
+    var plant=pl(entry.id);if(!plant)return'';
+    var dots=(plant.seasons||[]).map(function(s){
+      return'<span class="sdot" style="background:'+(SEASON_COLORS_MAP[s]||'#888')+'" title="'+s+'"></span>';
+    }).join('');
+    var eid=entry.id;
+    return'<div class="myplant-chip" data-id="'+eid+'">'+
+      '<span class="myplant-chip-dot" style="background:'+plant.color+'"></span>'+
+      dots+
+      '<span>'+plant.name+'</span>'+
+      '<span class="myplant-waves">'+
+        '<button class="myplant-wbtn" data-id="'+eid+'" data-d="-1" onclick="adjMyPlantWaves(this.dataset.id,parseInt(this.dataset.d))">−</button>'+
+        '<span style="min-width:14px;text-align:center;font-size:12px;font-weight:600;color:var(--text)">'+(entry.waves||1)+'</span>'+
+        '<button class="myplant-wbtn" data-id="'+eid+'" data-d="1" onclick="adjMyPlantWaves(this.dataset.id,parseInt(this.dataset.d))">+</button>'+
+        '<span style="margin-left:2px">wave'+(entry.waves>1?'s':'')+'</span>'+
+      '</span>'+
+      '<button class="myplant-chip-remove" data-id="'+eid+'" onclick="removeFromMyPlants(this.dataset.id)" aria-label="Remove">'+
+        '<i class="ti ti-x" style="font-size:11px"></i>'+
+      '</button>'+
+    '</div>';
+  }).join('');
+}
+
+function renderLibrary(){
+  var el=document.getElementById('library-grid');
+  if(!el)return;
+  var search=(document.getElementById('lib-search')||{}).value||'';
+  search=search.toLowerCase().trim();
+  var CAT_ICONS={'Vegetables':'ti-plant-2','Greens':'ti-leaf','Root veg':'ti-arrow-down','Legumes':'ti-seeding','Herbs':'ti-herb','Flowers':'ti-flower','Custom':'ti-star'};
+  var inListIds=myPlantList.map(function(e){return e.id;});
+  var filtered=PLANTS.filter(function(p){
+    if(p.cat==='Custom')return false;// custom plants shown in myplants only
+    return!search||p.name.toLowerCase().indexOf(search)>=0||p.cat.toLowerCase().indexOf(search)>=0;
+  });
+  // Sort alphabetically in library
+  filtered.sort(function(a,b){return a.name.localeCompare(b.name);});
+  var bycat={};
+  filtered.forEach(function(p){if(!bycat[p.cat])bycat[p.cat]=[];bycat[p.cat].push(p);});
+  var SEASON_COLORS_MAP={'spring':'#185fa5','summer':'#C47A1E','fall':'#3A6B2A','year-round':'#9A8070'};
+  var html='';
+  Object.keys(bycat).forEach(function(cat){
+    var icon=CAT_ICONS[cat]||'ti-category';
+    html+='<div class="lib-cat-label"><i class="ti '+icon+'"></i>'+cat+'</div><div class="lib-chips">';
+    bycat[cat].forEach(function(plant){
+      var inList=inListIds.indexOf(plant.id)>=0;
+      var dot='<span class="lib-dot" style="background:'+plant.color+'"></span>';
+      var seasonDots=(plant.seasons||[]).map(function(s){return'<span class="sdot" style="background:'+(SEASON_COLORS_MAP[s]||'#888')+'"></span>';}).join('');
+      var action=inList?'removeFromMyPlants':'addToMyPlants';
+      html+='<button class="lib-chip'+(inList?' in-list':'')+'" data-id="'+plant.id+'" onclick="'+action+'(this.dataset.id)" title="'+plant.warmNote+'">'+
+        dot+plant.name+' '+seasonDots+
+        (inList?'<i class="ti ti-check" style="font-size:11px;margin-left:2px"></i>':'')+
+      '</button>';
+    });
+    html+='</div>';
+  });
+  if(!html)html='<div style="font-size:13px;color:var(--text3);font-style:italic">No plants match your search.</div>';
+  el.innerHTML=html;
 }
 
 var selectedSeasons=['spring','summer','fall','year-round'];
@@ -1266,7 +1569,7 @@ function adjSelWaves(id,d,prefix){
   var el=document.getElementById(prefix+'-'+id);if(el)el.textContent=selPlants[id].waves;
 }
 function updateSelSummary(){
-  var ids=Object.keys(selPlants);
+  var ids=myPlantList.map(function(e){return e.id;});
   document.getElementById('sel-count').textContent=ids.length?'('+ids.length+' crops)':'';
   document.getElementById('sel-summary').innerHTML=ids.length
     ?ids.map(function(id){var plant=pl(id);return'<span class="sel-chip"><span class="sel-chip-dot" style="background:'+plant.color+'"></span>'+plant.name+'</span>';}).join('')
@@ -1283,9 +1586,10 @@ function setMode(m){
 }
 
 function goStep(s){
-  if(s===1){applySeasonDetection();renderChecklist();}
+  if(s===1){applySeasonDetection();renderMyPlants();renderLibrary();}
   if(s===2){beds.forEach(function(b){if(!b.grid||b.grid.length!==b.L*b.W)b.grid=Array(b.L*b.W).fill(null);});renderBedTabs();setTimeout(function(){renderActiveBed();renderPlantSelector();},50);}
   if(s===3)buildCalendar();
+  if(s===4)renderGuide();
   document.querySelectorAll('.panel').forEach(function(el,i){el.classList.toggle('active',i===s);});
   document.querySelectorAll('.step-tab').forEach(function(el,i){el.classList.toggle('active',i===s);if(i<s)el.classList.add('done');else el.classList.remove('done');});
 }
@@ -1481,6 +1785,11 @@ function getZoneRows(b){
   return{warm:[],cool:[]};
 }
 
+function isBorderSquare(b,i){
+  var r=Math.floor(i/b.L),c=i%b.L;
+  return r===0||r===b.W-1||c===0||c===b.L-1;
+}
+
 function placePlantSmart(b,plant,count,preferZone){
   // preferZone: 'warm'=rows 0..half, 'cool'=rows half..end, null=anywhere
   var placed=0;
@@ -1494,9 +1803,10 @@ function placePlantSmart(b,plant,count,preferZone){
     return true;
   }
 
-  function tryPlace(checkZone,checkCompanion,checkNorth){
+  function tryPlace(checkZone,checkCompanion,checkNorth,edgeOnly){
     for(var i=0;i<b.grid.length&&placed<count;i++){
       if(b.grid[i]!==null)continue;
+      if(edgeOnly&&!isBorderSquare(b,i))continue;
       if(checkZone&&!inZone(i))continue;
       var row=Math.floor(i/b.L);
       if(checkNorth&&plant.northEdge&&row>1)continue;
@@ -1504,7 +1814,6 @@ function placePlantSmart(b,plant,count,preferZone){
       var nb=getNeighbors(b,i);
       if(nb.some(function(j){return b.grid[j]&&plant.enemies.indexOf(b.grid[j])>=0;}))continue;
       if(checkCompanion&&plant.companions.length&&!hasAdjacentCompanion(b,i,plant.companions)&&placed===0){
-        // prefer companion-adjacent on first pass only
         var hasComp=nb.some(function(j){return b.grid[j]&&plant.companions.indexOf(b.grid[j])>=0;});
         if(!hasComp)continue;
       }
@@ -1512,27 +1821,82 @@ function placePlantSmart(b,plant,count,preferZone){
     }
   }
 
-  // Pass 1: correct zone + companion adjacent + north preference
-  tryPlace(true,true,true);
-  // Pass 2: correct zone + north preference (no companion requirement)
-  tryPlace(true,false,true);
-  // Pass 3: correct zone, anywhere in it
-  tryPlace(true,false,false);
-  // Pass 4: any empty square (zone fallback)
-  tryPlace(false,false,false);
+  var isVining=plant.edgePlant===true;
+
+  if(isVining){
+    // Vining plants: border squares only, north edge preferred
+    tryPlace(false,false,true,true);  // Pass 1: border + north edge
+    tryPlace(false,false,false,true); // Pass 2: any border square
+    // Fallback only if no border squares free (very small beds)
+    tryPlace(false,false,false,false);
+  } else {
+    // Pass 1: correct zone + companion adjacent + north preference
+    tryPlace(true,true,true,false);
+    // Pass 2: correct zone + north preference
+    tryPlace(true,false,true,false);
+    // Pass 3: correct zone, anywhere
+    tryPlace(true,false,false,false);
+    // Pass 4: any empty square
+    tryPlace(false,false,false,false);
+  }
   return placed;
 }
 
+function isPlantInSeason(plant){
+  // Returns true if plant is active now or coming up within 8 weeks
+  var lfStr=document.getElementById('last-frost').value;
+  var ffStr=document.getElementById('first-fall-frost').value;
+  var today=new Date();
+
+  if(lfStr){
+    var yr=today.getFullYear();
+    var lf=new Date(yr+'-'+lfStr.slice(5));
+    var ff=ffStr?new Date(yr+'-'+ffStr.slice(5)):null;
+    var firstPlant=new Date(lf);firstPlant.setDate(firstPlant.getDate()+plant.frostOffset);
+    // Window: from 8 weeks before first plant date to fall frost (or end of season)
+    var windowStart=new Date(firstPlant);windowStart.setDate(windowStart.getDate()-56);
+    var windowEnd=ff||new Date(lf);
+    if(!ff)windowEnd.setDate(windowEnd.getDate()+180);
+    return today>=windowStart&&today<=windowEnd;
+  }
+  // Fallback: use selected seasons
+  return plant.seasons&&plant.seasons.some(function(s){return selectedSeasons.indexOf(s)>=0;});
+}
+
 function autoPopulate(){
-  var hh=getHH();var ids=Object.keys(selPlants);
-  if(!ids.length){document.getElementById('conflict-area').innerHTML='<div class="alert alert-warn">Select plants in step 2 first.</div>';return;}
+  var hh=getHH();
+  var ids=myPlantList.map(function(e){return e.id;});
+  if(!ids.length){document.getElementById('conflict-area').innerHTML='<div class="alert alert-warn">Add plants in step 2 first.</div>';return;}
+
+  // Filter to only plants relevant for this time of year
+  var seasonalIds=ids.filter(function(id){
+    var plant=pl(id);return plant&&isPlantInSeason(plant);
+  });
+  var skippedIds=ids.filter(function(id){return seasonalIds.indexOf(id)<0;});
 
   // Clear all beds
   beds.forEach(function(b){b.grid=Array(b.L*b.W).fill(null);});
 
   var hasMultiBeds=beds.length>1;
-  var selectedIds=ids.slice();
+  var selectedIds=seasonalIds.slice();
   var remaining={};selectedIds.forEach(function(id){remaining[id]=pl(id).recSq[hh]||1;});
+
+  // Show info if some plants were skipped
+  if(skippedIds.length){
+    var skippedNames=skippedIds.map(function(id){var p=pl(id);return p?p.name:id;}).join(', ');
+    setTimeout(function(){
+      var ca=document.getElementById('conflict-area');
+      if(ca){
+        var existing=ca.innerHTML;
+        ca.innerHTML='<div class="alert alert-info"><i class="ti ti-clock" aria-hidden="true"></i> Not in season now — skipped: '+skippedNames+'</div>'+existing;
+      }
+    },100);
+  }
+
+  if(!selectedIds.length){
+    document.getElementById('conflict-area').innerHTML='<div class="alert alert-warn"><i class="ti ti-clock" aria-hidden="true"></i> None of your plants are in season right now. Try adjusting your season selection or planting dates.</div>';
+    renderAllBeds();return;
+  }
 
   // Determine if potatoes conflict and need isolation
   var potatoConflict=selectedIds.indexOf('potato')>=0&&
@@ -1605,7 +1969,7 @@ function autoPopulate(){
 }
 
 function renderPlantSelector(){
-  var ids=Object.keys(selPlants);
+  var ids=myPlantList.map(function(e){return e.id;});
   if(!ids.length){document.getElementById('plant-selector').innerHTML='<span style="font-size:12px;color:var(--text3)">No plants selected — go back to step 2</span>';return;}
   if(ids.indexOf(selPlant)<0)selPlant=ids[0];
   document.getElementById('plant-selector').innerHTML=ids.map(function(id){
@@ -1683,7 +2047,8 @@ function buildPlantCalendar(counts, lf, ff){
   Object.keys(counts).forEach(function(id){
     var plant=pl(id);if(!plant)return;
     var isTransplant=['transplant','set/transplant'].indexOf(plant.note)>=0;
-    var waves=selPlants[id]?selPlants[id].waves:plant.waves;
+    var entry=myPlantList.find(function(e){return e.id===id;});
+    var waves=entry?entry.waves:(selPlants[id]?selPlants[id].waves:plant.waves);
     var interval=plant.harvest||Math.round(plant.dtm*.3);
     var firstOutdoor=addDays(lf,plant.frostOffset);
     var indoorStart=isTransplant?addDays(firstOutdoor,-49):null;// ~7 wks before transplant
@@ -1780,11 +2145,99 @@ function buildCalendar(){
   }).join('');
 }
 
+loadMyPlants();
 var today=new Date(),later=new Date(today);later.setMonth(later.getMonth()+6);
 window.addEventListener('resize',function(){
   if(document.querySelector('#panel2.active'))renderActiveBed();
 });
 setTimeout(function(){applySeasonDetection();},100);
+var guideFilter='all';
+
+function setGuideFilter(btn){
+  guideFilter=btn.getAttribute('data-f');
+  document.querySelectorAll('.guide-filter-btn').forEach(function(b){
+    b.classList.toggle('active',b===btn);
+  });
+  renderGuide();
+}
+
+function renderGuide(){
+  var el=document.getElementById('guide-list');
+  if(!el)return;
+  var search=(document.getElementById('guide-search')||{}).value||'';
+  search=search.toLowerCase().trim();
+
+  var myIds=myPlantList.map(function(e){return e.id;});
+  var filtered=PLANTS.filter(function(plant){
+    var matchSearch=!search||plant.name.toLowerCase().indexOf(search)>=0||plant.cat.toLowerCase().indexOf(search)>=0;
+    var matchSeason=guideFilter==='all'||(plant.seasons&&plant.seasons.indexOf(guideFilter)>=0);
+    return matchSearch&&matchSeason;
+  });
+
+  if(!filtered.length){
+    el.innerHTML='<div class="guide-empty"><i class="ti ti-plant-off" style="font-size:32px;display:block;margin-bottom:.5rem"></i>No plants match your search</div>';
+    return;
+  }
+
+  var SEASON_COLORS={'spring':'#185fa5','summer':'#C47A1E','fall':'#3A6B2A','year-round':'#9A8070'};
+  var CAT_ICONS={'Vegetables':'ti-plant-2','Greens':'ti-leaf','Root veg':'ti-arrow-down','Legumes':'ti-seeding','Herbs':'ti-herb','Flowers':'ti-flower'};
+
+  var bycat={};
+  filtered.forEach(function(p){
+    if(!bycat[p.cat])bycat[p.cat]=[];
+    bycat[p.cat].push(p);
+  });
+
+  var html='';
+  Object.keys(bycat).forEach(function(cat){
+    var icon=CAT_ICONS[cat]||'ti-category';
+    html+='<div class="guide-cat-header"><i class="ti '+icon+'"></i>'+cat+'</div>';
+    bycat[cat].forEach(function(plant){
+      var dots=(plant.seasons||[]).map(function(s){
+        return'<span class="sdot" style="background:'+(SEASON_COLORS[s]||'#888')+'" title="'+s+'"></span>';
+      }).join('');
+
+      var plantNow='';
+      var lfStr=document.getElementById('last-frost').value;
+      if(lfStr){
+        var today=new Date();
+        var yr=today.getFullYear();
+        var lf=new Date(yr+'-'+lfStr.slice(5));
+        var firstPlant=new Date(lf);firstPlant.setDate(firstPlant.getDate()+plant.frostOffset);
+        var ffStr=document.getElementById('first-fall-frost').value;
+        var ff=ffStr?new Date(yr+'-'+ffStr.slice(5)):null;
+        var lastPlant=ff?new Date(ff):new Date(lf);lastPlant.setDate(lastPlant.getDate()+(plant.harvest||30));
+        if(today>=firstPlant&&today<=lastPlant)plantNow='<span class="now-badge">PLANT NOW</span>';
+      }
+
+      var companions=plant.companions&&plant.companions.length
+        ?'<div class="guide-companions"><i class="ti ti-heart" style="font-size:11px"></i> Good neighbors: '+plant.companions.map(function(id){var p=PLANTS.find(function(x){return x.id===id;});return p?p.name:id;}).join(', ')+'</div>':'';
+      var enemies=plant.enemies&&plant.enemies.length
+        ?'<div class="guide-enemies"><i class="ti ti-ban" style="font-size:11px"></i> Bad neighbors: '+plant.enemies.map(function(id){var p=PLANTS.find(function(x){return x.id===id;});return p?p.name:id;}).join(', ')+'</div>':'';
+      var warn=plant.sizeWarn?'<div class="guide-warn"><i class="ti ti-alert-triangle" style="font-size:12px;flex-shrink:0;margin-top:1px"></i>'+plant.sizeWarn+'</div>':'';
+
+      html+='<div class="guide-card">'+
+        '<div class="guide-card-header">'+
+          '<div class="guide-color-bar" style="background:'+plant.color+'"></div>'+
+          '<div style="flex:1">'+
+            '<div class="guide-name">'+plant.name+plantNow+'</div>'+
+            '<div class="guide-cat-tag">'+plant.cat+' · '+plant.warmNote+'</div>'+
+          '</div>'+
+          '<div class="guide-season-dots">'+dots+'</div>'+
+        '</div>'+
+        '<div class="guide-body">'+
+          '<div class="guide-stat"><div class="guide-stat-label">Per sq ft</div><div class="guide-stat-val">'+plant.perSqFt+' plant'+(plant.perSqFt>1?'s':'')+'</div></div>'+
+          '<div class="guide-stat"><div class="guide-stat-label">Days to harvest</div><div class="guide-stat-val">'+plant.dtm+' days</div></div>'+
+          '<div class="guide-stat"><div class="guide-stat-label">Harvest window</div><div class="guide-stat-val">'+(plant.harvest>0?plant.harvest+' days':'Once ripe')+'</div></div>'+
+          '<div class="guide-stat"><div class="guide-stat-label">Start as</div><div class="guide-stat-val">'+plant.note+'</div></div>'+
+          (warn||companions||enemies?'<div style="grid-column:1/-1">'+warn+companions+enemies+'</div>':'')+
+        '</div>'+
+      '</div>';
+    });
+  });
+  el.innerHTML=html;
+}
+
 document.getElementById('last-frost').value=today.toISOString().slice(0,10);
 document.getElementById('first-fall-frost').value=later.toISOString().slice(0,10);
 beds[0].grid=Array(32).fill(null);
