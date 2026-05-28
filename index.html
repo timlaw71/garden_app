@@ -2836,8 +2836,8 @@ function renderMonthlyBannerHTML(){
 /* =============================================
    BOTTOM ACTION BAR
    ============================================= */
-var babMinimized=false;
-try{babMinimized=localStorage.getItem('seedsmith_bab_min')==='1';}catch(e){}
+var babMinimized=true;
+try{var _bab=localStorage.getItem('seedsmith_bab_min');if(_bab!==null)babMinimized=_bab==='1';}catch(e){}
 
 function toggleBottomBar(){
   babMinimized=!babMinimized;
