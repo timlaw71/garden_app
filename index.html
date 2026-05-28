@@ -1214,13 +1214,13 @@ body.bab-minimized .shell{padding-bottom:3rem}
 var babMinimized=true;
 try{
   var _babVer=localStorage.getItem('seedsmith_bab_ver');
-  if(_babVer==='2'){
+  if(_babVer==='3'){
     var _bab=localStorage.getItem('seedsmith_bab_min');
     if(_bab!==null)babMinimized=_bab==='1';
   } else {
     // First visit or old version — force minimized and save version
     localStorage.setItem('seedsmith_bab_min','1');
-    localStorage.setItem('seedsmith_bab_ver','2');
+    localStorage.setItem('seedsmith_bab_ver','3');
   }
 }catch(e){}
 
