@@ -2374,10 +2374,31 @@ function renderMonthlyBannerHTML(){
     });
   }
 
+  var hh=getHH();
+
+  function plantQty(plant){
+    // How many plants/seeds to buy for this household
+    var sqFt=plant.recSq[hh]||1;
+    var totalPlants=sqFt*plant.perSqFt;
+    if(plant.perSqFt>=9){
+      // High-density crops — show sq ft instead of plant count
+      return sqFt+' sq ft ('+totalPlants+' seeds)';
+    } else if(totalPlants===1){
+      return'1 '+plant.note;
+    } else {
+      return totalPlants+' '+plant.note+'s';
+    }
+  }
+
   function chips(arr,limit){
     if(!arr.length)return'<span class="month-empty">Nothing right now</span>';
     return arr.slice(0,limit||8).map(function(p){
-      return'<span class="month-chip"><span class="month-chip-dot" style="background:'+p.color+'"></span>'+p.name+'</span>';
+      var qty=plantQty(p);
+      return'<span class="month-chip">'+
+        '<span class="month-chip-dot" style="background:'+p.color+'"></span>'+
+        '<span>'+p.name+'</span>'+
+        '<span style="opacity:.7;font-size:10px;margin-left:2px">· '+qty+'</span>'+
+      '</span>';
     }).join('');
   }
 
