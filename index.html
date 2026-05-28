@@ -1207,6 +1207,10 @@ body.bab-minimized .shell{padding-bottom:3rem}
 
 <script>
 
+// Init minimized state immediately
+var babMinimized=true;
+try{var _bab=localStorage.getItem('seedsmith_bab_min');if(_bab!==null)babMinimized=_bab==='1';}catch(e){}
+
 const PLANTS=[
   {id:'tomato',seasons:['summer'],  name:'Tomato',     cat:'Vegetables',perSqFt:1, dtm:75, harvest:30,waves:1,color:'#D85A30',tc:'#712B13',note:'transplant', frostOffset:70, frostType:'tender',warmNote:'after soil warms (~May)',    companions:['basil','carrot','marigold'],enemies:['potato'],          goals:['cooking','snacking','preserving'],ease:1,northEdge:true, recSq:{1:1,2:2,3:2,4:3,6:4}},
   {id:'pepper',     seasons:['summer'],name:'Bell pepper',   cat:'Vegetables',perSqFt:1, dtm:70, harvest:45,waves:1,color:'#993C1D',tc:'#4A1B0C',note:'transplant', frostOffset:77, frostType:'tender',warmNote:'after soil warms (~mid May)',companions:['basil','carrot'],           enemies:[],goals:['cooking','snacking'],             ease:1,northEdge:true, recSq:{1:1,2:1,3:1,4:2,6:3}},
@@ -2836,8 +2840,6 @@ function renderMonthlyBannerHTML(){
 /* =============================================
    BOTTOM ACTION BAR
    ============================================= */
-var babMinimized=true;
-try{var _bab=localStorage.getItem('seedsmith_bab_min');if(_bab!==null)babMinimized=_bab==='1';}catch(e){}
 
 function toggleBottomBar(){
   babMinimized=!babMinimized;
