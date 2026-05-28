@@ -2455,9 +2455,10 @@ function buildHero(){
       var indoorStart=(['transplant','set/transplant'].indexOf(plant.note)>=0)?new Date(firstPlant):null;
       if(indoorStart)indoorStart.setDate(indoorStart.getDate()-49);
       var diff=(firstPlant-today)/dayMs;
+      var indoorDiff2=indoorStart?(indoorStart-today)/dayMs:999;
 
-      if(diff>=-14&&diff<=28){plantNow.push(plant);}
-      else if(indoorStart&&(indoorStart-today)/dayMs>=-7&&(indoorStart-today)/dayMs<=28){startIndoors.push(plant);}
+      if(diff>=-56&&diff<=28){plantNow.push(plant);}
+      else if(indoorStart&&indoorDiff2>=-14&&indoorDiff2<=35){startIndoors.push(plant);}
       else if(diff>28&&diff<=70){comingUp.push(plant);}
     });
   } else {
@@ -2892,8 +2893,11 @@ function buildBottomBar(){
       if(indoorStart)indoorStart.setDate(indoorStart.getDate()-49);
       var diff=(firstPlant-today)/dayMs;
       var indoorDiff=indoorStart?(indoorStart-today)/dayMs:999;
-      if(diff>=-14&&diff<=28)plantNow.push(plant);
-      else if(indoorStart&&indoorDiff>=-7&&indoorDiff<=28)startIndoors.push(plant);
+      // Plant now: ideal window was up to 8 weeks ago, or opens within 4 weeks
+      if(diff>=-56&&diff<=28)plantNow.push(plant);
+      // Start indoors: indoor start was up to 2 weeks ago, or within 5 weeks
+      else if(indoorStart&&indoorDiff>=-14&&indoorDiff<=35)startIndoors.push(plant);
+      // Coming up: planting window opens 4-10 weeks from now
       else if(diff>28&&diff<=70)comingUp.push(plant);
       if(today>=harvestStart&&today<=harvestEnd&&plant.harvest>0)harvestNow.push(plant);
     });
