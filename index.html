@@ -695,6 +695,56 @@ select:focus,input:focus{outline:none;border-color:var(--leaf);box-shadow:0 0 0 
   border-color:var(--leaf);box-shadow:0 2px 8px rgba(58,107,42,.25);
 }
 .lib-chip .lib-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+
+/* =============================================
+   MONTHLY PLANTING BANNER
+   ============================================= */
+.month-banner{
+  background:linear-gradient(135deg,var(--bark) 0%,var(--umber) 100%);
+  border-radius:var(--r-xl);padding:1.25rem 1.5rem;
+  box-shadow:var(--shadow-md);color:var(--cream);
+  margin-bottom:0;
+}
+.month-banner-header{
+  display:flex;align-items:center;gap:.75rem;margin-bottom:1rem;
+}
+.month-banner-icon{
+  width:42px;height:42px;border-radius:12px;
+  background:rgba(255,255,255,.12);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;flex-shrink:0;
+}
+.month-banner-title{font-family:var(--font-serif);font-size:20px;color:var(--cream)}
+.month-banner-sub{font-size:12px;color:var(--straw);margin-top:2px;font-weight:300}
+.month-sections{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.75rem}
+.month-section{
+  background:rgba(255,255,255,.08);border-radius:var(--r-lg);
+  padding:.75rem 1rem;border:1px solid rgba(255,255,255,.1);
+}
+.month-section-label{
+  font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  margin-bottom:.5rem;display:flex;align-items:center;gap:5px;
+}
+.month-section-items{display:flex;flex-wrap:wrap;gap:4px}
+.month-chip{
+  display:inline-flex;align-items:center;gap:4px;
+  font-size:12px;font-weight:500;
+  padding:3px 9px;border-radius:30px;
+  background:rgba(255,255,255,.12);
+  border:1px solid rgba(255,255,255,.15);
+  color:var(--cream);cursor:default;
+}
+.month-chip-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.month-empty{font-size:12px;color:var(--straw);font-style:italic}
+.month-no-dates{
+  font-size:13px;color:var(--straw);
+  display:flex;align-items:center;gap:8px;
+}
+@media(max-width:600px){
+  .month-banner{padding:1rem}
+  .month-sections{grid-template-columns:1fr 1fr}
+  .month-banner-title{font-size:17px}
+}
 </style>
 </head>
 <body>
@@ -743,6 +793,7 @@ select:focus,input:focus{outline:none;border-color:var(--leaf);box-shadow:0 0 0 
 
   <!-- STEP 1: SETUP -->
   <div class="panel active" id="panel0">
+    <div id="monthly-banner-setup" style="margin-bottom:1.25rem"></div>
     <div class="card">
       <div class="card-title"><i class="ti ti-home"></i>Household</div>
       <div class="row">
@@ -916,6 +967,7 @@ select:focus,input:focus{outline:none;border-color:var(--leaf);box-shadow:0 0 0 
 
   <!-- STEP 5: PLANT GUIDE -->
   <div class="panel" id="panel4">
+    <div id="monthly-banner-guide" style="margin-bottom:1.25rem"></div>
     <div class="card" style="margin-bottom:1.25rem">
       <div class="card-title"><i class="ti ti-book-2"></i>Plant Reference Guide</div>
       <div class="card-subtitle">Every plant in Seedsmith — when to plant, how many per square foot, and what to watch for</div>
@@ -1469,7 +1521,8 @@ function lookupFrost(){
   var sd=parse(frost.lf),ed=parse(frost.ff);
   if(sd)document.getElementById('last-frost').value=sd.toISOString().slice(0,10);
   if(ed)document.getElementById('first-fall-frost').value=ed.toISOString().slice(0,10);
-  el.innerHTML='<div class="frost-success"><i class="ti ti-check"></i> Zone '+zone+' — last frost ~'+frost.lf+', first fall frost ~'+frost.ff+'</div>';
+  buildMonthlyBanner();
+    el.innerHTML='<div class="frost-success"><i class="ti ti-check"></i> Zone '+zone+' — last frost ~'+frost.lf+', first fall frost ~'+frost.ff+'</div>';
 }
 
 function wizToggle(btn){btn.classList.toggle('sel');}
@@ -1586,10 +1639,11 @@ function setMode(m){
 }
 
 function goStep(s){
+  if(s===0)buildMonthlyBanner();
   if(s===1){applySeasonDetection();renderMyPlants();renderLibrary();}
   if(s===2){beds.forEach(function(b){if(!b.grid||b.grid.length!==b.L*b.W)b.grid=Array(b.L*b.W).fill(null);});renderBedTabs();setTimeout(function(){renderActiveBed();renderPlantSelector();},50);}
   if(s===3)buildCalendar();
-  if(s===4)renderGuide();
+  if(s===4){renderGuide();buildMonthlyBanner();}
   document.querySelectorAll('.panel').forEach(function(el,i){el.classList.toggle('active',i===s);});
   document.querySelectorAll('.step-tab').forEach(function(el,i){el.classList.toggle('active',i===s);if(i<s)el.classList.add('done');else el.classList.remove('done');});
 }
@@ -2150,7 +2204,7 @@ var today=new Date(),later=new Date(today);later.setMonth(later.getMonth()+6);
 window.addEventListener('resize',function(){
   if(document.querySelector('#panel2.active'))renderActiveBed();
 });
-setTimeout(function(){applySeasonDetection();},100);
+setTimeout(function(){applySeasonDetection();buildMonthlyBanner();},100);
 var guideFilter='all';
 
 function setGuideFilter(btn){
@@ -2242,6 +2296,127 @@ document.getElementById('last-frost').value=today.toISOString().slice(0,10);
 document.getElementById('first-fall-frost').value=later.toISOString().slice(0,10);
 beds[0].grid=Array(32).fill(null);
 renderBedList();
+
+/* =============================================
+   MONTHLY PLANTING SUGGESTIONS
+   ============================================= */
+var MONTH_ICONS=['🌱','❄️','🌱','🌱','☀️','☀️','☀️','☀️','🍂','🍂','🍂','❄️'];
+var MONTH_NAMES=['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+function buildMonthlyBanner(){
+  var targets=['monthly-banner-setup','monthly-banner-guide'];
+  targets.forEach(function(id){
+    var el=document.getElementById(id);
+    if(el)el.innerHTML=renderMonthlyBannerHTML();
+  });
+}
+
+function renderMonthlyBannerHTML(){
+  var today=new Date();
+  var mo=today.getMonth();
+  var lfStr=document.getElementById('last-frost').value;
+  var ffStr=document.getElementById('first-fall-frost').value;
+  var monthName=MONTH_NAMES[mo];
+  var icon=MONTH_ICONS[mo];
+
+  // Source plants — my list if populated, else full library
+  var sourcePlants=myPlantList.length
+    ?myPlantList.map(function(e){return pl(e.id);}).filter(Boolean)
+    :PLANTS.filter(function(p){return p.cat!=='Custom';});
+
+  var plantNow=[],startIndoors=[],harvestNow=[],comingUp=[];
+
+  if(lfStr){
+    var yr=today.getFullYear();
+    var lf=new Date(yr+'-'+lfStr.slice(5));
+    var ff=ffStr?new Date(yr+'-'+ffStr.slice(5)):null;
+
+    sourcePlants.forEach(function(plant){
+      var firstPlant=new Date(lf);firstPlant.setDate(firstPlant.getDate()+plant.frostOffset);
+      var harvestStart=new Date(firstPlant);harvestStart.setDate(harvestStart.getDate()+plant.dtm);
+      var harvestEnd=new Date(harvestStart);harvestEnd.setDate(harvestEnd.getDate()+(plant.harvest||14));
+      var indoorStart=(['transplant','set/transplant'].indexOf(plant.note)>=0)?new Date(firstPlant):null;
+      if(indoorStart)indoorStart.setDate(indoorStart.getDate()-49);// 7 wks before transplant
+
+      var dayMs=864e5;
+      var diffToPlant=(firstPlant-today)/dayMs;
+      var diffToHarvest=(harvestStart-today)/dayMs;
+
+      // Plant now: window open (-14 to +28 days)
+      if(diffToPlant>=-14&&diffToPlant<=28){
+        plantNow.push(plant);
+      }
+      // Start indoors: 6-10 weeks before transplant date
+      else if(indoorStart&&(indoorStart-today)/dayMs>=-7&&(indoorStart-today)/dayMs<=28){
+        startIndoors.push(plant);
+      }
+      // Harvest now: in harvest window
+      else if(today>=harvestStart&&today<=harvestEnd&&plant.harvest>0){
+        harvestNow.push(plant);
+      }
+      // Coming up: planting window 4-10 weeks away
+      else if(diffToPlant>28&&diffToPlant<=70){
+        comingUp.push(plant);
+      }
+    });
+  } else {
+    // No frost dates — suggest by month using season
+    var moSeasons={
+      0:['spring'],1:['spring'],2:['spring'],3:['spring'],
+      4:['summer'],5:['summer'],6:['summer'],7:['summer'],
+      8:['fall'],9:['fall'],10:['fall'],11:['spring']
+    };
+    var activeSeason=moSeasons[mo]||['spring'];
+    sourcePlants.forEach(function(plant){
+      if(plant.seasons&&plant.seasons.some(function(s){return activeSeason.indexOf(s)>=0;})){
+        plantNow.push(plant);
+      }
+    });
+  }
+
+  function chips(arr,limit){
+    if(!arr.length)return'<span class="month-empty">Nothing right now</span>';
+    return arr.slice(0,limit||8).map(function(p){
+      return'<span class="month-chip"><span class="month-chip-dot" style="background:'+p.color+'"></span>'+p.name+'</span>';
+    }).join('');
+  }
+
+  var subText=lfStr
+    ?'Based on your frost dates &amp; location'
+    :'Enter your ZIP in Setup for precise dates';
+
+  var sections='';
+  if(plantNow.length){
+    sections+='<div class="month-section"><div class="month-section-label" style="color:#c0dd97"><i class="ti ti-shovel" aria-hidden="true"></i>Plant outside now</div><div class="month-section-items">'+chips(plantNow)+'</div></div>';
+  }
+  if(startIndoors.length){
+    sections+='<div class="month-section"><div class="month-section-label" style="color:#aed6f1"><i class="ti ti-home" aria-hidden="true"></i>Start indoors now</div><div class="month-section-items">'+chips(startIndoors)+'</div></div>';
+  }
+  if(harvestNow.length){
+    sections+='<div class="month-section"><div class="month-section-label" style="color:#f5d07a"><i class="ti ti-basket" aria-hidden="true"></i>Ready to harvest</div><div class="month-section-items">'+chips(harvestNow)+'</div></div>';
+  }
+  if(comingUp.length){
+    sections+='<div class="month-section"><div class="month-section-label" style="color:#c9a876"><i class="ti ti-clock" aria-hidden="true"></i>Coming up soon</div><div class="month-section-items">'+chips(comingUp,6)+'</div></div>';
+  }
+  if(!sections){
+    sections='<div class="month-section" style="grid-column:1/-1"><div class="month-empty">';
+    sections+=lfStr
+      ?'Nothing to plant this month — a good time to plan ahead for next season.'
+      :'Enter your ZIP code in Setup to see personalized planting suggestions.';
+    sections+='</div></div>';
+  }
+
+  return'<div class="month-banner">'+
+    '<div class="month-banner-header">'+
+      '<div class="month-banner-icon">'+icon+'</div>'+
+      '<div>'+
+        '<div class="month-banner-title">'+monthName+' planting guide</div>'+
+        '<div class="month-banner-sub">'+subText+'</div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="month-sections">'+sections+'</div>'+
+  '</div>';
+}
 
 </script>
 </body>
