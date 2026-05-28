@@ -1210,9 +1210,19 @@ body.bab-minimized .shell{padding-bottom:3rem}
 
 <script>
 
-// Init minimized state immediately
+// Init minimized state — v2 resets any old expanded preference
 var babMinimized=true;
-try{var _bab=localStorage.getItem('seedsmith_bab_min');if(_bab!==null)babMinimized=_bab==='1';}catch(e){}
+try{
+  var _babVer=localStorage.getItem('seedsmith_bab_ver');
+  if(_babVer==='2'){
+    var _bab=localStorage.getItem('seedsmith_bab_min');
+    if(_bab!==null)babMinimized=_bab==='1';
+  } else {
+    // First visit or old version — force minimized and save version
+    localStorage.setItem('seedsmith_bab_min','1');
+    localStorage.setItem('seedsmith_bab_ver','2');
+  }
+}catch(e){}
 
 const PLANTS=[
   {id:'tomato',seasons:['summer'],  name:'Tomato',     cat:'Vegetables',perSqFt:1, dtm:75, harvest:30,waves:1,color:'#D85A30',tc:'#712B13',note:'transplant', frostOffset:70, frostType:'tender',warmNote:'after soil warms (~May)',    companions:['basil','carrot','marigold'],enemies:['potato'],          goals:['cooking','snacking','preserving'],ease:1,northEdge:true, recSq:{1:1,2:2,3:2,4:3,6:4}},
