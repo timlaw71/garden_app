@@ -1235,25 +1235,25 @@ const PLANTS=[
   {id:'pumpkin',    seasons:['summer'],name:'Pumpkin',    cat:'Vegetables',perSqFt:1, dtm:100,harvest:0, waves:1,color:'#D85A1A',tc:'#FFFFFF',note:'transplant',sizeWarn:'Vining plant — trellis or plant at bed edge so vines run outside', frostOffset:63,frostType:'tender',warmNote:'after soil warms (~May)',companions:['marigold'],enemies:[],goals:['cooking','preserving'],           ease:1,northEdge:true,edgePlant:true,recSq:{1:1,2:2,3:2,4:3,6:4}},
   {id:'watermelon', seasons:['summer'],name:'Watermelon', cat:'Vegetables',perSqFt:1, dtm:90, harvest:14,waves:1,color:'#3B7A2A',tc:'#FFFFFF',note:'transplant',sizeWarn:'Large vining plant — trellis or allow vines to run outside the bed', frostOffset:70,frostType:'tender',warmNote:'after soil warms (~May)',companions:['marigold'],enemies:[],goals:['snacking'],                       ease:1,northEdge:true,edgePlant:true,recSq:{1:1,2:1,3:2,4:2,6:3}},
   {id:'cantaloupe', seasons:['summer'],name:'Cantaloupe', cat:'Vegetables',perSqFt:1, dtm:85, harvest:14,waves:1,color:'#C8974A',tc:'#FFFFFF',note:'transplant',sizeWarn:'Vining plant — trellis or plant at bed edge so vines run outside', frostOffset:70,frostType:'tender',warmNote:'after soil warms (~May)',companions:['marigold'],enemies:[],goals:['snacking'],                       ease:1,northEdge:true,edgePlant:true,recSq:{1:1,2:1,3:2,4:2,6:3}},
-  {id:'broccoli',seasons:['spring','fall'],name:'Broccoli',   cat:'Vegetables',perSqFt:1, dtm:80, harvest:14,waves:2,color:'#085041',tc:'#E1F5EE',note:'transplant', frostOffset:-28,frostType:'hardy', warmNote:'4 wks before last frost',   companions:['onion'],                    enemies:[],                   goals:['cooking'],                        ease:2,northEdge:false,recSq:{1:1,2:1,3:2,4:2,6:3}},
-  {id:'romaine',seasons:['spring','fall'], name:'Romaine',    cat:'Greens',    perSqFt:4, dtm:60, harvest:14,waves:4,color:'#639922',tc:'#27500A',note:'seed',       frostOffset:-28,frostType:'hardy', warmNote:'4 wks before last frost',   companions:['carrot','cucumber'],        enemies:[],                   goals:['salads'],                         ease:1,northEdge:false,recSq:{1:1,2:2,3:3,4:4,6:6}},
-  {id:'spinach',seasons:['spring','fall'], name:'Spinach',    cat:'Greens',    perSqFt:9, dtm:40, harvest:10,waves:5,color:'#3B6D11',tc:'#EAF3DE',note:'seed',       frostOffset:-42,frostType:'hardy', warmNote:'6 wks before last frost',   companions:[],                           enemies:[],                   goals:['salads','cooking'],               ease:1,northEdge:false,recSq:{1:1,2:1,3:2,4:2,6:3}},
-  {id:'kale',seasons:['spring','fall'],    name:'Kale',       cat:'Greens',    perSqFt:1, dtm:55, harvest:60,waves:2,color:'#5DCAA5',tc:'#04342C',note:'transplant', frostOffset:-28,frostType:'hardy', warmNote:'4 wks before last frost',   companions:[],                           enemies:[],                   goals:['salads','cooking'],               ease:1,northEdge:false,recSq:{1:1,2:1,3:2,4:2,6:3}},
-  {id:'arugula',seasons:['spring','fall'], name:'Arugula',    cat:'Greens',    perSqFt:4, dtm:40, harvest:14,waves:5,color:'#97C459',tc:'#173404',note:'seed',       frostOffset:-35,frostType:'hardy', warmNote:'5 wks before last frost',   companions:[],                           enemies:[],                   goals:['salads'],                         ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:2,6:2}},
-  {id:'chard',seasons:['spring','fall'],   name:'Swiss chard',cat:'Greens',    perSqFt:4, dtm:50, harvest:21,waves:3,color:'#D4537E',tc:'#4B1528',note:'seed',       frostOffset:-21,frostType:'hardy', warmNote:'3 wks before last frost',   companions:[],                           enemies:[],                   goals:['cooking','salads'],               ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:2,6:2}},
-  {id:'collards',seasons:['spring','fall'],name:'Collards',   cat:'Greens',    perSqFt:1, dtm:60, harvest:60,waves:2,color:'#0F6E56',tc:'#E1F5EE',note:'transplant', frostOffset:-28,frostType:'hardy', warmNote:'4 wks before last frost',   companions:[],                           enemies:[],                   goals:['cooking'],                        ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:2,6:3}},
-  {id:'carrot',seasons:['spring','fall'],  name:'Carrot',     cat:'Root veg',  perSqFt:16,dtm:70, harvest:14,waves:2,color:'#BA7517',tc:'#412402',note:'seed',       frostOffset:-21,frostType:'hardy', warmNote:'3 wks before last frost',   companions:['tomato','romaine'],         enemies:[],                   goals:['snacking','cooking'],             ease:1,northEdge:false,recSq:{1:1,2:1,3:2,4:2,6:3}},
-  {id:'radish',seasons:['spring','fall'],  name:'Radish',     cat:'Root veg',  perSqFt:16,dtm:25, harvest:7, waves:6,color:'#E24B4A',tc:'#501313',note:'seed',       frostOffset:-35,frostType:'hardy', warmNote:'5 wks before last frost',   companions:['carrot','spinach'],         enemies:[],                   goals:['snacking','salads'],              ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:1,6:2}},
-  {id:'beet',seasons:['spring','fall'],    name:'Beet',       cat:'Root veg',  perSqFt:9, dtm:60, harvest:14,waves:2,color:'#791F1F',tc:'#FCEBEB',note:'seed',       frostOffset:-21,frostType:'hardy', warmNote:'3 wks before last frost',   companions:[],                           enemies:[],                   goals:['cooking','preserving'],           ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:2,6:2}},
+  {id:'broccoli',seasons:['spring','fall'],name:'Broccoli',   cat:'Vegetables',perSqFt:1, dtm:80, harvest:14,waves:2,color:'#085041',tc:'#E1F5EE',note:'transplant', frostOffset:-28,frostType:'hardy',fallFrostOffset:-70, warmNote:'4 wks before last frost',   companions:['onion'],                    enemies:[],                   goals:['cooking'],                        ease:2,northEdge:false,recSq:{1:1,2:1,3:2,4:2,6:3}},
+  {id:'romaine',seasons:['spring','fall'], name:'Romaine',    cat:'Greens',    perSqFt:4, dtm:60, harvest:14,waves:4,color:'#639922',tc:'#27500A',note:'seed',       frostOffset:-28,frostType:'hardy',fallFrostOffset:-56, warmNote:'4 wks before last frost',   companions:['carrot','cucumber'],        enemies:[],                   goals:['salads'],                         ease:1,northEdge:false,recSq:{1:1,2:2,3:3,4:4,6:6}},
+  {id:'spinach',seasons:['spring','fall'], name:'Spinach',    cat:'Greens',    perSqFt:9, dtm:40, harvest:10,waves:5,color:'#3B6D11',tc:'#EAF3DE',note:'seed',       frostOffset:-42,frostType:'hardy',fallFrostOffset:-63, warmNote:'6 wks before last frost',   companions:[],                           enemies:[],                   goals:['salads','cooking'],               ease:1,northEdge:false,recSq:{1:1,2:1,3:2,4:2,6:3}},
+  {id:'kale',seasons:['spring','fall'],    name:'Kale',       cat:'Greens',    perSqFt:1, dtm:55, harvest:60,waves:2,color:'#5DCAA5',tc:'#04342C',note:'transplant', frostOffset:-28,frostType:'hardy',fallFrostOffset:-56, warmNote:'4 wks before last frost',   companions:[],                           enemies:[],                   goals:['salads','cooking'],               ease:1,northEdge:false,recSq:{1:1,2:1,3:2,4:2,6:3}},
+  {id:'arugula',seasons:['spring','fall'], name:'Arugula',    cat:'Greens',    perSqFt:4, dtm:40, harvest:14,waves:5,color:'#97C459',tc:'#173404',note:'seed',       frostOffset:-35,frostType:'hardy',fallFrostOffset:-49, warmNote:'5 wks before last frost',   companions:[],                           enemies:[],                   goals:['salads'],                         ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:2,6:2}},
+  {id:'chard',seasons:['spring','fall'],   name:'Swiss chard',cat:'Greens',    perSqFt:4, dtm:50, harvest:21,waves:3,color:'#D4537E',tc:'#4B1528',note:'seed',       frostOffset:-21,frostType:'hardy',fallFrostOffset:-56, warmNote:'3 wks before last frost',   companions:[],                           enemies:[],                   goals:['cooking','salads'],               ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:2,6:2}},
+  {id:'collards',seasons:['spring','fall'],name:'Collards',   cat:'Greens',    perSqFt:1, dtm:60, harvest:60,waves:2,color:'#0F6E56',tc:'#E1F5EE',note:'transplant', frostOffset:-28,frostType:'hardy',fallFrostOffset:-63, warmNote:'4 wks before last frost',   companions:[],                           enemies:[],                   goals:['cooking'],                        ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:2,6:3}},
+  {id:'carrot',seasons:['spring','fall'],  name:'Carrot',     cat:'Root veg',  perSqFt:16,dtm:70, harvest:14,waves:2,color:'#BA7517',tc:'#412402',note:'seed',       frostOffset:-21,frostType:'hardy',fallFrostOffset:-70, warmNote:'3 wks before last frost',   companions:['tomato','romaine'],         enemies:[],                   goals:['snacking','cooking'],             ease:1,northEdge:false,recSq:{1:1,2:1,3:2,4:2,6:3}},
+  {id:'radish',seasons:['spring','fall'],  name:'Radish',     cat:'Root veg',  perSqFt:16,dtm:25, harvest:7, waves:6,color:'#E24B4A',tc:'#501313',note:'seed',       frostOffset:-35,frostType:'hardy',fallFrostOffset:-42, warmNote:'5 wks before last frost',   companions:['carrot','spinach'],         enemies:[],                   goals:['snacking','salads'],              ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:1,6:2}},
+  {id:'beet',seasons:['spring','fall'],    name:'Beet',       cat:'Root veg',  perSqFt:9, dtm:60, harvest:14,waves:2,color:'#791F1F',tc:'#FCEBEB',note:'seed',       frostOffset:-21,frostType:'hardy',fallFrostOffset:-70, warmNote:'3 wks before last frost',   companions:[],                           enemies:[],                   goals:['cooking','preserving'],           ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:2,6:2}},
   {id:'potato',seasons:['spring'],  name:'Potato',     cat:'Root veg',  perSqFt:1, dtm:90, harvest:0, waves:1,color:'#888780',tc:'#2C2C2A',note:'seed potato',frostOffset:-14,frostType:'semi',  warmNote:'2 wks before last frost',   companions:[],                           enemies:['cucumber','tomato'],goals:['cooking','preserving'],           ease:1,northEdge:false,recSq:{1:2,2:4,3:6,4:8,6:12}},
   {id:'onion',seasons:['spring','fall'],   name:'Onion',      cat:'Root veg',  perSqFt:16,dtm:100,harvest:0, waves:1,color:'#AFA9EC',tc:'#26215C',note:'transplant', frostOffset:-28,frostType:'hardy', warmNote:'4 wks before last frost',   companions:['carrot','tomato'],          enemies:[],                   goals:['cooking','preserving'],           ease:1,northEdge:false,recSq:{1:1,2:1,3:2,4:2,6:3}},
-  {id:'garlic',seasons:['fall'],  name:'Garlic',     cat:'Root veg',  perSqFt:9, dtm:240,harvest:0, waves:1,color:'#D3D1C7',tc:'#2C2C2A',note:'clove',      frostOffset:-210,frostType:'hardy',warmNote:'fall planting',              companions:['tomato','pepper'],          enemies:[],                   goals:['cooking'],                        ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:2,6:2}},
+  {id:'garlic',seasons:['fall'],  name:'Garlic',     cat:'Root veg',  perSqFt:9, dtm:240,harvest:0, waves:1,color:'#D3D1C7',tc:'#2C2C2A',note:'clove',      frostOffset:0,fallFrostOffset:-42,frostType:'hardy',warmNote:'plant Oct-Nov (6 wks before fall frost)',              companions:['tomato','pepper'],          enemies:[],                   goals:['cooking'],                        ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:2,6:2}},
   {id:'beans',seasons:['summer'],   name:'Bush beans', cat:'Legumes',   perSqFt:9, dtm:50, harvest:14,waves:3,color:'#D4537E',tc:'#4B1528',note:'seed',       frostOffset:63, frostType:'tender',warmNote:'after soil warms (~May)',    companions:['cucumber'],                 enemies:[],                   goals:['cooking','preserving','snacking'],ease:1,northEdge:false,recSq:{1:1,2:2,3:2,4:3,6:4}},
-  {id:'peas',seasons:['spring','fall'],    name:'Snap peas',  cat:'Legumes',   perSqFt:8, dtm:60, harvest:14,waves:2,color:'#C0DD97',tc:'#173404',note:'seed',       frostOffset:-28,frostType:'hardy', warmNote:'4 wks before last frost',   companions:['carrot','spinach'],         enemies:[],                   goals:['snacking'],                       ease:1,northEdge:true, recSq:{1:1,2:1,3:2,4:2,6:3}},
+  {id:'peas',seasons:['spring','fall'],    name:'Snap peas',  cat:'Legumes',   perSqFt:8, dtm:60, harvest:14,waves:2,color:'#C0DD97',tc:'#173404',note:'seed',       frostOffset:-28,frostType:'hardy',fallFrostOffset:-56, warmNote:'4 wks before last frost',   companions:['carrot','spinach'],         enemies:[],                   goals:['snacking'],                       ease:1,northEdge:true, recSq:{1:1,2:1,3:2,4:2,6:3}},
   {id:'basil',seasons:['summer'],   name:'Basil',      cat:'Herbs',     perSqFt:4, dtm:30, harvest:60,waves:2,color:'#7F77DD',tc:'#26215C',note:'transplant', frostOffset:70, frostType:'tender',warmNote:'after soil warms (~May)',    companions:['tomato','pepper'],          enemies:[],                   goals:['cooking','herbs'],                ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:2,6:2}},
   {id:'parsley',seasons:['spring','summer','fall'], name:'Parsley',    cat:'Herbs',     perSqFt:4, dtm:70, harvest:90,waves:1,color:'#639922',tc:'#173404',note:'transplant', frostOffset:-14,frostType:'hardy', warmNote:'2 wks before last frost',   companions:[],                           enemies:[],                   goals:['cooking','herbs'],                ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:1,6:2}},
-  {id:'cilantro',seasons:['spring','fall'],name:'Cilantro',   cat:'Herbs',     perSqFt:4, dtm:45, harvest:21,waves:4,color:'#5DCAA5',tc:'#085041',note:'seed',       frostOffset:-21,frostType:'hardy', warmNote:'3 wks before last frost',   companions:[],                           enemies:[],                   goals:['cooking','herbs'],                ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:1,6:2}},
-  {id:'dill',seasons:['spring','summer','fall'],    name:'Dill',       cat:'Herbs',     perSqFt:4, dtm:40, harvest:30,waves:3,color:'#97C459',tc:'#27500A',note:'seed',       frostOffset:-14,frostType:'hardy', warmNote:'2 wks before last frost',   companions:['cucumber'],                 enemies:['tomato'],           goals:['cooking','herbs','preserving'],   ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:1,6:2}},
+  {id:'cilantro',seasons:['spring','fall'],name:'Cilantro',   cat:'Herbs',     perSqFt:4, dtm:45, harvest:21,waves:4,color:'#5DCAA5',tc:'#085041',note:'seed',       frostOffset:-21,frostType:'hardy',fallFrostOffset:-42, warmNote:'3 wks before last frost',   companions:[],                           enemies:[],                   goals:['cooking','herbs'],                ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:1,6:2}},
+  {id:'dill',seasons:['spring','summer','fall'],    name:'Dill',       cat:'Herbs',     perSqFt:4, dtm:40, harvest:30,waves:3,color:'#97C459',tc:'#27500A',note:'seed',       frostOffset:-14,frostType:'hardy',fallFrostOffset:-42, warmNote:'2 wks before last frost',   companions:['cucumber'],                 enemies:['tomato'],           goals:['cooking','herbs','preserving'],   ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:1,6:2}},
   {id:'oregano',seasons:['summer','year-round'], name:'Oregano',    cat:'Herbs',     perSqFt:4, dtm:90, harvest:90,waves:1,color:'#BA7517',tc:'#412402',note:'transplant', frostOffset:7,  frostType:'tender',warmNote:'after last frost',           companions:['tomato','pepper'],          enemies:[],                   goals:['cooking','herbs'],                ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:1,6:1}},
   {id:'thyme',seasons:['summer','year-round'],   name:'Thyme',      cat:'Herbs',     perSqFt:4, dtm:90, harvest:90,waves:1,color:'#888780',tc:'#2C2C2A',note:'transplant', frostOffset:7,  frostType:'tender',warmNote:'after last frost',           companions:[],                           enemies:[],                   goals:['cooking','herbs'],                ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:1,6:1}},
   {id:'chives',seasons:['spring','summer','fall'],  name:'Chives',     cat:'Herbs',     perSqFt:16,dtm:90, harvest:90,waves:1,color:'#AFA9EC',tc:'#26215C',note:'transplant', frostOffset:-14,frostType:'hardy', warmNote:'2 wks before last frost',   companions:['carrot','tomato'],          enemies:[],                   goals:['cooking','herbs'],                ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:1,6:1}},
@@ -2142,7 +2142,7 @@ function isPlantInSeason(plant){
     var yr=today.getFullYear();
     var lf=new Date(yr+'-'+lfStr.slice(5));
     var ff=ffStr?new Date(yr+'-'+ffStr.slice(5)):null;
-    var firstPlant=new Date(lf);firstPlant.setDate(firstPlant.getDate()+plant.frostOffset);
+    var firstPlant=plant.fallFrostOffset!==undefined&&ff?new Date(ff):new Date(lf);firstPlant.setDate(firstPlant.getDate()+(plant.fallFrostOffset!==undefined&&ff?plant.fallFrostOffset:plant.frostOffset));
     // Window: from 8 weeks before first plant date to fall frost (or end of season)
     var windowStart=new Date(firstPlant);windowStart.setDate(windowStart.getDate()-56);
     var windowEnd=ff||new Date(lf);
@@ -2340,7 +2340,7 @@ function buildPlantCalendar(counts, lf, ff){
     var entry=myPlantList.find(function(e){return e.id===id;});
     var waves=entry?entry.waves:(selPlants[id]?selPlants[id].waves:plant.waves);
     var interval=plant.harvest||Math.round(plant.dtm*.3);
-    var firstOutdoor=addDays(lf,plant.frostOffset);
+    var firstOutdoor=plant.fallFrostOffset!==undefined&&ff?addDays(ff,plant.fallFrostOffset):addDays(lf,plant.frostOffset);
     var indoorStart=isTransplant?addDays(firstOutdoor,-49):null;// ~7 wks before transplant
 
     html+='<tr><td class="pname" title="'+plant.name+'">'+plant.name+'</td>';
@@ -2469,7 +2469,7 @@ function buildHero(){
     var dayMs=864e5;
 
     sourcePlants.forEach(function(plant){
-      var firstPlant=new Date(lf);firstPlant.setDate(firstPlant.getDate()+plant.frostOffset);
+      var firstPlant=getFirstPlantDate(plant,lf,ff);
       var indoorStart=(['transplant','set/transplant'].indexOf(plant.note)>=0)?new Date(firstPlant):null;
       if(indoorStart)indoorStart.setDate(indoorStart.getDate()-49);
       var diff=(firstPlant-today)/dayMs;
@@ -2668,7 +2668,7 @@ function renderGuide(){
         var today=new Date();
         var yr=today.getFullYear();
         var lf=new Date(yr+'-'+lfStr.slice(5));
-        var firstPlant=new Date(lf);firstPlant.setDate(firstPlant.getDate()+plant.frostOffset);
+        var firstPlant=plant.fallFrostOffset!==undefined&&ff?new Date(ff):new Date(lf);firstPlant.setDate(firstPlant.getDate()+(plant.fallFrostOffset!==undefined&&ff?plant.fallFrostOffset:plant.frostOffset));
         var ffStr=document.getElementById('first-fall-frost').value;
         var ff=ffStr?new Date(yr+'-'+ffStr.slice(5)):null;
         var lastPlant=ff?new Date(ff):new Date(lf);lastPlant.setDate(lastPlant.getDate()+(plant.harvest||30));
@@ -2743,7 +2743,7 @@ function renderMonthlyBannerHTML(){
     var ff=ffStr?new Date(yr+'-'+ffStr.slice(5)):null;
 
     sourcePlants.forEach(function(plant){
-      var firstPlant=new Date(lf);firstPlant.setDate(firstPlant.getDate()+plant.frostOffset);
+      var firstPlant=plant.fallFrostOffset!==undefined&&ff?new Date(ff):new Date(lf);firstPlant.setDate(firstPlant.getDate()+(plant.fallFrostOffset!==undefined&&ff?plant.fallFrostOffset:plant.frostOffset));
       var harvestStart=new Date(firstPlant);harvestStart.setDate(harvestStart.getDate()+plant.dtm);
       var harvestEnd=new Date(harvestStart);harvestEnd.setDate(harvestEnd.getDate()+(plant.harvest||14));
       var indoorStart=(['transplant','set/transplant'].indexOf(plant.note)>=0)?new Date(firstPlant):null;
@@ -2872,6 +2872,21 @@ function applyBabState(){
   if(shell)shell.style.paddingBottom=babMinimized?'3.5rem':'7rem';
 }
 
+function getFirstPlantDate(plant, lf, ff){
+  var today=new Date();
+  var springDate=new Date(lf);springDate.setDate(springDate.getDate()+plant.frostOffset);
+  // If plant has a fall planting option AND we have a fall frost date
+  if(plant.fallFrostOffset!==undefined&&ff){
+    var fallDate=new Date(ff);fallDate.setDate(fallDate.getDate()+plant.fallFrostOffset);
+    // Use fall date if we are past July 1 (summer solstice passed, heading to fall)
+    // or if spring date has already passed by more than 12 weeks
+    var springPassed=(today-springDate)/(864e5)>84;
+    var isFallSeason=today.getMonth()>=6;// July onwards
+    if(isFallSeason||springPassed)return fallDate;
+  }
+  return springDate;
+}
+
 function buildBottomBar(){
   var bar=document.getElementById('bottom-action-bar');
   var sectionsEl=document.getElementById('bab-sections');
@@ -2902,18 +2917,15 @@ function buildBottomBar(){
     var lf=new Date(yr+'-'+lfStr.slice(5));
     var ff=ffStr?new Date(yr+'-'+ffStr.slice(5)):null;
     sourcePlants.forEach(function(plant){
-      var firstPlant=new Date(lf);firstPlant.setDate(firstPlant.getDate()+plant.frostOffset);
+      var firstPlant=getFirstPlantDate(plant,lf,ff);
       var harvestStart=new Date(firstPlant);harvestStart.setDate(harvestStart.getDate()+plant.dtm);
       var harvestEnd=new Date(harvestStart);harvestEnd.setDate(harvestEnd.getDate()+(plant.harvest||14));
       var indoorStart=(['transplant','set/transplant'].indexOf(plant.note)>=0)?new Date(firstPlant):null;
       if(indoorStart)indoorStart.setDate(indoorStart.getDate()-49);
       var diff=(firstPlant-today)/dayMs;
       var indoorDiff=indoorStart?(indoorStart-today)/dayMs:999;
-      // Plant now: ideal window was up to 8 weeks ago, or opens within 4 weeks
       if(diff>=-56&&diff<=28)plantNow.push(plant);
-      // Start indoors: indoor start was up to 2 weeks ago, or within 5 weeks
       else if(indoorStart&&indoorDiff>=-14&&indoorDiff<=35)startIndoors.push(plant);
-      // Coming up: planting window opens 4-10 weeks from now
       else if(diff>28&&diff<=70)comingUp.push(plant);
       if(today>=harvestStart&&today<=harvestEnd&&plant.harvest>0)harvestNow.push(plant);
     });
