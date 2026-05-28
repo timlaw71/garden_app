@@ -840,6 +840,7 @@ select:focus,input:focus{outline:none;border-color:var(--leaf);box-shadow:0 0 0 
 #bottom-action-bar.minimized .bab-body{
   display:none !important;
 }
+/* Start minimized via inline style on bab-body — JS overrides on expand */
 .bab-header{
   max-width:820px;margin:0 auto;
   padding:.5rem 1rem;
@@ -1197,7 +1198,7 @@ body.bab-minimized .shell{padding-bottom:3rem}
         <i class="ti ti-chevron-up" id="bab-chevron"></i>
       </button>
     </div>
-    <div class="bab-body" id="bab-body">
+    <div class="bab-body" id="bab-body" style="display:none">
       <div class="bab-sections" id="bab-sections"></div>
     </div>
   </div>
@@ -2598,7 +2599,6 @@ function toggleCustomForm(){
 }
 
 setTimeout(function(){applySeasonDetection();buildHero();buildBottomBar();autoDetectOnLoad();},150);
-try{if(localStorage.getItem('seedsmith_bab_min')==='1'){babMinimized=true;setTimeout(applyBabState,200);}}catch(e){}
 var guideFilter='all';
 
 function setGuideFilter(btn){
@@ -2849,11 +2849,12 @@ function applyBabState(){
   var bar=document.getElementById('bottom-action-bar');
   if(!bar)return;
   bar.classList.toggle('minimized',babMinimized);
+  var body=document.getElementById('bab-body');
+  if(body)body.style.display=babMinimized?'none':'block';
   var chevron=document.getElementById('bab-chevron');
-  if(chevron){
-    chevron.className=babMinimized?'ti ti-chevron-up':'ti ti-chevron-down';
-  }
-  document.querySelector('.shell').style.paddingBottom=babMinimized?'3.5rem':'7rem';
+  if(chevron)chevron.className=babMinimized?'ti ti-chevron-up':'ti ti-chevron-down';
+  var shell=document.querySelector('.shell');
+  if(shell)shell.style.paddingBottom=babMinimized?'3.5rem':'7rem';
 }
 
 function buildBottomBar(){
@@ -2914,6 +2915,8 @@ function buildBottomBar(){
 
   bar.style.display='block';
   applyBabState();
+  // Force minimized state immediately so it never flashes open
+  if(babMinimized){var body=document.getElementById('bab-body');if(body)body.style.display='none';}
 
   function chipHTML(plant){
     var sqFt=plant.recSq[hh]||1;
