@@ -2933,14 +2933,14 @@ function buildBottomBar(){
   // Force minimized state immediately so it never flashes open
   if(babMinimized){var body=document.getElementById('bab-body');if(body)body.style.display='none';}
 
-  function chipHTML(plant){
+  function chipHTML(plant,showQty){
     var sqFt=plant.recSq[hh]||1;
     var total=sqFt*plant.perSqFt;
     var qty=plant.perSqFt>=9?(sqFt+' sq ft ('+total+' seeds)'):(total+' '+plant.note+(total>1?'s':''));
     return'<div class="bab-chip">'+
       '<span class="bab-chip-dot" style="background:'+plant.color+'"></span>'+
       '<span>'+plant.name+'</span>'+
-      '<span class="bab-qty">· '+qty+'</span>'+
+      (showQty!==false?'<span class="bab-qty">· '+qty+'</span>':'')+
     '</div>';
   }
 
@@ -2960,7 +2960,7 @@ function buildBottomBar(){
   if(harvestNow.length){
     html+='<div>'+
       '<div class="bab-section-label"><i class="ti ti-basket" style="font-size:11px"></i> Ready to harvest</div>'+
-      '<div class="bab-chips">'+harvestNow.map(chipHTML).join('')+'</div>'+
+      '<div class="bab-chips">'+harvestNow.map(function(p){return chipHTML(p,false);}).join('')+'</div>'+
     '</div>';
   }
   if(comingUp.length){
