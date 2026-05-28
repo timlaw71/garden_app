@@ -760,7 +760,12 @@ select:focus,input:focus{outline:none;border-color:var(--leaf);box-shadow:0 0 0 
     </div>
   </header>
 
-  <div class="app-legend">
+  <div style="margin-bottom:1rem;display:flex;justify-content:flex-end">
+    <button class="btn btn-sm" onclick="toggleLegend()" id="legend-toggle-btn" style="color:var(--text3);font-size:12px">
+      <i class="ti ti-info-circle" style="font-size:14px"></i> Color guide
+    </button>
+  </div>
+  <div class="app-legend" id="app-legend" style="display:none;margin-bottom:1rem">
     <div class="app-legend-section">
       <span class="app-legend-label">Season</span>
       <div class="leg-item-app"><span class="sdot" style="background:#185fa5"></span>Spring</div>
@@ -770,7 +775,7 @@ select:focus,input:focus{outline:none;border-color:var(--leaf);box-shadow:0 0 0 
     </div>
     <div class="app-legend-divider"></div>
     <div class="app-legend-section">
-      <span class="app-legend-label">Calendar</span>
+      <span class="app-legend-label">Planting calendar</span>
       <div class="leg-item-app"><span style="display:inline-block;width:20px;height:9px;border-radius:3px;background:#185fa5;opacity:.85"></span>Start indoors</div>
       <div class="leg-item-app"><span style="display:inline-block;width:20px;height:9px;border-radius:3px;background:#3A6B2A"></span>Sow / transplant</div>
       <div class="leg-item-app"><span style="display:inline-block;width:20px;height:9px;border-radius:3px;background:#C47A1E"></span>Harvest window</div>
@@ -788,12 +793,11 @@ select:focus,input:focus{outline:none;border-color:var(--leaf);box-shadow:0 0 0 
     <button class="step-tab" id="tab1" onclick="goStep(1)"><span class="num">2</span>Plants</button>
     <button class="step-tab" id="tab2" onclick="goStep(2)"><span class="num">3</span>Grid</button>
     <button class="step-tab" id="tab3" onclick="goStep(3)"><span class="num">4</span>Calendar</button>
-    <button class="step-tab" id="tab4" onclick="goStep(4)"><i class="ti ti-book-2" style="font-size:13px"></i> Guide</button>
+    <button class="step-tab" id="tab4" onclick="goStep(4)" style="border-left:2px solid var(--border);flex:0.7"><i class="ti ti-book-2" style="font-size:13px"></i> Guide</button>
   </div>
 
   <!-- STEP 1: SETUP -->
   <div class="panel active" id="panel0">
-    <div id="monthly-banner-setup" style="margin-bottom:1.25rem"></div>
     <div class="card">
       <div class="card-title"><i class="ti ti-home"></i>Household</div>
       <div class="row">
@@ -826,6 +830,7 @@ select:focus,input:focus{outline:none;border-color:var(--leaf);box-shadow:0 0 0 
       <div id="bed-list"></div>
       <button class="btn" style="margin-top:.875rem" onclick="addBed()"><i class="ti ti-plus" aria-hidden="true"></i> Add another bed</button>
     </div>
+    <div id="monthly-banner-setup" style="margin-bottom:1rem"></div>
     <div class="nav-row"><button class="btn btn-green" onclick="goStep(1)">Choose your plants <i class="ti ti-arrow-right" aria-hidden="true"></i></button></div>
   </div>
 
@@ -858,35 +863,40 @@ select:focus,input:focus{outline:none;border-color:var(--leaf);box-shadow:0 0 0 
       </div>
     </div>
 
-    <!-- Add custom plant -->
+    <!-- Add custom plant (collapsible) -->
     <div class="card">
-      <div class="card-title"><i class="ti ti-plus"></i>Add a custom plant</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
-        <div class="field" style="min-width:140px"><label>Plant name</label>
-          <input type="text" id="custom-name" placeholder="e.g. Lemon Basil" maxlength="40">
+      <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="toggleCustomForm()">
+        <div class="card-title" style="margin-bottom:0"><i class="ti ti-plus"></i>Add a custom plant</div>
+        <i class="ti ti-chevron-down" id="custom-chevron" style="color:var(--text3);transition:transform .2s"></i>
+      </div>
+      <div id="custom-form" style="display:none;margin-top:1rem">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
+          <div class="field" style="min-width:140px"><label>Plant name</label>
+            <input type="text" id="custom-name" placeholder="e.g. Lemon Basil" maxlength="40">
+          </div>
+          <div class="field" style="min-width:120px"><label>Season</label>
+            <select id="custom-season">
+              <option value="spring">Spring</option>
+              <option value="summer" selected>Summer</option>
+              <option value="fall">Fall</option>
+              <option value="year-round">Year-round</option>
+            </select>
+          </div>
+          <div class="field" style="max-width:100px"><label>Per sq ft</label>
+            <select id="custom-persqft">
+              <option value="1">1 plant</option>
+              <option value="4" selected>4 plants</option>
+              <option value="9">9 plants</option>
+              <option value="16">16 plants</option>
+            </select>
+          </div>
+          <div class="field" style="max-width:120px"><label>Days to harvest</label>
+            <input type="number" id="custom-dtm" value="60" min="14" max="365" step="1">
+          </div>
+          <button class="btn btn-green" onclick="addCustomPlant()" style="align-self:flex-end">
+            <i class="ti ti-plus"></i> Add plant
+          </button>
         </div>
-        <div class="field" style="min-width:120px"><label>Season</label>
-          <select id="custom-season">
-            <option value="spring">Spring</option>
-            <option value="summer" selected>Summer</option>
-            <option value="fall">Fall</option>
-            <option value="year-round">Year-round</option>
-          </select>
-        </div>
-        <div class="field" style="max-width:100px"><label>Per sq ft</label>
-          <select id="custom-persqft">
-            <option value="1">1 plant</option>
-            <option value="4" selected>4 plants</option>
-            <option value="9">9 plants</option>
-            <option value="16">16 plants</option>
-          </select>
-        </div>
-        <div class="field" style="max-width:100px"><label>DTM (days)</label>
-          <input type="number" id="custom-dtm" value="60" min="14" max="365" step="1">
-        </div>
-        <button class="btn btn-green" onclick="addCustomPlant()" style="align-self:flex-end">
-          <i class="ti ti-plus"></i> Add
-        </button>
       </div>
     </div>
 
@@ -967,7 +977,6 @@ select:focus,input:focus{outline:none;border-color:var(--leaf);box-shadow:0 0 0 
 
   <!-- STEP 5: PLANT GUIDE -->
   <div class="panel" id="panel4">
-    <div id="monthly-banner-guide" style="margin-bottom:1.25rem"></div>
     <div class="card" style="margin-bottom:1.25rem">
       <div class="card-title"><i class="ti ti-book-2"></i>Plant Reference Guide</div>
       <div class="card-subtitle">Every plant in Seedsmith — when to plant, how many per square foot, and what to watch for</div>
@@ -2204,6 +2213,24 @@ var today=new Date(),later=new Date(today);later.setMonth(later.getMonth()+6);
 window.addEventListener('resize',function(){
   if(document.querySelector('#panel2.active'))renderActiveBed();
 });
+function toggleLegend(){
+  var el=document.getElementById('app-legend');
+  var btn=document.getElementById('legend-toggle-btn');
+  var show=el.style.display==='none';
+  el.style.display=show?'flex':'none';
+  btn.innerHTML=show
+    ?'<i class="ti ti-x" style="font-size:14px"></i> Close guide'
+    :'<i class="ti ti-info-circle" style="font-size:14px"></i> Color guide';
+}
+
+function toggleCustomForm(){
+  var form=document.getElementById('custom-form');
+  var chevron=document.getElementById('custom-chevron');
+  var show=form.style.display==='none';
+  form.style.display=show?'block':'none';
+  chevron.style.transform=show?'rotate(180deg)':'rotate(0)';
+}
+
 setTimeout(function(){applySeasonDetection();buildMonthlyBanner();},100);
 var guideFilter='all';
 
