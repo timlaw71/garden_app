@@ -745,6 +745,86 @@ select:focus,input:focus{outline:none;border-color:var(--leaf);box-shadow:0 0 0 
   .month-sections{grid-template-columns:1fr 1fr}
   .month-banner-title{font-size:17px}
 }
+
+/* =============================================
+   LANDING HERO
+   ============================================= */
+.hero-card{
+  background:linear-gradient(140deg,var(--bark) 0%,#1a2e14 60%,var(--umber) 100%);
+  border-radius:var(--r-xl);padding:2rem;
+  box-shadow:var(--shadow-lg);color:var(--cream);
+  position:relative;overflow:hidden;
+}
+.hero-card::before{
+  content:'';position:absolute;top:-40px;right:-40px;
+  width:200px;height:200px;border-radius:50%;
+  background:radial-gradient(circle,rgba(200,168,118,.15) 0%,transparent 70%);
+  pointer-events:none;
+}
+.hero-card::after{
+  content:'';position:absolute;bottom:-60px;left:-20px;
+  width:250px;height:250px;border-radius:50%;
+  background:radial-gradient(circle,rgba(58,107,42,.15) 0%,transparent 70%);
+  pointer-events:none;
+}
+.hero-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;flex-wrap:wrap;gap:.5rem}
+.hero-month-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);
+  border-radius:30px;padding:.4rem 1rem;
+  font-size:14px;font-weight:500;color:var(--cream);
+}
+.hero-location{
+  font-size:12px;color:var(--straw);
+  display:flex;align-items:center;gap:5px;
+}
+.hero-headline{
+  font-family:var(--font-serif);font-size:28px;line-height:1.2;
+  color:#fff;margin-bottom:.5rem;position:relative;z-index:1;
+}
+.hero-sub{font-size:14px;color:var(--straw);font-weight:300;line-height:1.5;position:relative;z-index:1}
+.hero-plant-grid{
+  display:flex;flex-wrap:wrap;gap:8px;
+  position:relative;z-index:1;
+}
+.hero-plant-chip{
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.18);
+  border-radius:30px;padding:6px 12px;
+  font-size:13px;font-weight:500;color:var(--cream);
+}
+.hero-plant-qty{font-size:11px;color:var(--straw);margin-left:2px}
+.hero-section-label{
+  font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--straw);margin-bottom:.5rem;display:flex;align-items:center;gap:5px;
+}
+.hero-section{margin-bottom:.875rem;position:relative;z-index:1}
+.hero-section:last-child{margin-bottom:0}
+.hero-cta{
+  font-size:15px;height:44px;padding:0 24px;
+  box-shadow:0 4px 16px rgba(58,107,42,.4);
+  position:relative;z-index:1;
+}
+.hero-cta:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(58,107,42,.5)}
+.hero-skip{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.15);color:var(--straw);position:relative;z-index:1}
+.hero-skip:hover{background:rgba(255,255,255,.15);color:var(--cream)}
+.hero-loading{
+  display:flex;align-items:center;gap:8px;
+  font-size:13px;color:var(--straw);font-style:italic;
+}
+.hero-spinner{
+  width:14px;height:14px;border-radius:50%;
+  border:2px solid rgba(255,255,255,.2);border-top-color:var(--straw);
+  animation:spin .8s linear infinite;flex-shrink:0;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.hero-no-location{font-size:13px;color:var(--straw)}
+
+@media(max-width:600px){
+  .hero-card{padding:1.25rem}
+  .hero-headline{font-size:22px}
+  .hero-top{flex-direction:column;align-items:flex-start;gap:.5rem}
+}
 </style>
 </head>
 <body>
@@ -755,10 +835,38 @@ select:focus,input:focus{outline:none;border-color:var(--leaf);box-shadow:0 0 0 
       <div class="app-logo"><i class="ti ti-plant-2" aria-hidden="true"></i></div>
       <div>
         <div class="app-title">Seed<span>smith</span></div>
-        <div class="app-tagline">Square foot garden planner — raise more in less space</div>
+        <div class="app-tagline">Square foot garden planner</div>
       </div>
     </div>
+    <div id="location-status" style="font-size:12px;color:var(--text3);display:flex;align-items:center;gap:5px"></div>
   </header>
+
+  <!-- LANDING HERO — shown before setup is complete -->
+  <div id="landing-hero" style="margin-bottom:1.5rem">
+    <div class="hero-card">
+      <div class="hero-top">
+        <div class="hero-month-badge" id="hero-month-badge">
+          <span id="hero-month-icon">🌱</span>
+          <span id="hero-month-name">Loading...</span>
+        </div>
+        <div class="hero-location" id="hero-location">
+          <i class="ti ti-map-pin" style="font-size:12px"></i>
+          <span id="hero-location-text">Detecting your location...</span>
+        </div>
+      </div>
+      <div class="hero-headline" id="hero-headline">Finding what to plant...</div>
+      <div class="hero-sub" id="hero-sub">We're checking your location and the calendar to give you personalized planting advice.</div>
+      <div id="hero-suggestions" style="margin:1.25rem 0"></div>
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <button class="btn btn-green hero-cta" onclick="goStep(1)" id="hero-cta">
+          <i class="ti ti-arrow-right"></i> Pick my plants
+        </button>
+        <button class="btn hero-skip" onclick="goStep(0)" style="font-size:13px;color:var(--text3)">
+          Set up manually <i class="ti ti-settings" style="font-size:12px"></i>
+        </button>
+      </div>
+    </div>
+  </div>
 
   <div style="margin-bottom:1rem;display:flex;justify-content:flex-end">
     <button class="btn btn-sm" onclick="toggleLegend()" id="legend-toggle-btn" style="color:var(--text3);font-size:12px">
@@ -1441,7 +1549,7 @@ function resolveZipFromCoords(lat,lng,btn,btnText,resultEl){
     .then(function(r){return r.json();})
     .then(function(data){
       var zip=data.postcode||data.locality;
-      // postcode may be city name on non-US — validate it's numeric
+      // postcode may be city name on non-US — validate it is numeric
       if(zip&&/^\d{5}/.test(zip)){
         applyZipFinal(zip);
       } else {
@@ -1530,7 +1638,7 @@ function lookupFrost(){
   var sd=parse(frost.lf),ed=parse(frost.ff);
   if(sd)document.getElementById('last-frost').value=sd.toISOString().slice(0,10);
   if(ed)document.getElementById('first-fall-frost').value=ed.toISOString().slice(0,10);
-  buildMonthlyBanner();
+  buildMonthlyBanner();buildHero();
     el.innerHTML='<div class="frost-success"><i class="ti ti-check"></i> Zone '+zone+' — last frost ~'+frost.lf+', first fall frost ~'+frost.ff+'</div>';
 }
 
@@ -1648,12 +1756,15 @@ function setMode(m){
 }
 
 function goStep(s){
-  if(s===0)buildMonthlyBanner();
+  if(s===0){buildMonthlyBanner();buildHero();}
   if(s===1){applySeasonDetection();renderMyPlants();renderLibrary();}
   if(s===2){beds.forEach(function(b){if(!b.grid||b.grid.length!==b.L*b.W)b.grid=Array(b.L*b.W).fill(null);});renderBedTabs();setTimeout(function(){renderActiveBed();renderPlantSelector();},50);}
   if(s===3)buildCalendar();
   if(s===4){renderGuide();buildMonthlyBanner();}
   document.querySelectorAll('.panel').forEach(function(el,i){el.classList.toggle('active',i===s);});
+  // Show hero only on setup tab
+  var hero=document.getElementById('landing-hero');
+  if(hero)hero.style.display=s===0?'block':'none';
   document.querySelectorAll('.step-tab').forEach(function(el,i){el.classList.toggle('active',i===s);if(i<s)el.classList.add('done');else el.classList.remove('done');});
 }
 
@@ -2208,6 +2319,162 @@ function buildCalendar(){
   }).join('');
 }
 
+
+/* =============================================
+   LANDING HERO
+   ============================================= */
+var MONTH_NAMES_FULL=['January','February','March','April','May','June','July','August','September','October','November','December'];
+var MONTH_ICONS_FULL=['❄️','❄️','🌱','🌱','☀️','☀️','☀️','🌿','🍂','🍂','🍂','❄️'];
+
+function buildHero(){
+  var today=new Date();
+  var mo=today.getMonth();
+  var monthName=MONTH_NAMES_FULL[mo];
+  var icon=MONTH_ICONS_FULL[mo];
+
+  document.getElementById('hero-month-icon').textContent=icon;
+  document.getElementById('hero-month-name').textContent=monthName;
+
+  var lfStr=document.getElementById('last-frost').value;
+  var ffStr=document.getElementById('first-fall-frost').value;
+  var hh=getHH();
+
+  // Source: my plants or full library
+  var sourcePlants=myPlantList.length
+    ?myPlantList.map(function(e){return pl(e.id);}).filter(Boolean)
+    :PLANTS.filter(function(p){return p.cat!=='Custom';});
+
+  var plantNow=[],startIndoors=[],comingUp=[];
+
+  if(lfStr){
+    var yr=today.getFullYear();
+    var lf=new Date(yr+'-'+lfStr.slice(5));
+    var ff=ffStr?new Date(yr+'-'+ffStr.slice(5)):null;
+    var dayMs=864e5;
+
+    sourcePlants.forEach(function(plant){
+      var firstPlant=new Date(lf);firstPlant.setDate(firstPlant.getDate()+plant.frostOffset);
+      var indoorStart=(['transplant','set/transplant'].indexOf(plant.note)>=0)?new Date(firstPlant):null;
+      if(indoorStart)indoorStart.setDate(indoorStart.getDate()-49);
+      var diff=(firstPlant-today)/dayMs;
+
+      if(diff>=-14&&diff<=28){plantNow.push(plant);}
+      else if(indoorStart&&(indoorStart-today)/dayMs>=-7&&(indoorStart-today)/dayMs<=28){startIndoors.push(plant);}
+      else if(diff>28&&diff<=70){comingUp.push(plant);}
+    });
+  } else {
+    // Month-based fallback
+    var moSeasons=[['spring'],['spring'],['spring'],['spring'],['summer'],['summer'],['summer'],['summer'],['fall'],['fall'],['fall'],['spring']];
+    var activeSeason=moSeasons[mo];
+    sourcePlants.forEach(function(plant){
+      if(plant.seasons&&plant.seasons.some(function(s){return activeSeason.indexOf(s)>=0;})){
+        plantNow.push(plant);
+      }
+    });
+  }
+
+  // Build headline
+  var headline='';
+  var sub='';
+  if(plantNow.length){
+    var names=plantNow.slice(0,3).map(function(p){return p.name;});
+    var nameStr=names.length>2?names[0]+', '+names[1]+' & more':names.join(' & ');
+    headline='Time to plant '+nameStr+'.';
+    sub=monthName+' is prime time for these crops in your area. Add them to your garden plan and we will tell you exactly how many you need.';
+  } else if(startIndoors.length){
+    var names=startIndoors.slice(0,2).map(function(p){return p.name;});
+    headline='Start your '+names.join(' & ')+' indoors now.';
+    sub='These transplants need 6–8 weeks indoors before they are ready to go outside. Get them started today.';
+  } else if(comingUp.length){
+    var names=comingUp.slice(0,2).map(function(p){return p.name;});
+    headline=names.join(' & ')+' season is coming.';
+    sub='Plan ahead. '+monthName+' is a great time to get your beds ready and source your plants.';
+  } else {
+    headline='Plan your '+monthName+' garden.';
+    sub='Enter your location to get personalized planting advice for your zone and time of year.';
+  }
+
+  document.getElementById('hero-headline').textContent=headline;
+  document.getElementById('hero-sub').textContent=sub;
+
+  // Build suggestion chips
+  function chipHTML(plant){
+    var sqFt=plant.recSq[hh]||1;
+    var total=sqFt*plant.perSqFt;
+    var qty=plant.perSqFt>=9?(sqFt+' sq ft'):total+' '+plant.note+(total>1?'s':'');
+    return'<div class="hero-plant-chip">'+
+      '<span style="width:8px;height:8px;border-radius:50%;background:'+plant.color+';display:inline-block;flex-shrink:0"></span>'+
+      '<span>'+plant.name+'</span>'+
+      '<span class="hero-plant-qty">· '+qty+'</span>'+
+    '</div>';
+  }
+
+  var sugHTML='';
+  if(plantNow.length){
+    sugHTML+='<div class="hero-section">'+
+      '<div class="hero-section-label"><i class="ti ti-shovel" style="font-size:12px"></i> Plant outside now</div>'+
+      '<div class="hero-plant-grid">'+plantNow.slice(0,8).map(chipHTML).join('')+'</div>'+
+    '</div>';
+  }
+  if(startIndoors.length){
+    sugHTML+='<div class="hero-section">'+
+      '<div class="hero-section-label"><i class="ti ti-home" style="font-size:12px"></i> Start indoors now</div>'+
+      '<div class="hero-plant-grid">'+startIndoors.slice(0,6).map(chipHTML).join('')+'</div>'+
+    '</div>';
+  }
+  if(comingUp.length&&plantNow.length+startIndoors.length<4){
+    sugHTML+='<div class="hero-section">'+
+      '<div class="hero-section-label"><i class="ti ti-clock" style="font-size:12px"></i> Coming up soon</div>'+
+      '<div class="hero-plant-grid">'+comingUp.slice(0,5).map(chipHTML).join('')+'</div>'+
+    '</div>';
+  }
+
+  document.getElementById('hero-suggestions').innerHTML=sugHTML||
+    '<div class="hero-no-location"><i class="ti ti-map-pin" style="font-size:13px"></i> Enter your ZIP in setup for personalized suggestions</div>';
+}
+
+function updateHeroLocation(text){
+  var el=document.getElementById('hero-location-text');
+  if(el)el.textContent=text;
+}
+
+function autoDetectOnLoad(){
+  if(!navigator.geolocation){
+    updateHeroLocation('Enter ZIP in setup for local advice');
+    buildHero();return;
+  }
+  document.getElementById('hero-suggestions').innerHTML=
+    '<div class="hero-loading"><div class="hero-spinner"></div>Finding your location and what is in season...</div>';
+  navigator.geolocation.getCurrentPosition(
+    function(pos){
+      updateHeroLocation('Checking your area...');
+      resolveZipFromCoords(
+        pos.coords.latitude,pos.coords.longitude,
+        {disabled:false,textContent:''},
+        {textContent:''},
+        {innerHTML:''}
+      );
+      // Give resolveZipFromCoords time to set dates, then rebuild hero
+      setTimeout(function(){
+        var lfStr=document.getElementById('last-frost').value;
+        var zone=document.getElementById('frost-result').innerHTML;
+        if(lfStr){
+          var zoneMatch=zone.match(/Zone\s([^\s—]+)/);
+          updateHeroLocation(zoneMatch?"Zone "+zoneMatch[1]+" · "+MONTH_NAMES_FULL[new Date().getMonth()]:'Location detected');
+        } else {
+          updateHeroLocation('Location found. Enter ZIP to refine');
+        }
+        buildHero();
+      },2500);
+    },
+    function(){
+      updateHeroLocation('Enter ZIP in setup for local advice');
+      buildHero();
+    },
+    {timeout:8000,maximumAge:600000,enableHighAccuracy:false}
+  );
+}
+
 loadMyPlants();
 var today=new Date(),later=new Date(today);later.setMonth(later.getMonth()+6);
 window.addEventListener('resize',function(){
@@ -2231,7 +2498,7 @@ function toggleCustomForm(){
   chevron.style.transform=show?'rotate(180deg)':'rotate(0)';
 }
 
-setTimeout(function(){applySeasonDetection();buildMonthlyBanner();},100);
+setTimeout(function(){applySeasonDetection();buildMonthlyBanner();buildHero();autoDetectOnLoad();},150);
 var guideFilter='all';
 
 function setGuideFilter(btn){
