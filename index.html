@@ -3193,13 +3193,76 @@ function buildMaintContent(){
   // Per-plant care cards
   html+='<div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.75rem">Full care guide</div>';
 
-  myPlantList.forEach(function(entry,idx){
+  // Only show plants that are in the ground or need action soon
+  var dayMs=864e5;
+  var actionableEntries=myPlantList.filter(function(entry){
+    var plant=pl(entry.id);if(!plant)return false;
+    if(!lfStr)return true;// no dates — show all
+    var yr=today.getFullYear();
+    var lfDate=new Date(yr+'-'+lfStr.slice(5));
+    var ffDate=ffStr?new Date(yr+'-'+ffStr.slice(5)):null;
+    var firstPlant=getFirstPlantDate(plant,lfDate,ffDate);
+    var indoorStart=(['transplant','set/transplant'].indexOf(plant.note)>=0)?new Date(firstPlant):null;
+    if(indoorStart)indoorStart=new Date(firstPlant.getTime()-49*dayMs);
+    var diff=(firstPlant-today)/dayMs;
+    var indoorDiff=indoorStart?(indoorStart-today)/dayMs:999;
+    // In ground: planted up to 8 weeks ago and season not over
+    var inGround=diff<=-0&&diff>=-56;
+    // Starting indoors: indoor start is within 2 weeks past or 5 weeks future
+    var startingIndoors=indoorStart&&indoorDiff>=-14&&indoorDiff<=35;
+    // Planting soon: window opens within 4 weeks
+    var plantingSoon=diff>0&&diff<=28;
+    return inGround||startingIndoors||plantingSoon;
+  });
+
+  if(!actionableEntries.length){
+    html+='<div style="font-size:13px;color:var(--text3);text-align:center;padding:1.5rem 0;font-style:italic">'+
+      'Nothing needs attention right now.<br>Check back as your planting windows approach.</div>';
+    document.getElementById('maint-content').innerHTML=html;
+    return;
+  }
+
+  html+='<div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.75rem">'+actionableEntries.length+' plant'+(actionableEntries.length>1?'s':'')+' need your attention</div>';
+
+  actionableEntries.forEach(function(entry,idx){
     var plant=pl(entry.id);if(!plant)return;
     var data=MAINT_DATA[entry.id];
     var stage=lfStr?getPlantStage(plant,lfStr,ffStr):'Growing';
-    var stageColor=stage==='Harvest time!'?'var(--harvest)':stage==='Not planted yet'?'var(--text3)':'var(--leaf)';
+
+    // Determine action type for header badge
+    var yr=today.getFullYear();
+    var lfDate=lfStr?new Date(yr+'-'+lfStr.slice(5)):null;
+    var ffDate=ffStr?new Date(yr+'-'+ffStr.slice(5)):null;
+    var actionBadge='';
+    if(lfDate){
+      var firstPlant=getFirstPlantDate(plant,lfDate,ffDate);
+      var indoorStart=(['transplant','set/transplant'].indexOf(plant.note)>=0)?new Date(firstPlant.getTime()-49*dayMs):null;
+      var diff=(firstPlant-today)/dayMs;
+      var indoorDiff=indoorStart?(indoorStart-today)/dayMs:999;
+      if(indoorStart&&indoorDiff>=-14&&indoorDiff<=35&&diff>0){
+        var daysToIndoor=Math.round(indoorDiff);
+        actionBadge='<span style="font-size:10px;background:rgba(36,113,163,.1);color:var(--sky);border:1px solid rgba(36,113,163,.2);border-radius:20px;padding:2px 8px;margin-left:6px">'+(daysToIndoor<=0?'Start indoors now':'Start indoors in '+daysToIndoor+'d')+'</span>';
+      } else if(diff>0&&diff<=28){
+        actionBadge='<span style="font-size:10px;background:rgba(58,107,42,.1);color:var(--leaf);border:1px solid rgba(58,107,42,.2);border-radius:20px;padding:2px 8px;margin-left:6px">Plant in '+Math.round(diff)+'d</span>';
+      } else if(stage==='Harvest time!'){
+        actionBadge='<span style="font-size:10px;background:rgba(196,122,30,.1);color:var(--harvest);border:1px solid rgba(196,122,30,.2);border-radius:20px;padding:2px 8px;margin-left:6px">Harvest now</span>';
+      }
+    }
+
+    var stageColor=stage==='Harvest time!'?'var(--harvest)':stage.indexOf('Not planted')>=0?'var(--text3)':'var(--leaf)';
 
     html+='<div class="maint-plant-card">'+
+      '<div class="maint-plant-header" onclick="toggleMaintCard('+idx+')">'+
+        '<div class="maint-color-bar" style="background:'+plant.color+'"></div>'+
+        '<div style="flex:1">'+
+          '<div class="maint-plant-name">'+plant.name+actionBadge+'</div>'+
+          '<div class="maint-plant-stage" style="color:'+stageColor+'">'+stage+'</div>'+
+        '</div>'+
+        '<i class="ti ti-chevron-down maint-chevron" id="maint-chev-'+idx+'"></i>'+
+      '</div>'+
+      '<div class="maint-plant-body" id="maint-body-'+idx+'">'+
+    // Add a "what to do now" pre-section for upcoming plants
+    (stage.indexOf('Not planted')>=0?'<div style="background:rgba(58,107,42,.06);border:1px solid rgba(58,107,42,.15);border-radius:var(--r);padding:.6rem .875rem;margin-bottom:.75rem;font-size:13px;color:var(--leaf)"><i class="ti ti-clock" style="margin-right:5px"></i><strong>Get ready:</strong> Prepare your bed, source your '+plant.note+'s, and check soil temperature before planting.</div>':'');
       '<div class="maint-plant-header" onclick="toggleMaintCard('+idx+')">'+
         '<div class="maint-color-bar" style="background:'+plant.color+'"></div>'+
         '<div style="flex:1">'+
@@ -3223,6 +3286,18 @@ function buildMaintContent(){
       html+='<div style="font-size:13px;color:var(--text3);font-style:italic">Care guide coming soon for this plant.</div>';
     }
 
+    if(data){
+      html+=
+        '<div class="maint-detail-row"><i class="ti ti-droplet maint-detail-icon"></i><span class="maint-detail-label">Watering</span><span class="maint-detail-val">'+data.water+'</span></div>'+
+        '<div class="maint-detail-row"><i class="ti ti-leaf maint-detail-icon"></i><span class="maint-detail-label">Feeding</span><span class="maint-detail-val">'+data.feed+'</span></div>'+
+        '<div class="maint-detail-row"><i class="ti ti-cut maint-detail-icon"></i><span class="maint-detail-label">Pruning</span><span class="maint-detail-val">'+data.prune+'</span></div>'+
+        '<div class="maint-detail-row"><i class="ti ti-bug maint-detail-icon"></i><span class="maint-detail-label">Watch for</span><span class="maint-detail-val">'+data.pests.map(function(p){return'<span class="maint-pest-badge">'+p+'</span>';}).join('')+'</span></div>';
+      if(data.tips&&data.tips.length){
+        html+='<div class="maint-tip"><i class="ti ti-bulb" style="font-size:12px;margin-right:4px"></i><strong>Tips:</strong> '+data.tips.join(' · ')+'</div>';
+      }
+    } else {
+      html+='<div style="font-size:13px;color:var(--text3);font-style:italic">Care guide coming soon for this plant.</div>';
+    }
     html+='</div></div>';
   });
 
