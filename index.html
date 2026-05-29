@@ -147,8 +147,8 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 .step-tab:last-child{border-right:none}
 .step-tab:hover{background:var(--surface2);color:var(--text2)}
 .step-tab.active{background:var(--leaf);color:#fff}
-.step-tab.done{color:var(--leaf)}
-.step-tab.done::after{content:'✓';font-size:10px;margin-left:4px;opacity:.7}
+.step-tab.done{color:var(--leaf);background:rgba(58,107,42,.06)}
+.step-tab.done::after{content:'✓';font-size:10px;margin-left:4px;font-weight:700}
 .step-tab .num{
   display:inline-flex;align-items:center;justify-content:center;
   width:20px;height:20px;border-radius:50%;font-size:11px;
@@ -552,7 +552,9 @@ select:focus,input:focus{outline:none;border-color:var(--leaf);box-shadow:0 0 0 
 /* =============================================
    MOBILE
    ============================================= */
+.hide-mobile{}
 @media(max-width:600px){
+  .hide-mobile{display:none}
   .shell{padding:0 .75rem 4rem}
   .app-header{padding:1.25rem 0 1rem}
   .app-title{font-size:22px}
@@ -911,6 +913,40 @@ body.bab-minimized .shell{padding-bottom:3rem}
 @media(max-width:380px){
   .bab-sections{grid-template-columns:1fr}
 }
+
+/* =============================================
+   MAINTENANCE DRAWER
+   ============================================= */
+.maint-week-card{
+  background:linear-gradient(135deg,var(--bark),var(--umber));
+  border-radius:var(--r-lg);padding:1rem 1.25rem;
+  margin-bottom:1rem;color:var(--cream);
+}
+.maint-week-title{font-family:var(--font-serif);font-size:17px;color:#fff;margin-bottom:.75rem;display:flex;align-items:center;gap:8px}
+.maint-task{display:flex;align-items:flex-start;gap:8px;margin-bottom:.5rem;font-size:13px;color:var(--cream)}
+.maint-task i{color:var(--straw);flex-shrink:0;margin-top:1px;font-size:14px}
+.maint-task-plant{font-weight:600;color:#fff}
+.maint-plant-card{
+  border:1px solid var(--border);border-radius:var(--r-lg);
+  margin-bottom:.75rem;overflow:hidden;
+}
+.maint-plant-header{
+  display:flex;align-items:center;gap:10px;padding:.75rem 1rem;
+  cursor:pointer;background:var(--surface);transition:background .12s;
+}
+.maint-plant-header:hover{background:var(--surface2)}
+.maint-color-bar{width:4px;border-radius:2px;align-self:stretch;min-height:36px;flex-shrink:0}
+.maint-plant-name{font-size:14px;font-weight:500;color:var(--text);flex:1}
+.maint-plant-stage{font-size:11px;color:var(--text3);margin-top:1px}
+.maint-chevron{color:var(--text3);font-size:13px;transition:transform .2s;margin-left:auto}
+.maint-plant-body{display:none;padding:.75rem 1rem;border-top:1px solid var(--border);background:var(--surface2)}
+.maint-plant-body.open{display:block}
+.maint-detail-row{display:flex;gap:6px;margin-bottom:.5rem;font-size:13px;align-items:flex-start}
+.maint-detail-icon{color:var(--harvest);flex-shrink:0;width:18px;font-size:14px;margin-top:1px}
+.maint-detail-label{font-weight:500;color:var(--text);min-width:80px;flex-shrink:0}
+.maint-detail-val{color:var(--text2);flex:1}
+.maint-pest-badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;padding:2px 8px;border-radius:20px;background:rgba(192,57,43,.08);color:var(--rust);border:1px solid rgba(192,57,43,.15);margin:2px}
+.maint-tip{font-size:12px;color:var(--leaf);background:rgba(58,107,42,.06);border:1px solid rgba(58,107,42,.12);border-radius:var(--r);padding:.4rem .75rem;margin-top:.5rem}
 </style>
 </head>
 <body>
@@ -924,7 +960,17 @@ body.bab-minimized .shell{padding-bottom:3rem}
         <div class="app-tagline">Square foot garden planner</div>
       </div>
     </div>
-    <div id="location-status" style="font-size:12px;color:var(--text3);display:flex;align-items:center;gap:5px"></div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div id="location-status" style="font-size:12px;color:var(--text3);display:flex;align-items:center;gap:5px"></div>
+      <button class="btn btn-sm" onclick="openMaintDrawer()" id="maint-btn" style="display:none;background:var(--leaf);color:#fff;border-color:var(--leaf);gap:5px" title="Garden maintenance guide">
+        <i class="ti ti-garden-cart" style="font-size:14px"></i>
+        <span class="hide-mobile">Care guide</span>
+      </button>
+      <button class="btn btn-sm" onclick="toggleLegend()" id="legend-toggle-btn" style="color:var(--text3);font-size:12px;display:none" id2="leg-btn">
+        <i class="ti ti-info-circle" style="font-size:14px"></i>
+        <span class="hide-mobile">Color guide</span>
+      </button>
+    </div>
   </header>
 
   <!-- LANDING HERO — shown before setup is complete -->
@@ -941,24 +987,20 @@ body.bab-minimized .shell{padding-bottom:3rem}
         </div>
       </div>
       <div class="hero-headline" id="hero-headline">Finding what to plant...</div>
-      <div class="hero-sub" id="hero-sub">We're checking your location and the calendar to give you personalized planting advice.</div>
+      <div class="hero-sub" id="hero-sub">Checking your location to show what to plant right now.</div>
       <div id="hero-suggestions" style="margin:1.25rem 0"></div>
       <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
         <button class="btn btn-green hero-cta" onclick="goStep(1)" id="hero-cta">
           <i class="ti ti-arrow-right"></i> Pick my plants
         </button>
         <button class="btn hero-skip" onclick="goStep(0)" style="font-size:13px;color:var(--text3)">
-          Set up manually <i class="ti ti-settings" style="font-size:12px"></i>
+          Enter my ZIP instead <i class="ti ti-map-pin" style="font-size:12px"></i>
         </button>
       </div>
     </div>
   </div>
 
-  <div style="margin-bottom:1rem;display:flex;justify-content:flex-end">
-    <button class="btn btn-sm" onclick="toggleLegend()" id="legend-toggle-btn" style="color:var(--text3);font-size:12px">
-      <i class="ti ti-info-circle" style="font-size:14px"></i> Color guide
-    </button>
-  </div>
+
   <div class="app-legend" id="app-legend" style="display:none;margin-bottom:1rem">
     <div class="app-legend-section">
       <span class="app-legend-label">Season</span>
@@ -982,7 +1024,7 @@ body.bab-minimized .shell{padding-bottom:3rem}
     </div>
   </div>
 
-  <div class="step-nav">
+  <div class="step-nav" id="step-nav" style="display:none">
     <button class="step-tab active" id="tab0" onclick="goStep(0)"><span class="num">1</span>Setup</button>
     <button class="step-tab" id="tab1" onclick="goStep(1)"><span class="num">2</span>Plants</button>
     <button class="step-tab" id="tab2" onclick="goStep(2)"><span class="num">3</span>Grid</button>
@@ -1051,6 +1093,10 @@ body.bab-minimized .shell{padding-bottom:3rem}
           <i class="ti ti-trash" style="font-size:12px"></i> Clear all
         </button>
       </div>
+      <div style="font-size:13px;color:var(--text3);margin-bottom:.75rem;display:flex;align-items:center;gap:6px">
+        <i class="ti ti-hand-click" style="color:var(--harvest);font-size:16px"></i>
+        Pick from the library below — tap any plant to add it to your list
+      </div>
       <div id="myplants-list" style="min-height:48px">
         <div style="font-size:13px;color:var(--text3);font-style:italic">No plants added yet — pick from the library below or add a custom plant.</div>
       </div>
@@ -1112,9 +1158,11 @@ body.bab-minimized .shell{padding-bottom:3rem}
 <!-- STEP 3: GRID -->
   <div class="panel" id="panel2">
     <div class="grid-toolbar">
-      <div class="bed-tabs" id="bed-tabs"></div>
-      <button class="btn btn-green btn-sm" onclick="autoPopulate()"><i class="ti ti-wand"></i> Auto-fill</button>
-      <button class="btn btn-sm btn-danger" onclick="clearCurrentBed()"><i class="ti ti-trash"></i> Clear</button>
+      <div class="bed-tabs" id="bed-tabs" style="flex:1;margin-bottom:0"></div>
+      <div style="display:flex;gap:6px;flex-shrink:0">
+        <button class="btn btn-green btn-sm" onclick="autoPopulate()"><i class="ti ti-wand"></i> Auto-fill</button>
+        <button class="btn btn-sm btn-danger" onclick="clearCurrentBed()"><i class="ti ti-trash"></i></button>
+      </div>
     </div>
     <div id="bed-grid-panels"></div>
     <div id="conflict-area"></div>
@@ -1148,7 +1196,7 @@ body.bab-minimized .shell{padding-bottom:3rem}
       <span class="frost-tag ft-tender">Warm-season: wait for warm soil</span>
     </div>
     <div class="stats-row" id="cal-summary"></div>
-    <div class="card">
+    <div class="card" style="border:2px solid var(--leaf);box-shadow:0 4px 20px rgba(58,107,42,.12)">
       <div class="card-title"><i class="ti ti-calendar"></i>Planting calendar</div>
       <div class="cal-legend">
         <div class="cal-legend-item"><div class="cal-legend-dot" style="background:#185fa5;opacity:.85"></div>Start indoors</div>
@@ -1190,6 +1238,21 @@ body.bab-minimized .shell{padding-bottom:3rem}
     <div id="guide-list"></div>
   </div>
 
+  <!-- MAINTENANCE DRAWER -->
+  <div id="maint-overlay" onclick="closeMaintDrawer()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;backdrop-filter:blur(2px)"></div>
+  <div id="maint-drawer" style="position:fixed;top:0;right:0;bottom:0;width:min(420px,100vw);background:var(--surface);z-index:201;transform:translateX(100%);transition:transform .35s cubic-bezier(.16,1,.3,1);overflow-y:auto;display:flex;flex-direction:column">
+    <div style="position:sticky;top:0;background:var(--surface);z-index:1;border-bottom:1px solid var(--border);padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-family:var(--font-serif);font-size:20px;color:var(--text)"><i class="ti ti-garden-cart" style="color:var(--leaf);font-size:18px"></i> Garden maintenance</div>
+        <div style="font-size:12px;color:var(--text3);margin-top:2px" id="maint-subtitle">Your garden care guide</div>
+      </div>
+      <button onclick="closeMaintDrawer()" style="width:32px;height:32px;border-radius:50%;border:1px solid var(--border2);background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--text3);font-size:16px"><i class="ti ti-x"></i></button>
+    </div>
+    <div style="padding:1rem 1.25rem;flex:1" id="maint-content">
+      <div style="font-size:13px;color:var(--text3);font-style:italic">Add plants in step 2 to see your maintenance guide.</div>
+    </div>
+  </div>
+
   <!-- PERSISTENT BOTTOM ACTION BAR -->
   <div id="bottom-action-bar" style="display:none">
     <div class="bab-header" onclick="toggleBottomBar()">
@@ -1225,14 +1288,14 @@ try{
 }catch(e){}
 
 const PLANTS=[
-  {id:'tomato',seasons:['summer'],  name:'Tomato',     cat:'Vegetables',perSqFt:1, dtm:75, harvest:30,waves:1,color:'#D85A30',tc:'#712B13',note:'transplant', frostOffset:70, frostType:'tender',warmNote:'after soil warms (~May)',    companions:['basil','carrot','marigold'],enemies:['potato'],          goals:['cooking','snacking','preserving'],ease:1,northEdge:true, recSq:{1:1,2:2,3:2,4:3,6:4}},
+  {id:'tomato',seasons:['summer'],  name:'Tomato',     cat:'Vegetables',perSqFt:1, dtm:75, harvest:30,waves:1,color:'#D85A30',tc:'#712B13',note:'transplant', frostOffset:77, frostType:'tender',warmNote:'after soil warms (~May)',    companions:['basil','carrot','marigold'],enemies:['potato'],          goals:['cooking','snacking','preserving'],ease:1,northEdge:true, recSq:{1:1,2:2,3:2,4:3,6:4}},
   {id:'pepper',     seasons:['summer'],name:'Bell pepper',   cat:'Vegetables',perSqFt:1, dtm:70, harvest:45,waves:1,color:'#993C1D',tc:'#4A1B0C',note:'transplant', frostOffset:77, frostType:'tender',warmNote:'after soil warms (~mid May)',companions:['basil','carrot'],           enemies:[],goals:['cooking','snacking'],             ease:1,northEdge:true, recSq:{1:1,2:1,3:1,4:2,6:3}},
   {id:'hotpepper',   seasons:['summer'],name:'Hot pepper',     cat:'Vegetables',perSqFt:1, dtm:80, harvest:45,waves:1,color:'#CC2200',tc:'#FFFFFF',note:'transplant', frostOffset:77, frostType:'tender',warmNote:'after soil warms (~mid May)',companions:['basil','carrot','tomato'],  enemies:[],goals:['cooking','preserving'],           ease:1,northEdge:true, recSq:{1:1,2:1,3:1,4:2,6:3}},
   {id:'bananapepper',seasons:['summer'],name:'Banana pepper',  cat:'Vegetables',perSqFt:1, dtm:65, harvest:45,waves:1,color:'#E8B84B',tc:'#412402',note:'transplant', frostOffset:77, frostType:'tender',warmNote:'after soil warms (~mid May)',companions:['basil','carrot','tomato'],  enemies:[],goals:['cooking','snacking','preserving'],ease:1,northEdge:true, recSq:{1:1,2:1,3:1,4:2,6:3}},
-  {id:'cucumber',seasons:['summer'],name:'Cucumber',   cat:'Vegetables',perSqFt:1, dtm:55, harvest:21,waves:2,color:'#1D9E75',tc:'#085041',note:'transplant', frostOffset:63, frostType:'tender',warmNote:'after soil warms (~May)',    companions:['beans','romaine'],          enemies:['potato'],           goals:['snacking','cooking'],             ease:1,northEdge:true,edgePlant:true, recSq:{1:1,2:2,3:2,4:3,6:4}},
-  {id:'zucchini',seasons:['summer'],name:'Zucchini',   cat:'Vegetables',perSqFt:1, dtm:50, harvest:21,waves:1,color:'#0F6E56',tc:'#04342C',note:'transplant',sizeWarn:'Choose bush variety — vining types will take over the bed', frostOffset:63, frostType:'tender',warmNote:'after soil warms (~May)',    companions:[],                           enemies:[],                   goals:['cooking'],                        ease:1,northEdge:true,edgePlant:true, recSq:{1:1,2:1,3:1,4:2,6:2}},
-  {id:'squash',seasons:['summer'],  name:'Squash',     cat:'Vegetables',perSqFt:1, dtm:50, harvest:21,waves:1,color:'#EF9F27',tc:'#633806',note:'transplant',sizeWarn:'Bush varieties work best in SFG — avoid vining types', frostOffset:63, frostType:'tender',warmNote:'after soil warms (~May)',    companions:[],                           enemies:[],                   goals:['cooking'],                        ease:1,northEdge:true,edgePlant:true, recSq:{1:1,2:1,3:1,4:2,6:2}},
-  {id:'pumpkin',    seasons:['summer'],name:'Pumpkin',    cat:'Vegetables',perSqFt:1, dtm:100,harvest:0, waves:1,color:'#D85A1A',tc:'#FFFFFF',note:'transplant',sizeWarn:'Vining plant — trellis or plant at bed edge so vines run outside', frostOffset:63,frostType:'tender',warmNote:'after soil warms (~May)',companions:['marigold'],enemies:[],goals:['cooking','preserving'],           ease:1,northEdge:true,edgePlant:true,recSq:{1:1,2:2,3:2,4:3,6:4}},
+  {id:'cucumber',seasons:['summer'],name:'Cucumber',   cat:'Vegetables',perSqFt:1, dtm:55, harvest:21,waves:2,color:'#1D9E75',tc:'#085041',note:'transplant', frostOffset:77, frostType:'tender',warmNote:'after soil warms (~May)',    companions:['beans','romaine'],          enemies:['potato'],           goals:['snacking','cooking'],             ease:1,northEdge:true,edgePlant:true, recSq:{1:1,2:2,3:2,4:3,6:4}},
+  {id:'zucchini',seasons:['summer'],name:'Zucchini',   cat:'Vegetables',perSqFt:1, dtm:50, harvest:21,waves:1,color:'#0F6E56',tc:'#04342C',note:'transplant',sizeWarn:'Choose bush variety — vining types will take over the bed', frostOffset:77, frostType:'tender',warmNote:'after soil warms (~May)',    companions:[],                           enemies:[],                   goals:['cooking'],                        ease:1,northEdge:true,edgePlant:true, recSq:{1:1,2:1,3:1,4:2,6:2}},
+  {id:'squash',seasons:['summer'],  name:'Squash',     cat:'Vegetables',perSqFt:1, dtm:50, harvest:21,waves:1,color:'#EF9F27',tc:'#633806',note:'transplant',sizeWarn:'Bush varieties work best in SFG — avoid vining types', frostOffset:77, frostType:'tender',warmNote:'after soil warms (~May)',    companions:[],                           enemies:[],                   goals:['cooking'],                        ease:1,northEdge:true,edgePlant:true, recSq:{1:1,2:1,3:1,4:2,6:2}},
+  {id:'pumpkin',    seasons:['summer'],name:'Pumpkin',    cat:'Vegetables',perSqFt:1, dtm:100,harvest:0, waves:1,color:'#D85A1A',tc:'#FFFFFF',note:'transplant',sizeWarn:'Vining plant — trellis or plant at bed edge so vines run outside', frostOffset:70,frostType:'tender',warmNote:'after soil warms (~May)',companions:['marigold'],enemies:[],goals:['cooking','preserving'],           ease:1,northEdge:true,edgePlant:true,recSq:{1:1,2:2,3:2,4:3,6:4}},
   {id:'watermelon', seasons:['summer'],name:'Watermelon', cat:'Vegetables',perSqFt:1, dtm:90, harvest:14,waves:1,color:'#3B7A2A',tc:'#FFFFFF',note:'transplant',sizeWarn:'Large vining plant — trellis or allow vines to run outside the bed', frostOffset:70,frostType:'tender',warmNote:'after soil warms (~May)',companions:['marigold'],enemies:[],goals:['snacking'],                       ease:1,northEdge:true,edgePlant:true,recSq:{1:1,2:1,3:2,4:2,6:3}},
   {id:'cantaloupe', seasons:['summer'],name:'Cantaloupe', cat:'Vegetables',perSqFt:1, dtm:85, harvest:14,waves:1,color:'#C8974A',tc:'#FFFFFF',note:'transplant',sizeWarn:'Vining plant — trellis or plant at bed edge so vines run outside', frostOffset:70,frostType:'tender',warmNote:'after soil warms (~May)',companions:['marigold'],enemies:[],goals:['snacking'],                       ease:1,northEdge:true,edgePlant:true,recSq:{1:1,2:1,3:2,4:2,6:3}},
   {id:'broccoli',seasons:['spring','fall'],name:'Broccoli',   cat:'Vegetables',perSqFt:1, dtm:80, harvest:14,waves:2,color:'#085041',tc:'#E1F5EE',note:'transplant', frostOffset:-28,frostType:'hardy',fallFrostOffset:-70, warmNote:'4 wks before last frost',   companions:['onion'],                    enemies:[],                   goals:['cooking'],                        ease:2,northEdge:false,recSq:{1:1,2:1,3:2,4:2,6:3}},
@@ -1248,14 +1311,14 @@ const PLANTS=[
   {id:'potato',seasons:['spring'],  name:'Potato',     cat:'Root veg',  perSqFt:1, dtm:90, harvest:0, waves:1,color:'#888780',tc:'#2C2C2A',note:'seed potato',frostOffset:-14,frostType:'semi',  warmNote:'2 wks before last frost',   companions:[],                           enemies:['cucumber','tomato'],goals:['cooking','preserving'],           ease:1,northEdge:false,recSq:{1:2,2:4,3:6,4:8,6:12}},
   {id:'onion',seasons:['spring','fall'],   name:'Onion',      cat:'Root veg',  perSqFt:16,dtm:100,harvest:0, waves:1,color:'#AFA9EC',tc:'#26215C',note:'transplant', frostOffset:-28,frostType:'hardy', warmNote:'4 wks before last frost',   companions:['carrot','tomato'],          enemies:[],                   goals:['cooking','preserving'],           ease:1,northEdge:false,recSq:{1:1,2:1,3:2,4:2,6:3}},
   {id:'garlic',seasons:['fall'],  name:'Garlic',     cat:'Root veg',  perSqFt:9, dtm:240,harvest:0, waves:1,color:'#D3D1C7',tc:'#2C2C2A',note:'clove',      frostOffset:0,fallFrostOffset:-42,frostType:'hardy',warmNote:'plant Oct-Nov (6 wks before fall frost)',              companions:['tomato','pepper'],          enemies:[],                   goals:['cooking'],                        ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:2,6:2}},
-  {id:'beans',seasons:['summer'],   name:'Bush beans', cat:'Legumes',   perSqFt:9, dtm:50, harvest:14,waves:3,color:'#D4537E',tc:'#4B1528',note:'seed',       frostOffset:63, frostType:'tender',warmNote:'after soil warms (~May)',    companions:['cucumber'],                 enemies:[],                   goals:['cooking','preserving','snacking'],ease:1,northEdge:false,recSq:{1:1,2:2,3:2,4:3,6:4}},
+  {id:'beans',seasons:['summer'],   name:'Bush beans', cat:'Legumes',   perSqFt:9, dtm:50, harvest:14,waves:3,color:'#D4537E',tc:'#4B1528',note:'seed',       frostOffset:77, frostType:'tender',warmNote:'after soil warms (~May)',    companions:['cucumber'],                 enemies:[],                   goals:['cooking','preserving','snacking'],ease:1,northEdge:false,recSq:{1:1,2:2,3:2,4:3,6:4}},
   {id:'peas',seasons:['spring','fall'],    name:'Snap peas',  cat:'Legumes',   perSqFt:8, dtm:60, harvest:14,waves:2,color:'#C0DD97',tc:'#173404',note:'seed',       frostOffset:-28,frostType:'hardy',fallFrostOffset:-56, warmNote:'4 wks before last frost',   companions:['carrot','spinach'],         enemies:[],                   goals:['snacking'],                       ease:1,northEdge:true, recSq:{1:1,2:1,3:2,4:2,6:3}},
-  {id:'basil',seasons:['summer'],   name:'Basil',      cat:'Herbs',     perSqFt:4, dtm:30, harvest:60,waves:2,color:'#7F77DD',tc:'#26215C',note:'transplant', frostOffset:70, frostType:'tender',warmNote:'after soil warms (~May)',    companions:['tomato','pepper'],          enemies:[],                   goals:['cooking','herbs'],                ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:2,6:2}},
+  {id:'basil',seasons:['summer'],   name:'Basil',      cat:'Herbs',     perSqFt:4, dtm:30, harvest:60,waves:2,color:'#7F77DD',tc:'#26215C',note:'transplant', frostOffset:77, frostType:'tender',warmNote:'after soil warms (~May)',    companions:['tomato','pepper'],          enemies:[],                   goals:['cooking','herbs'],                ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:2,6:2}},
   {id:'parsley',seasons:['spring','summer','fall'], name:'Parsley',    cat:'Herbs',     perSqFt:4, dtm:70, harvest:90,waves:1,color:'#639922',tc:'#173404',note:'transplant', frostOffset:-14,frostType:'hardy', warmNote:'2 wks before last frost',   companions:[],                           enemies:[],                   goals:['cooking','herbs'],                ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:1,6:2}},
   {id:'cilantro',seasons:['spring','fall'],name:'Cilantro',   cat:'Herbs',     perSqFt:4, dtm:45, harvest:21,waves:4,color:'#5DCAA5',tc:'#085041',note:'seed',       frostOffset:-21,frostType:'hardy',fallFrostOffset:-42, warmNote:'3 wks before last frost',   companions:[],                           enemies:[],                   goals:['cooking','herbs'],                ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:1,6:2}},
   {id:'dill',seasons:['spring','summer','fall'],    name:'Dill',       cat:'Herbs',     perSqFt:4, dtm:40, harvest:30,waves:3,color:'#97C459',tc:'#27500A',note:'seed',       frostOffset:-14,frostType:'hardy',fallFrostOffset:-42, warmNote:'2 wks before last frost',   companions:['cucumber'],                 enemies:['tomato'],           goals:['cooking','herbs','preserving'],   ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:1,6:2}},
-  {id:'oregano',seasons:['summer','year-round'], name:'Oregano',    cat:'Herbs',     perSqFt:4, dtm:90, harvest:90,waves:1,color:'#BA7517',tc:'#412402',note:'transplant', frostOffset:7,  frostType:'tender',warmNote:'after last frost',           companions:['tomato','pepper'],          enemies:[],                   goals:['cooking','herbs'],                ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:1,6:1}},
-  {id:'thyme',seasons:['summer','year-round'],   name:'Thyme',      cat:'Herbs',     perSqFt:4, dtm:90, harvest:90,waves:1,color:'#888780',tc:'#2C2C2A',note:'transplant', frostOffset:7,  frostType:'tender',warmNote:'after last frost',           companions:[],                           enemies:[],                   goals:['cooking','herbs'],                ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:1,6:1}},
+  {id:'oregano',seasons:['summer','year-round'], name:'Oregano',    cat:'Herbs',     perSqFt:4, dtm:90, harvest:90,waves:1,color:'#BA7517',tc:'#412402',note:'transplant', frostOffset:42,  frostType:'tender',warmNote:'after last frost',           companions:['tomato','pepper'],          enemies:[],                   goals:['cooking','herbs'],                ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:1,6:1}},
+  {id:'thyme',seasons:['summer','year-round'],   name:'Thyme',      cat:'Herbs',     perSqFt:4, dtm:90, harvest:90,waves:1,color:'#888780',tc:'#2C2C2A',note:'transplant', frostOffset:42,  frostType:'tender',warmNote:'after last frost',           companions:[],                           enemies:[],                   goals:['cooking','herbs'],                ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:1,6:1}},
   {id:'chives',seasons:['spring','summer','fall'],  name:'Chives',     cat:'Herbs',     perSqFt:16,dtm:90, harvest:90,waves:1,color:'#AFA9EC',tc:'#26215C',note:'transplant', frostOffset:-14,frostType:'hardy', warmNote:'2 wks before last frost',   companions:['carrot','tomato'],          enemies:[],                   goals:['cooking','herbs'],                ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:1,6:1}},
   {id:'marigold',seasons:['summer'],name:'Marigold',   cat:'Flowers',   perSqFt:4, dtm:50, harvest:0,waves:1,color:'#EF9F27',tc:'#412402',note:'transplant',frostOffset:21, frostType:'tender',warmNote:'after last frost',           companions:['tomato','pepper','beans'],  enemies:[],                   goals:['salads','snacking','cooking'],    ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:2,6:2}},
 ];
@@ -1314,6 +1377,7 @@ function saveMyPlants(){
   selPlants={};
   myPlantList.forEach(function(entry){selPlants[entry.id]={waves:entry.waves||1};});
   buildBottomBar();
+  updateMaintBtn();
 }
 
 function addToMyPlants(id){
@@ -1391,16 +1455,14 @@ function renderMyPlants(){
       return'<span class="sdot" style="background:'+(SEASON_COLORS_MAP[s]||'#888')+'" title="'+s+'"></span>';
     }).join('');
     var eid=entry.id;
+    var waves=entry.waves||1;
     return'<div class="myplant-chip" data-id="'+eid+'">'+
       '<span class="myplant-chip-dot" style="background:'+plant.color+'"></span>'+
       dots+
       '<span>'+plant.name+'</span>'+
-      '<span class="myplant-waves">'+
-        '<button class="myplant-wbtn" data-id="'+eid+'" data-d="-1" onclick="adjMyPlantWaves(this.dataset.id,parseInt(this.dataset.d))">−</button>'+
-        '<span style="min-width:14px;text-align:center;font-size:12px;font-weight:600;color:var(--text)">'+(entry.waves||1)+'</span>'+
-        '<button class="myplant-wbtn" data-id="'+eid+'" data-d="1" onclick="adjMyPlantWaves(this.dataset.id,parseInt(this.dataset.d))">+</button>'+
-        '<span style="margin-left:2px">wave'+(entry.waves>1?'s':'')+'</span>'+
-      '</span>'+
+      (waves>1?'<span style="font-size:10px;background:var(--surface2);border-radius:30px;padding:1px 6px;color:var(--text3);margin-left:2px">'+waves+'× waves</span>':'')+
+      '<button class="myplant-wbtn" data-id="'+eid+'" data-d="-1" onclick="adjMyPlantWaves(this.dataset.id,parseInt(this.dataset.d))" title="Fewer waves" style="margin-left:4px">−</button>'+
+      '<button class="myplant-wbtn" data-id="'+eid+'" data-d="1" onclick="adjMyPlantWaves(this.dataset.id,parseInt(this.dataset.d))" title="More waves">+</button>'+
       '<button class="myplant-chip-remove" data-id="'+eid+'" onclick="removeFromMyPlants(this.dataset.id)" aria-label="Remove">'+
         '<i class="ti ti-x" style="font-size:11px"></i>'+
       '</button>'+
@@ -2593,6 +2655,7 @@ function autoDetectOnLoad(){
 }
 
 loadMyPlants();
+document.addEventListener('keydown',function(e){if(e.key==='Escape')closeMaintDrawer();});
 var today=new Date(),later=new Date(today);later.setMonth(later.getMonth()+6);
 window.addEventListener('resize',function(){
   if(document.querySelector('#panel2.active'))renderActiveBed();
@@ -2615,7 +2678,7 @@ function toggleCustomForm(){
   chevron.style.transform=show?'rotate(180deg)':'rotate(0)';
 }
 
-setTimeout(function(){applySeasonDetection();buildHero();buildBottomBar();autoDetectOnLoad();},150);
+setTimeout(function(){applySeasonDetection();buildHero();buildBottomBar();autoDetectOnLoad();updateMaintBtn();},150);
 var guideFilter='all';
 
 function setGuideFilter(btn){
@@ -2982,6 +3045,194 @@ function buildBottomBar(){
     '</div>';
   }
   sectionsEl.innerHTML=html;
+}
+
+/* =============================================
+   MAINTENANCE DRAWER
+   ============================================= */
+
+var MAINT_DATA = {
+  tomato:   {water:'1-2 inches per week, deep watering at base',feed:'Every 2 weeks with tomato fertilizer once flowering',prune:'Pinch suckers weekly, remove lower leaves touching soil',pests:['Aphids','Hornworms','Whitefly','Blossom end rot'],tips:['Stake or cage early before plant gets heavy','Consistent watering prevents blossom end rot','Yellow lower leaves are normal — remove them']},
+  pepper:   {water:'1 inch per week, let soil dry slightly between',feed:'Every 3 weeks, low nitrogen once flowering',prune:'Pinch first few flower buds to build stronger plant',pests:['Aphids','Spider mites','Bacterial leaf spot'],tips:['Peppers love heat — do not overwater in cool weather','Mulch to retain moisture and regulate soil temp']},
+  hotpepper:{water:'1 inch per week, drought-tolerant once established',feed:'Monthly balanced fertilizer',prune:'Minimal — remove dead branches only',pests:['Aphids','Spider mites'],tips:['More water stress = hotter peppers','Let some ripen fully red for maximum heat']},
+  bananapepper:{water:'1 inch per week',feed:'Monthly balanced fertilizer',prune:'Remove dead or crossing branches',pests:['Aphids','Pepper weevil'],tips:['Harvest when 4-6 inches for best flavor','Stays mild — pick before it turns red if you want sweet']},
+  cucumber: {water:'1 inch per week, consistent moisture critical',feed:'Every 2 weeks with balanced fertilizer',prune:'Pinch growing tip after 6 leaves if not trellising',pests:['Cucumber beetles','Powdery mildew','Aphids'],tips:['Harvest when 6-8 inches — do not let get yellow','Trellis saves space and improves air circulation','Bitter cucumbers mean inconsistent watering']},
+  zucchini: {water:'1 inch per week, water at base not leaves',feed:'Every 3 weeks balanced',prune:'Remove old leaves blocking airflow',pests:['Squash vine borer','Powdery mildew','Squash bugs'],tips:['Harvest at 6-8 inches — they grow FAST','Check daily once fruiting — huge zucchini are seedy and tough','Hand pollinate if bees are scarce']},
+  squash:   {water:'1 inch per week',feed:'Monthly balanced',prune:'Remove dead leaves',pests:['Squash vine borer','Squash bugs','Powdery mildew'],tips:['Harvest summer squash young','Winter squash — leave until skin is hard']},
+  pumpkin:  {water:'1 inch per week, reduce as fruit matures',feed:'High phosphorus once fruiting',prune:'Limit to 2-3 fruits per vine for large pumpkins',pests:['Squash vine borer','Powdery mildew','Cucumber beetles'],tips:['Slip a board under developing pumpkins to prevent rot','Stop watering 1 week before harvest for harder skin']},
+  watermelon:{water:'1-2 inches per week, reduce as fruit matures',feed:'High potassium once fruiting',prune:'Limit to 3-4 fruits per plant',pests:['Aphids','Cucumber beetles','Fusarium wilt'],tips:['Thump test — hollow sound means ripe','Tendril nearest fruit drying up = harvest time','Slip a board under fruit to prevent rot']},
+  cantaloupe:{water:'1 inch per week, reduce sharply as fruit ripens',feed:'Balanced until fruit sets, then high potassium',prune:'2-3 fruits per vine for best size',pests:['Aphids','Cucumber beetles','Powdery mildew'],tips:['Ripe when stem slips off easily with gentle pressure','Netting on skin should be raised and corky when ripe','Reduce water last 2 weeks for sweeter fruit']},
+  broccoli: {water:'1-1.5 inches per week',feed:'High nitrogen every 3 weeks',prune:'Harvest main head before flowers open, side shoots will follow',pests:['Cabbage worms','Aphids','Flea beetles'],tips:['Harvest in morning when heads are tight and firm','Yellow flowers mean you waited too long','Side shoots keep producing for weeks after main harvest']},
+  romaine:  {water:'1 inch per week, keep soil moist',feed:'Light nitrogen every 3 weeks',prune:'Harvest outer leaves or cut whole head 1 inch above soil',pests:['Aphids','Slugs','Leaf miners'],tips:['Cut and come again — leave 1 inch stub for regrowth','Bolts in heat — plant in partial shade in summer','Bitter taste means it is bolting — harvest immediately']},
+  spinach:  {water:'1 inch per week, consistent moisture',feed:'Light nitrogen monthly',prune:'Harvest outer leaves, leave center to keep producing',pests:['Leafminers','Aphids','Downy mildew'],tips:['Bolts fast in heat — succession plant every 2 weeks','Young tender leaves best for salads','Freezes well after blanching']},
+  kale:     {water:'1-1.5 inches per week',feed:'High nitrogen every 3 weeks',prune:'Harvest lower leaves first, working up the stalk',pests:['Cabbage worms','Aphids','Flea beetles'],tips:['Flavor improves after frost','Strip leaves off stalk — do not cut whole stalk','Keeps producing for months if lower-leaf harvested']},
+  arugula:  {water:'1 inch per week',feed:'Light nitrogen monthly',prune:'Cut entire plant 1 inch above soil for regrowth',pests:['Flea beetles','Aphids'],tips:['Harvest before flowering for mild flavor','Spicy = hot weather, harvest immediately or it will bolt','Great cut-and-come-again crop']},
+  chard:    {water:'1-1.5 inches per week',feed:'Monthly balanced',prune:'Harvest outer stalks, leave 3-4 inner leaves',pests:['Leafminers','Aphids','Slugs'],tips:['One of the longest-producing greens in the garden','Can harvest from same plant for months','Colorful stems make it ornamental too']},
+  collards: {water:'1-1.5 inches per week',feed:'High nitrogen every 3 weeks',prune:'Harvest lower leaves regularly',pests:['Cabbage worms','Aphids','Harlequin bugs'],tips:['Flavor improves after frost','Traditional Southern cooking — cook low and slow','Will survive light freezes']},
+  carrot:   {water:'1 inch per week, deep watering encourages deep roots',feed:'Low nitrogen, high phosphorus — do not overfeed',prune:'Thin seedlings to 2 inches apart when 2 inches tall',pests:['Carrot rust fly','Aphids','Wireworms'],tips:['Loose, deep soil is critical — rocks cause forked carrots','Thin aggressively — crowded carrots stay small','Green shoulders mean too much sun exposure — hill soil around tops']},
+  radish:   {water:'1 inch per week, consistent moisture',feed:'Light fertilizer — heavy feeding causes leafy tops, small roots',prune:'Thin to 2 inches apart',pests:['Flea beetles','Root maggots'],tips:['Harvest in 25-30 days — do not let stay too long or they get pithy','Great gap filler between slower crops','Will bolt in heat — spring and fall crop only']},
+  beet:     {water:'1 inch per week',feed:'Low nitrogen, high phosphorus',prune:'Thin to 3-4 inches apart',pests:['Leafminers','Aphids'],tips:['Both roots and greens are edible','Thinned seedlings are delicious in salads','Harvest roots at golf ball size for best flavor']},
+  potato:   {water:'1-2 inches per week',feed:'High potassium fertilizer at planting',prune:'Hill soil around stems as they grow (3-4 times during season)',pests:['Colorado potato beetle','Blight','Aphids'],tips:['Hill regularly — exposed tubers turn green and bitter','Stop watering 2 weeks before harvest','Leaves dying back = potatoes are ready']},
+  onion:    {water:'1 inch per week, reduce as tops fall over',feed:'High nitrogen monthly until bulbing starts',prune:'Tops falling over = bulbing — stop fertilizing',pests:['Onion thrips','Onion maggot','Downy mildew'],tips:['When tops fall over, bend the rest down to speed maturation','Cure in dry airy spot for 2-4 weeks after harvest','Day-length determines bulb size — check variety for your latitude']},
+  garlic:   {water:'1 inch per week, stop when scapes appear',feed:'High nitrogen in spring, stop once scapes form',prune:'Remove scapes (curly tops) to redirect energy to bulb',pests:['Onion thrips','White rot','Rust'],tips:['Scapes are edible and delicious — do not waste them','Harvest when lower 1/3 of leaves are brown','Cure for 3-4 weeks in warm dry spot before storing']},
+  beans:    {water:'1 inch per week, avoid overhead watering',feed:'Minimal — beans fix their own nitrogen',prune:'Pick regularly to encourage more production',pests:['Mexican bean beetle','Aphids','Bean beetles'],tips:['Never work with bean plants when wet — spreads disease','Pick young for best flavor — do not let pods go to seed','Consistent picking doubles your yield']},
+  peas:     {water:'1 inch per week, avoid overhead watering',feed:'Minimal once established — nitrogen-fixers',prune:'Pinch growing tips to encourage branching',pests:['Aphids','Pea moths','Powdery mildew'],tips:['Harvest when pods are plump but before seeds bulge too much','Flavor drops quickly after picking — eat same day','Hate heat — pull plants when temps consistently hit 80°F']},
+  basil:    {water:'1 inch per week, keep soil moist but not soggy',feed:'Light balanced fertilizer monthly',prune:'Pinch flower heads immediately — basil bolts fast',pests:['Aphids','Fusarium wilt','Japanese beetles'],tips:['Pinch just above a leaf node — plant will branch','Harvest in morning after dew dries for best flavor','Never refrigerate fresh basil — it turns black']},
+  parsley:  {water:'1 inch per week',feed:'Monthly balanced',prune:'Harvest outer stems first',pests:['Aphids','Parsleyworm (black swallowtail caterpillar)'],tips:['Parsleyworms become beautiful butterflies — consider letting some stay','Biennial — will flower second year then die','Flat-leaf has more flavor than curly']},
+  cilantro: {water:'1 inch per week, keep moist',feed:'Light nitrogen monthly',prune:'Harvest top 1/3 of plant regularly',pests:['Aphids','Whitefly'],tips:['Bolts fast in heat — succession plant every 3 weeks','Once flowering, let it go to seed (coriander) for cooking','Grow in partial shade in summer to slow bolting']},
+  dill:     {water:'1 inch per week once established, drought-tolerant',feed:'Minimal feeding needed',prune:'Harvest leaves before flowering for best flavor',pests:['Aphids','Tomato hornworm'],tips:['Attracts beneficial insects — great companion plant','Let some go to seed for dill seeds (pickling)','Self-seeds readily — you will have dill forever once established']},
+  oregano:  {water:'Drought-tolerant — water every 7-10 days',feed:'Minimal — poor soil produces more flavorful oregano',prune:'Cut back by 1/3 before flowering, again in midsummer',pests:['Spider mites','Aphids'],tips:['Harvest before flowers open for maximum flavor','More sun and less water = more intense flavor','Dry or freeze for year-round use']},
+  thyme:    {water:'Drought-tolerant — water every 7-10 days',feed:'Minimal feeding',prune:'Trim lightly after flowering to keep bushy',pests:['Spider mites','Aphids'],tips:['Best flavor just before blooming','Woody stems — harvest soft new growth only','Excellent fresh or dried']},
+  chives:   {water:'1 inch per week',feed:'Light nitrogen in spring',prune:'Cut to 2 inches above soil — will regrow in 2-3 weeks',pests:['Thrips','Aphids'],tips:['Flowers are edible and beautiful — great in salads','Divide clumps every 3 years to keep vigorous','Repels aphids — plant near roses and carrots']},
+  marigold: {water:'1 inch per week, drought-tolerant once established',feed:'Minimal — too much nitrogen reduces flowers',prune:'Deadhead spent flowers weekly for continuous blooming',pests:['Spider mites (ironically — but they repel others)'],tips:['Root secretions repel nematodes — benefits neighbors','Plant at bed edges for best pest deterrent effect','Remove all old plants at end of season to break pest cycles']},
+};
+
+function getPlantStage(plant, lf, ff){
+  var today=new Date();
+  if(!lf)return'Growing';
+  var yr=today.getFullYear();
+  var lfDate=new Date(yr+'-'+lf.slice(5));
+  var ffDate=ff?new Date(yr+'-'+ff.slice(5)):null;
+  var firstPlant=getFirstPlantDate(plant,lfDate,ffDate);
+  var harvestStart=new Date(firstPlant);harvestStart.setDate(harvestStart.getDate()+plant.dtm);
+  var daysSincePlant=Math.round((today-firstPlant)/864e5);
+  var pct=Math.max(0,Math.min(100,Math.round(daysSincePlant/plant.dtm*100)));
+  if(daysSincePlant<0)return'Not planted yet';
+  if(daysSincePlant<14)return'Seedling (just planted)';
+  if(pct<30)return'Establishing ('+pct+'% to harvest)';
+  if(pct<60)return'Growing strong ('+pct+'% to harvest)';
+  if(pct<90)return'Approaching harvest ('+pct+'% to harvest)';
+  if(plant.harvest>0){
+    var harvestEnd=new Date(harvestStart);harvestEnd.setDate(harvestEnd.getDate()+plant.harvest);
+    if(today>=harvestStart&&today<=harvestEnd)return'Harvest time!';
+  }
+  return'Peak production';
+}
+
+function getWeeklyTasks(){
+  var tasks=[];
+  var today=new Date();
+  var mo=today.getMonth();
+  var lfStr=document.getElementById('last-frost').value;
+  var ffStr=document.getElementById('first-fall-frost').value;
+
+  myPlantList.forEach(function(entry){
+    var plant=pl(entry.id);if(!plant)return;
+    var data=MAINT_DATA[entry.id];if(!data)return;
+    var stage=getPlantStage(plant,lfStr,ffStr);
+    if(stage==='Not planted yet')return;
+
+    // Build contextual weekly tasks
+    if(data.prune&&(stage.indexOf('Growing')>=0||stage.indexOf('harvest')>=0||stage.indexOf('Seedling')>=0)){
+      tasks.push({icon:'ti-cut',plant:plant.name,color:plant.color,task:data.prune});
+    }
+    if(stage==='Harvest time!'||stage==='Peak production'){
+      tasks.push({icon:'ti-basket',plant:plant.name,color:plant.color,task:'Check daily and harvest regularly to keep plant producing'});
+    }
+  });
+  return tasks.slice(0,8);
+}
+
+function openMaintDrawer(){
+  document.getElementById('maint-overlay').style.display='block';
+  document.getElementById('maint-drawer').style.transform='translateX(0)';
+  buildMaintContent();
+}
+
+function closeMaintDrawer(){
+  document.getElementById('maint-overlay').style.display='none';
+  document.getElementById('maint-drawer').style.transform='translateX(100%)';
+}
+
+function toggleMaintCard(id){
+  var body=document.getElementById('maint-body-'+id);
+  var chev=document.getElementById('maint-chev-'+id);
+  if(!body)return;
+  var open=body.classList.toggle('open');
+  if(chev)chev.style.transform=open?'rotate(180deg)':'';
+}
+
+function buildMaintContent(){
+  var lfStr=document.getElementById('last-frost').value;
+  var ffStr=document.getElementById('first-fall-frost').value;
+  var today=new Date();
+  var MONTH_NAMES_M=['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+  if(!myPlantList.length){
+    document.getElementById('maint-content').innerHTML=
+      '<div style="text-align:center;padding:2rem 1rem;color:var(--text3)">'+
+      '<i class="ti ti-seeding" style="font-size:40px;display:block;margin-bottom:.75rem;color:var(--leaf)"></i>'+
+      '<div style="font-size:15px;font-weight:500;margin-bottom:.5rem">No plants added yet</div>'+
+      '<div style="font-size:13px;margin-bottom:1rem">Add plants in step 2 to see your personalized care guide</div>'+
+      '<button class="btn btn-green" onclick="closeMaintDrawer();goStep(1)"><i class="ti ti-arrow-right"></i> Add my plants</button>'+
+      '</div>';
+    return;
+  }
+
+  document.getElementById('maint-subtitle').textContent=
+    'Week of '+MONTH_NAMES_M[today.getMonth()]+' '+today.getDate();
+
+  var weekTasks=getWeeklyTasks();
+  var html='';
+
+  // Weekly summary card
+  html+='<div class="maint-week-card">';
+  html+='<div class="maint-week-title"><i class="ti ti-calendar-week" style="font-size:16px"></i> This week in your garden</div>';
+  if(weekTasks.length){
+    weekTasks.forEach(function(t){
+      html+='<div class="maint-task">'+
+        '<i class="ti '+t.icon+'" style="color:'+t.color+'"></i>'+
+        '<span><span class="maint-task-plant">'+t.plant+':</span> '+t.task+'</span>'+
+      '</div>';
+    });
+  } else {
+    html+='<div style="font-size:13px;color:var(--straw);font-style:italic">Keep up with watering and watch for pests. Your garden is in good shape!</div>';
+  }
+  html+='</div>';
+
+  // Per-plant care cards
+  html+='<div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:.75rem">Full care guide</div>';
+
+  myPlantList.forEach(function(entry,idx){
+    var plant=pl(entry.id);if(!plant)return;
+    var data=MAINT_DATA[entry.id];
+    var stage=lfStr?getPlantStage(plant,lfStr,ffStr):'Growing';
+    var stageColor=stage==='Harvest time!'?'var(--harvest)':stage==='Not planted yet'?'var(--text3)':'var(--leaf)';
+
+    html+='<div class="maint-plant-card">'+
+      '<div class="maint-plant-header" onclick="toggleMaintCard('+idx+')">'+
+        '<div class="maint-color-bar" style="background:'+plant.color+'"></div>'+
+        '<div style="flex:1">'+
+          '<div class="maint-plant-name">'+plant.name+'</div>'+
+          '<div class="maint-plant-stage" style="color:'+stageColor+'">'+stage+'</div>'+
+        '</div>'+
+        '<i class="ti ti-chevron-down maint-chevron" id="maint-chev-'+idx+'"></i>'+
+      '</div>'+
+      '<div class="maint-plant-body" id="maint-body-'+idx+'">';
+
+    if(data){
+      html+=
+        '<div class="maint-detail-row"><i class="ti ti-droplet maint-detail-icon"></i><span class="maint-detail-label">Watering</span><span class="maint-detail-val">'+data.water+'</span></div>'+
+        '<div class="maint-detail-row"><i class="ti ti-leaf maint-detail-icon"></i><span class="maint-detail-label">Feeding</span><span class="maint-detail-val">'+data.feed+'</span></div>'+
+        '<div class="maint-detail-row"><i class="ti ti-cut maint-detail-icon"></i><span class="maint-detail-label">Pruning</span><span class="maint-detail-val">'+data.prune+'</span></div>'+
+        '<div class="maint-detail-row"><i class="ti ti-bug maint-detail-icon"></i><span class="maint-detail-label">Watch for</span><span class="maint-detail-val">'+data.pests.map(function(p){return'<span class="maint-pest-badge">'+p+'</span>';}).join('')+'</span></div>';
+      if(data.tips&&data.tips.length){
+        html+='<div class="maint-tip"><i class="ti ti-bulb" style="font-size:12px;margin-right:4px"></i><strong>Tips:</strong> '+data.tips.join(' · ')+'</div>';
+      }
+    } else {
+      html+='<div style="font-size:13px;color:var(--text3);font-style:italic">Care guide coming soon for this plant.</div>';
+    }
+
+    html+='</div></div>';
+  });
+
+  document.getElementById('maint-content').innerHTML=html;
+}
+
+// Show care guide button once plants are added
+function updateMaintBtn(){
+  var btn=document.getElementById('maint-btn');
+  if(btn)btn.style.display=myPlantList.length?'inline-flex':'none';
 }
 
 </script>
