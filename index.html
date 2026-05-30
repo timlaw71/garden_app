@@ -1149,9 +1149,14 @@ select:focus,input:focus{outline:none;border-color:var(--leaf);box-shadow:0 0 0 
         <input type="text" id="lib-search" placeholder="Search library..." style="padding-left:32px" oninput="renderLibrary()">
       </div>
       <div id="lib-cat-filters" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:.5rem"></div>
-      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:.875rem">
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:.5rem">
         <button class="guide-filter-btn" id="lib-f-now" onclick="toggleLibFilter('plantNow')"><i class="ti ti-clock-hour-4" style="font-size:12px"></i> Plant now</button>
         <button class="guide-filter-btn" id="lib-f-beg" onclick="toggleLibFilter('beginner')"><i class="ti ti-mood-smile" style="font-size:12px"></i> Beginner-friendly</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:.625rem">
+        <button class="btn btn-sm" onclick="setAllLibCollapsed(false)" style="font-size:12px"><i class="ti ti-chevrons-down" style="font-size:12px"></i> Expand all</button>
+        <button class="btn btn-sm" onclick="setAllLibCollapsed(true)" style="font-size:12px"><i class="ti ti-chevrons-up" style="font-size:12px"></i> Collapse all</button>
+        <span style="font-size:11px;color:var(--text3);font-style:italic;margin-left:auto">Spacing &amp; timing are approximate</span>
       </div>
       <div id="library-grid"></div>
     </div>
@@ -1327,7 +1332,104 @@ const PLANTS=[
   {id:'marigold',seasons:['summer'],name:'Marigold',cat:'Flowers',perSqFt:4,dtm:50,harvest:0,waves:1,color:'#EF9F27',tc:'#412402',note:'transplant',frostOffset:21,frostType:'tender',warmNote:'after last frost',companions:['tomato','pepper','beans'],enemies:[],goals:['salads','snacking','cooking'],ease:1,northEdge:false,recSq:{1:1,2:1,3:1,4:2,6:2}},
 ];
 
-const CATS=[...new Set(PLANTS.map(function(x){return x.cat;}))];
+// Reclassify the original plants into plant-family categories (one-time migration of legacy ids)
+var LEGACY_CAT={
+  tomato:'Tomatoes & nightshades',pepper:'Tomatoes & nightshades',hotpepper:'Tomatoes & nightshades',bananapepper:'Tomatoes & nightshades',eggplant:'Tomatoes & nightshades',
+  cucumber:'Squash & cucurbits',zucchini:'Squash & cucurbits',squash:'Squash & cucurbits',pumpkin:'Squash & cucurbits',watermelon:'Squash & cucurbits',cantaloupe:'Squash & cucurbits',spaghettisquash:'Squash & cucurbits',butternutsquash:'Squash & cucurbits',
+  broccoli:'Brassicas',kale:'Brassicas',collards:'Brassicas',
+  romaine:'Leafy greens',spinach:'Leafy greens',arugula:'Leafy greens',chard:'Leafy greens',
+  carrot:'Roots',radish:'Roots',beet:'Roots',potato:'Roots',
+  onion:'Alliums',garlic:'Alliums'
+};
+PLANTS.forEach(function(p){if(LEGACY_CAT[p.id])p.cat=LEGACY_CAT[p.id];});
+
+// Builder: fills sensible defaults so each plant below is a short, scannable line.
+// Values (spacing, days-to-harvest, frost timing) are reasonable approximations — see the note in the UI.
+function mkPlant(o){
+  return Object.assign({
+    perSqFt:4,dtm:60,harvest:21,waves:1,color:'#6B8F5E',tc:'#fff',note:'transplant',
+    companions:[],enemies:[],goals:['cooking'],ease:1,northEdge:false,
+    frostType:'tender',frostOffset:21,warmNote:'after last frost',
+    recSq:{1:1,2:1,3:2,4:2,6:3}
+  },o);
+}
+
+[
+  // Tomatoes & nightshades
+  mkPlant({id:'cherrytomato',name:'Cherry tomato',cat:'Tomatoes & nightshades',seasons:['summer'],perSqFt:1,dtm:65,harvest:45,color:'#E0533B',frostType:'tender',frostOffset:77,warmNote:'after soil warms (~May)',goals:['snacking','salads'],companions:['basil','marigold','carrot'],enemies:['potato'],northEdge:true}),
+  mkPlant({id:'romatomato',name:'Roma tomato',cat:'Tomatoes & nightshades',seasons:['summer'],perSqFt:1,dtm:78,harvest:30,color:'#C0392B',frostType:'tender',frostOffset:77,warmNote:'after soil warms (~May)',goals:['cooking','preserving'],companions:['basil','marigold'],enemies:['potato'],northEdge:true,recSq:{1:1,2:2,3:2,4:3,6:4}}),
+  mkPlant({id:'tomatillo',name:'Tomatillo',cat:'Tomatoes & nightshades',seasons:['summer'],perSqFt:1,dtm:75,harvest:40,color:'#7BA23F',frostType:'tender',frostOffset:77,warmNote:'after soil warms (~May)',companions:['basil'],enemies:['potato'],ease:2,northEdge:true}),
+  mkPlant({id:'groundcherry',name:'Ground cherry',cat:'Tomatoes & nightshades',seasons:['summer'],perSqFt:1,dtm:70,harvest:45,color:'#E8B84B',tc:'#412402',frostType:'tender',frostOffset:77,warmNote:'after soil warms (~May)',goals:['snacking'],ease:2,northEdge:true}),
+  // Squash & cucurbits
+  mkPlant({id:'yellowsquash',name:'Yellow squash',cat:'Squash & cucurbits',seasons:['summer'],perSqFt:1,dtm:50,color:'#F2C14E',tc:'#5a3d06',frostType:'tender',frostOffset:77,warmNote:'after soil warms (~May)',edgePlant:true,northEdge:true,sizeWarn:'Sprawling plant — placed at bed edge for clearance.'}),
+  mkPlant({id:'acornsquash',name:'Acorn squash',cat:'Squash & cucurbits',seasons:['summer'],perSqFt:1,dtm:85,harvest:0,color:'#3E6B2A',frostType:'tender',frostOffset:70,warmNote:'after soil warms (~May)',goals:['cooking','preserving'],edgePlant:true,northEdge:true,sizeWarn:'Vining plant — placed at bed edge. Trellis or let vines run outside.'}),
+  mkPlant({id:'delicata',name:'Delicata squash',cat:'Squash & cucurbits',seasons:['summer'],perSqFt:1,dtm:90,harvest:0,color:'#E5C46B',tc:'#5a3d06',frostType:'tender',frostOffset:70,warmNote:'after soil warms (~May)',edgePlant:true,northEdge:true,sizeWarn:'Vining plant — placed at bed edge. Trellis or let vines run outside.'}),
+  mkPlant({id:'honeydew',name:'Honeydew melon',cat:'Squash & cucurbits',seasons:['summer'],perSqFt:1,dtm:85,harvest:14,color:'#A8C66C',frostType:'tender',frostOffset:70,warmNote:'after soil warms (~May)',goals:['snacking'],ease:2,edgePlant:true,northEdge:true,sizeWarn:'Vining plant — placed at bed edge. Trellis or let vines run outside.'}),
+  mkPlant({id:'gourd',name:'Gourd',cat:'Squash & cucurbits',seasons:['summer'],perSqFt:1,dtm:100,harvest:0,color:'#B5832E',frostType:'tender',frostOffset:70,warmNote:'after soil warms (~May)',edgePlant:true,northEdge:true,sizeWarn:'Large vining plant — placed at bed edge. Trellis or let vines run outside.'}),
+  // Brassicas
+  mkPlant({id:'cabbage',name:'Cabbage',cat:'Brassicas',seasons:['spring','fall'],perSqFt:1,dtm:80,harvest:14,color:'#9DBE7A',frostType:'hardy',frostOffset:-28,fallFrostOffset:-70,warmNote:'4 wks before last frost',goals:['cooking','preserving'],companions:['onion','dill']}),
+  mkPlant({id:'cauliflower',name:'Cauliflower',cat:'Brassicas',seasons:['spring','fall'],perSqFt:1,dtm:75,harvest:14,color:'#EDE8D0',tc:'#4b4326',frostType:'hardy',frostOffset:-21,fallFrostOffset:-63,warmNote:'3 wks before last frost',ease:2,companions:['onion']}),
+  mkPlant({id:'brusselssprouts',name:'Brussels sprouts',cat:'Brassicas',seasons:['fall'],perSqFt:1,dtm:100,harvest:30,color:'#4E7A3A',frostType:'hardy',frostOffset:-14,fallFrostOffset:-90,warmNote:'plant midsummer for fall harvest',ease:2,recSq:{1:1,2:1,3:1,4:2,6:2}}),
+  mkPlant({id:'kohlrabi',name:'Kohlrabi',cat:'Brassicas',seasons:['spring','fall'],perSqFt:4,dtm:55,harvest:14,color:'#A7B5D4',tc:'#26305c',note:'seed',frostType:'hardy',frostOffset:-28,fallFrostOffset:-56,warmNote:'4 wks before last frost',goals:['cooking','snacking']}),
+  mkPlant({id:'bokchoy',name:'Bok choy',cat:'Brassicas',seasons:['spring','fall'],perSqFt:4,dtm:45,harvest:14,color:'#7FB04F',note:'seed',frostType:'hardy',frostOffset:-21,fallFrostOffset:-49,warmNote:'3 wks before last frost',goals:['cooking','salads'],waves:3,recSq:{1:1,2:2,3:2,4:3,6:4}}),
+  mkPlant({id:'mustard',name:'Mustard greens',cat:'Brassicas',seasons:['spring','fall'],perSqFt:4,dtm:40,color:'#8FAF3A',note:'seed',frostType:'hardy',frostOffset:-28,fallFrostOffset:-49,warmNote:'4 wks before last frost',goals:['salads','cooking'],waves:4}),
+  mkPlant({id:'napacabbage',name:'Napa cabbage',cat:'Brassicas',seasons:['fall'],perSqFt:1,dtm:70,harvest:14,color:'#C3D29A',tc:'#3a4520',frostType:'hardy',frostOffset:-21,fallFrostOffset:-70,warmNote:'best as a fall crop',goals:['cooking','salads']}),
+  mkPlant({id:'romanesco',name:'Romanesco',cat:'Brassicas',seasons:['fall'],perSqFt:1,dtm:85,harvest:14,color:'#A6C84F',frostType:'hardy',frostOffset:-14,fallFrostOffset:-80,warmNote:'plant midsummer for fall harvest',ease:2,recSq:{1:1,2:1,3:1,4:2,6:2}}),
+  mkPlant({id:'broccolirabe',name:'Broccoli rabe',cat:'Brassicas',seasons:['spring','fall'],perSqFt:4,dtm:45,harvest:14,color:'#5E8C33',note:'seed',frostType:'hardy',frostOffset:-28,fallFrostOffset:-49,warmNote:'4 wks before last frost',waves:2}),
+  // Leafy greens
+  mkPlant({id:'lettuce',name:'Leaf lettuce',cat:'Leafy greens',seasons:['spring','fall'],perSqFt:4,dtm:45,color:'#86B94A',note:'seed',frostType:'hardy',frostOffset:-28,fallFrostOffset:-49,warmNote:'4 wks before last frost',goals:['salads'],waves:5,companions:['carrot','radish'],recSq:{1:1,2:2,3:3,4:4,6:6}}),
+  mkPlant({id:'butterhead',name:'Butterhead lettuce',cat:'Leafy greens',seasons:['spring','fall'],perSqFt:4,dtm:55,harvest:14,color:'#A6CC5E',frostType:'hardy',frostOffset:-28,fallFrostOffset:-49,warmNote:'4 wks before last frost',goals:['salads'],waves:4}),
+  mkPlant({id:'endive',name:'Endive',cat:'Leafy greens',seasons:['spring','fall'],perSqFt:4,dtm:60,harvest:14,color:'#9FC24B',note:'seed',frostType:'hardy',frostOffset:-21,fallFrostOffset:-56,warmNote:'3 wks before last frost',goals:['salads'],waves:2}),
+  mkPlant({id:'escarole',name:'Escarole',cat:'Leafy greens',seasons:['fall'],perSqFt:4,dtm:65,harvest:14,color:'#8DB243',note:'seed',frostType:'hardy',frostOffset:-21,fallFrostOffset:-63,warmNote:'best as a fall crop',goals:['salads','cooking'],waves:2}),
+  mkPlant({id:'mache',name:'Mache',cat:'Leafy greens',seasons:['spring','fall'],perSqFt:9,dtm:50,harvest:14,color:'#6FA03C',note:'seed',frostType:'hardy',frostOffset:-35,fallFrostOffset:-56,warmNote:'very cold-hardy — early spring/fall',goals:['salads'],waves:3}),
+  mkPlant({id:'sorrel',name:'Sorrel',cat:'Leafy greens',seasons:['spring','fall'],perSqFt:4,dtm:60,harvest:60,color:'#7FA838',note:'seed',frostType:'hardy',frostOffset:-28,fallFrostOffset:-56,warmNote:'4 wks before last frost',goals:['salads','cooking']}),
+  mkPlant({id:'mizuna',name:'Mizuna',cat:'Leafy greens',seasons:['spring','fall'],perSqFt:4,dtm:40,color:'#97C04A',note:'seed',frostType:'hardy',frostOffset:-28,fallFrostOffset:-49,warmNote:'4 wks before last frost',goals:['salads'],waves:4}),
+  mkPlant({id:'tatsoi',name:'Tatsoi',cat:'Leafy greens',seasons:['spring','fall'],perSqFt:4,dtm:45,color:'#5C8C32',note:'seed',frostType:'hardy',frostOffset:-28,fallFrostOffset:-49,warmNote:'4 wks before last frost',goals:['salads','cooking'],waves:3}),
+  // Roots
+  mkPlant({id:'turnip',name:'Turnip',cat:'Roots',seasons:['spring','fall'],perSqFt:9,dtm:50,harvest:14,color:'#C9A0C0',tc:'#43203e',note:'seed',frostType:'hardy',frostOffset:-21,fallFrostOffset:-56,warmNote:'3 wks before last frost',waves:2}),
+  mkPlant({id:'parsnip',name:'Parsnip',cat:'Roots',seasons:['spring','fall'],perSqFt:9,dtm:110,harvest:0,color:'#E8E0C0',tc:'#4b4326',note:'seed',frostType:'hardy',frostOffset:-14,fallFrostOffset:-110,warmNote:'sow ~2 wks before last frost',ease:2,recSq:{1:1,2:1,3:1,4:2,6:2}}),
+  mkPlant({id:'rutabaga',name:'Rutabaga',cat:'Roots',seasons:['fall'],perSqFt:4,dtm:90,harvest:0,color:'#D4A86A',note:'seed',frostType:'hardy',frostOffset:-14,fallFrostOffset:-90,warmNote:'sow midsummer for fall'}),
+  mkPlant({id:'celeriac',name:'Celeriac',cat:'Roots',seasons:['spring','fall'],perSqFt:4,dtm:100,harvest:0,color:'#CFC9A8',tc:'#4b4326',frostType:'semi',frostOffset:-7,fallFrostOffset:-100,warmNote:'~1 wk before last frost',ease:2}),
+  mkPlant({id:'sweetpotato',name:'Sweet potato',cat:'Roots',seasons:['summer'],perSqFt:1,dtm:100,harvest:0,color:'#B5651D',note:'slip',frostType:'tender',frostOffset:84,warmNote:'after soil is warm (~3 wks after frost)',edgePlant:true,sizeWarn:'Vines sprawl — placed at bed edge. Let vines run outside.',recSq:{1:1,2:2,3:2,4:3,6:4}}),
+  mkPlant({id:'salsify',name:'Salsify',cat:'Roots',seasons:['spring'],perSqFt:9,dtm:120,harvest:0,color:'#D8D2B8',tc:'#4b4326',note:'seed',frostType:'hardy',frostOffset:-14,warmNote:'sow ~2 wks before last frost',ease:2}),
+  mkPlant({id:'daikon',name:'Daikon radish',cat:'Roots',seasons:['fall'],perSqFt:4,dtm:60,harvest:14,color:'#E3E3D8',tc:'#4b4326',note:'seed',frostType:'hardy',frostOffset:-21,fallFrostOffset:-60,warmNote:'best sown late summer for fall'}),
+  // Alliums
+  mkPlant({id:'leek',name:'Leek',cat:'Alliums',seasons:['spring','fall'],perSqFt:9,dtm:120,harvest:0,color:'#B7C9A0',tc:'#34421f',frostType:'hardy',frostOffset:-35,warmNote:'5 wks before last frost',companions:['carrot']}),
+  mkPlant({id:'shallot',name:'Shallot',cat:'Alliums',seasons:['spring'],perSqFt:9,dtm:100,harvest:0,color:'#C7A2B0',tc:'#43202e',note:'set',frostType:'hardy',frostOffset:-28,warmNote:'4 wks before last frost',recSq:{1:1,2:1,3:1,4:2,6:2}}),
+  mkPlant({id:'scallion',name:'Scallion',cat:'Alliums',seasons:['spring','summer','fall'],perSqFt:16,dtm:60,color:'#A9D08A',tc:'#2f4a1c',note:'seed',frostType:'hardy',frostOffset:-28,warmNote:'4 wks before last frost',goals:['cooking','salads'],waves:3,companions:['carrot']}),
+  // Legumes
+  mkPlant({id:'polebeans',name:'Pole beans',cat:'Legumes',seasons:['summer'],perSqFt:8,dtm:65,harvest:30,color:'#5E9E4E',note:'seed',frostType:'tender',frostOffset:77,warmNote:'after soil warms (~May)',goals:['cooking','snacking'],northEdge:true,sizeWarn:'Climbing — needs a trellis. Placed at bed edge.'}),
+  mkPlant({id:'limabeans',name:'Lima beans',cat:'Legumes',seasons:['summer'],perSqFt:9,dtm:75,harvest:21,color:'#BFD49A',tc:'#34421f',note:'seed',frostType:'tender',frostOffset:84,warmNote:'after soil warms (~late May)'}),
+  mkPlant({id:'edamame',name:'Edamame',cat:'Legumes',seasons:['summer'],perSqFt:4,dtm:80,harvest:14,color:'#8FB85A',note:'seed',frostType:'tender',frostOffset:77,warmNote:'after soil warms (~May)',goals:['snacking','cooking'],recSq:{1:1,2:2,3:2,4:3,6:4}}),
+  mkPlant({id:'favabeans',name:'Fava beans',cat:'Legumes',seasons:['spring'],perSqFt:4,dtm:80,harvest:21,color:'#9CB87A',note:'seed',frostType:'hardy',frostOffset:-28,warmNote:'4 wks before last frost (cool-season)',recSq:{1:1,2:2,3:2,4:3,6:4}}),
+  mkPlant({id:'snowpeas',name:'Snow peas',cat:'Legumes',seasons:['spring','fall'],perSqFt:8,dtm:60,harvest:21,color:'#BBD98C',tc:'#34421f',note:'seed',frostType:'hardy',frostOffset:-28,fallFrostOffset:-56,warmNote:'4 wks before last frost',goals:['snacking','cooking'],companions:['carrot'],northEdge:true}),
+  mkPlant({id:'shellingpeas',name:'Shelling peas',cat:'Legumes',seasons:['spring','fall'],perSqFt:8,dtm:65,harvest:14,color:'#A9CE77',tc:'#34421f',note:'seed',frostType:'hardy',frostOffset:-28,fallFrostOffset:-56,warmNote:'4 wks before last frost',northEdge:true}),
+  // Herbs
+  mkPlant({id:'rosemary',name:'Rosemary',cat:'Herbs',seasons:['summer','year-round'],perSqFt:1,dtm:90,harvest:120,color:'#6E8B9E',frostType:'tender',frostOffset:42,warmNote:'after last frost (warm soil)',goals:['herbs','cooking'],recSq:{1:1,2:1,3:1,4:1,6:1}}),
+  mkPlant({id:'sage',name:'Sage',cat:'Herbs',seasons:['summer','year-round'],perSqFt:4,dtm:75,harvest:90,color:'#9AA98E',frostType:'tender',frostOffset:42,warmNote:'after last frost (warm soil)',goals:['herbs','cooking'],recSq:{1:1,2:1,3:1,4:1,6:1}}),
+  mkPlant({id:'mint',name:'Mint',cat:'Herbs',seasons:['spring','summer','fall'],perSqFt:1,dtm:60,harvest:90,color:'#5FB37A',frostType:'hardy',frostOffset:-14,warmNote:'2 wks before last frost',goals:['herbs'],sizeWarn:'Spreads aggressively — best in its own square or a pot.',recSq:{1:1,2:1,3:1,4:1,6:1}}),
+  mkPlant({id:'tarragon',name:'Tarragon',cat:'Herbs',seasons:['summer','year-round'],perSqFt:1,dtm:80,harvest:90,color:'#8FA86B',frostType:'tender',frostOffset:21,warmNote:'after last frost',goals:['herbs','cooking'],recSq:{1:1,2:1,3:1,4:1,6:1}}),
+  mkPlant({id:'marjoram',name:'Marjoram',cat:'Herbs',seasons:['summer'],perSqFt:4,dtm:70,harvest:90,color:'#A7B58A',frostType:'tender',frostOffset:42,warmNote:'after last frost (warm soil)',goals:['herbs','cooking'],recSq:{1:1,2:1,3:1,4:1,6:1}}),
+  mkPlant({id:'lemonbalm',name:'Lemon balm',cat:'Herbs',seasons:['spring','summer','fall'],perSqFt:1,dtm:70,harvest:90,color:'#9DC468',frostType:'hardy',frostOffset:-14,warmNote:'2 wks before last frost',goals:['herbs'],sizeWarn:'Spreads — give it room or a pot.',recSq:{1:1,2:1,3:1,4:1,6:1}}),
+  // Flowers
+  mkPlant({id:'nasturtium',name:'Nasturtium',cat:'Flowers',seasons:['summer'],perSqFt:1,dtm:50,harvest:60,color:'#EF7B2A',note:'seed',frostType:'tender',frostOffset:14,warmNote:'after last frost',goals:['salads','snacking'],companions:['cucumber','squash']}),
+  mkPlant({id:'sunflower',name:'Sunflower',cat:'Flowers',seasons:['summer'],perSqFt:1,dtm:80,harvest:0,color:'#F0B429',tc:'#5a3d06',note:'seed',frostType:'tender',frostOffset:14,warmNote:'after last frost',goals:['snacking'],northEdge:true,sizeWarn:'Tall — plant on the north edge so it does not shade other crops.'}),
+  mkPlant({id:'zinnia',name:'Zinnia',cat:'Flowers',seasons:['summer'],perSqFt:1,dtm:60,harvest:90,color:'#E0529C',note:'seed',frostType:'tender',frostOffset:21,warmNote:'after last frost',goals:[],companions:['tomato']}),
+  mkPlant({id:'calendula',name:'Calendula',cat:'Flowers',seasons:['spring','summer','fall'],perSqFt:4,dtm:50,harvest:90,color:'#F2A33A',note:'seed',frostType:'semi',frostOffset:-7,warmNote:'~1 wk before last frost',goals:['salads'],companions:['tomato']}),
+  mkPlant({id:'borage',name:'Borage',cat:'Flowers',seasons:['summer'],perSqFt:1,dtm:55,harvest:90,color:'#5E7BC4',note:'seed',frostType:'tender',frostOffset:14,warmNote:'after last frost',goals:['salads'],companions:['tomato','squash']}),
+  // Other veg
+  mkPlant({id:'corn',name:'Sweet corn',cat:'Other veg',seasons:['summer'],perSqFt:1,dtm:75,harvest:10,color:'#F4D35E',tc:'#5a3d06',note:'seed',frostType:'tender',frostOffset:14,warmNote:'after last frost (warm soil)',goals:['cooking','snacking'],northEdge:true,sizeWarn:'Tall — plant in a block on the north edge for good pollination.',recSq:{1:4,2:6,3:9,4:12,6:16}}),
+  mkPlant({id:'okra',name:'Okra',cat:'Other veg',seasons:['summer'],perSqFt:1,dtm:60,harvest:45,color:'#7FA23F',frostType:'tender',frostOffset:42,warmNote:'after last frost (heat-loving)',northEdge:true}),
+  mkPlant({id:'celery',name:'Celery',cat:'Other veg',seasons:['spring','fall'],perSqFt:4,dtm:100,harvest:21,color:'#A8C97F',frostType:'semi',frostOffset:-7,warmNote:'~1 wk before last frost',ease:2}),
+  mkPlant({id:'fennel',name:'Fennel (bulb)',cat:'Other veg',seasons:['spring','fall'],perSqFt:4,dtm:80,harvest:14,color:'#C7D49A',tc:'#3a4520',note:'seed',frostType:'semi',frostOffset:-7,fallFrostOffset:-70,warmNote:'~1 wk before last frost'}),
+  mkPlant({id:'asparagus',name:'Asparagus',cat:'Other veg',seasons:['spring','year-round'],perSqFt:1,dtm:730,harvest:30,color:'#7FB04F',note:'crown',frostType:'hardy',frostOffset:-14,warmNote:'perennial — plant crowns early spring',ease:2,sizeWarn:'Perennial — give it a permanent spot; first harvest is year 2-3.',recSq:{1:2,2:4,3:6,4:8,6:12}}),
+  mkPlant({id:'artichoke',name:'Artichoke',cat:'Other veg',seasons:['spring','year-round'],perSqFt:1,dtm:150,harvest:30,color:'#8FA86B',frostType:'semi',frostOffset:0,warmNote:'plant ~last frost; perennial in mild zones',ease:2,sizeWarn:'Large plant — needs ~3-4 sq ft of room.'}),
+  mkPlant({id:'rhubarb',name:'Rhubarb',cat:'Other veg',seasons:['spring','year-round'],perSqFt:1,dtm:730,harvest:30,color:'#C0392B',note:'crown',frostType:'hardy',frostOffset:-21,warmNote:'perennial — plant crowns early spring',sizeWarn:'Perennial — give it a permanent corner; do not harvest year 1.'})
+].forEach(function(p){if(!PLANTS.find(function(x){return x.id===p.id;}))PLANTS.push(p);});
+
+// Display order for plant families (categories not present in PLANTS are skipped automatically)
+var CAT_ORDER=['Tomatoes & nightshades','Brassicas','Squash & cucurbits','Leafy greens','Legumes','Roots','Alliums','Herbs','Other veg','Flowers','Custom'];
+const CATS=CAT_ORDER.filter(function(c){return PLANTS.some(function(p){return p.cat===c;});});
 
 const ZIP_ZONES={'040':'5b','041':'5b','042':'5b','043':'5a','044':'4b','045':'5a','046':'5b','047':'5a','048':'5b','049':'5b','030':'5b','031':'5b','032':'5b','033':'5b','034':'4b','035':'5b','036':'5b','037':'5b','038':'6a','050':'5a','051':'5a','052':'5a','053':'5a','054':'4b','056':'5a','057':'5a','058':'5a','059':'5b','010':'6a','011':'6a','012':'5b','013':'6a','014':'6a','015':'6a','016':'6a','017':'6a','018':'6b','019':'6b','020':'7a','021':'7a','022':'7a','023':'6b','024':'7a','025':'7a','026':'7a','027':'7a','028':'6b','029':'7a','060':'6b','061':'6b','062':'6b','063':'6b','064':'7a','065':'6a','066':'6b','067':'6b','068':'7a','069':'7a','100':'7b','101':'7b','102':'7b','103':'7a','104':'7a','105':'6b','106':'7a','107':'7a','108':'7a','109':'7a','110':'7a','111':'7a','112':'7a','113':'7a','114':'7a','115':'7a','116':'7a','117':'7a','118':'7a','119':'7a','120':'5b','121':'6a','122':'5b','123':'5b','124':'6b','125':'6b','126':'6b','127':'5b','128':'5a','129':'5b','130':'5b','131':'5b','132':'5b','133':'5a','134':'5a','135':'5a','136':'5a','137':'5b','138':'5b','139':'5b','140':'6a','141':'6a','142':'6a','143':'6a','144':'6a','145':'6a','146':'6a','147':'6a','148':'6a','149':'5b','070':'7a','071':'7a','072':'7a','073':'7a','074':'6b','075':'6b','076':'7a','077':'7a','078':'6b','079':'6b','080':'7a','081':'7a','082':'7a','083':'7a','084':'7a','085':'7a','086':'7a','087':'7a','088':'7a','089':'7a','150':'6a','151':'6a','152':'6a','153':'6a','154':'6a','155':'6a','156':'6a','157':'6a','158':'6a','159':'6a','160':'6a','161':'6a','162':'6a','163':'6a','164':'6a','165':'6a','166':'6a','167':'5b','168':'6a','169':'6a','170':'6b','171':'6b','172':'6b','173':'6b','174':'6b','175':'6b','176':'6b','177':'6a','178':'6b','179':'6b','180':'6a','181':'7a','182':'6b','183':'6b','184':'6a','185':'6a','186':'6a','187':'6a','188':'6b','189':'7a','190':'7a','191':'7a','192':'7a','193':'7a','194':'7a','195':'7a','196':'7a','197':'7a','198':'7a','199':'7a','206':'7a','207':'7a','208':'7a','209':'7a','210':'7a','211':'7a','212':'7a','214':'7a','215':'6b','216':'6b','217':'7a','218':'6b','219':'7a','220':'7a','221':'7a','222':'7a','223':'7a','224':'6b','225':'7a','226':'6b','227':'7a','228':'6b','229':'7a','230':'7b','231':'7b','232':'7b','233':'7b','234':'7b','235':'7b','236':'7b','237':'7b','238':'7a','239':'7b','240':'6a','241':'6a','242':'6a','243':'6b','244':'6b','245':'6b','246':'6b','247':'6a','248':'6a','249':'6a','250':'6b','251':'6b','252':'6b','253':'6b','254':'6a','255':'6a','256':'6a','257':'6a','258':'6a','259':'6a','260':'6a','261':'6a','262':'6a','263':'6a','264':'6a','265':'6a','266':'6a','267':'6a','268':'6a','270':'7b','271':'7b','272':'7b','273':'7b','274':'7b','275':'7b','276':'7b','277':'7b','278':'7b','279':'7b','280':'8a','281':'8a','282':'8a','283':'8a','284':'8a','285':'8a','286':'7a','287':'7a','288':'7a','289':'7a','290':'8a','291':'8a','292':'8a','293':'8a','294':'8a','295':'8a','296':'7b','297':'7b','298':'8a','299':'8b','300':'8a','301':'8a','302':'8a','303':'8a','304':'7b','305':'8a','306':'8a','307':'7b','308':'8b','309':'8b','310':'8b','311':'8b','312':'8b','313':'8b','314':'8b','315':'8b','316':'8a','317':'8a','318':'8b','319':'8b','320':'9a','321':'9b','322':'8b','323':'8b','324':'8b','325':'8b','326':'8b','327':'9b','328':'9b','329':'9b','330':'10b','331':'10b','332':'10a','333':'10a','334':'9b','335':'9b','336':'9b','337':'9b','338':'9b','339':'10a','340':'9a','341':'9a','342':'9a','344':'9a','346':'9a','347':'9a','349':'9b','350':'8a','351':'8a','352':'8a','354':'8a','355':'8a','356':'7b','357':'7b','358':'7b','359':'8a','360':'8b','361':'8b','362':'8b','363':'8b','364':'8b','365':'8b','366':'8b','367':'8b','368':'8b','369':'8b','386':'8a','387':'8a','388':'8a','389':'8b','390':'8b','391':'8b','392':'8b','393':'8b','394':'8b','395':'8b','396':'8b','397':'8a','370':'7a','371':'7a','372':'7a','373':'7a','374':'7a','375':'7b','376':'7a','377':'7a','378':'7a','379':'7a','380':'7b','381':'7b','382':'7b','383':'7a','384':'7a','385':'7a','400':'6b','401':'6b','402':'6b','403':'6b','404':'6a','405':'6b','406':'6b','407':'6a','408':'6a','409':'6a','410':'6b','411':'6a','412':'6a','413':'6a','414':'6a','415':'6a','416':'6a','417':'6b','418':'6a','430':'6a','431':'6a','432':'6a','433':'6a','434':'6a','435':'6a','436':'6a','437':'6a','438':'6a','439':'6a','440':'6b','441':'6b','442':'6b','443':'6b','444':'6a','445':'6a','446':'6a','447':'6a','448':'6a','449':'6a','450':'6a','451':'6a','452':'6a','453':'6a','454':'6a','455':'6a','456':'6a','457':'6a','458':'6a','460':'6a','461':'6a','462':'6a','463':'6a','464':'6a','465':'6a','466':'6a','467':'6a','468':'6a','469':'6a','470':'6a','471':'6a','472':'6a','473':'6a','474':'6a','475':'6a','476':'6a','477':'6a','478':'6a','479':'6a','480':'6a','481':'6a','482':'6a','483':'6a','484':'6a','485':'5b','486':'5b','487':'5b','488':'5b','489':'6a','490':'5b','491':'5b','492':'5b','493':'5b','494':'5b','495':'5a','496':'5a','497':'5a','498':'5a','499':'5a','530':'5b','531':'5b','532':'5b','534':'5b','535':'5a','537':'5a','538':'5a','539':'5a','540':'5a','541':'5a','542':'5a','543':'4b','544':'4b','545':'4b','546':'4b','547':'5a','548':'5a','549':'5a','600':'6a','601':'6a','602':'6a','603':'6a','604':'6a','605':'6a','606':'6a','607':'6a','608':'5b','609':'5b','610':'5b','611':'5b','612':'5b','613':'5b','614':'5b','615':'5b','616':'5b','617':'5b','618':'6a','619':'6a','620':'6a','622':'6a','623':'6a','624':'6a','625':'6a','626':'6a','627':'6a','628':'6a','629':'6a','630':'6b','631':'6b','633':'6b','634':'6a','635':'6a','636':'6b','637':'6b','638':'6b','639':'6b','640':'6a','641':'6a','644':'6a','645':'6a','646':'6a','647':'6a','648':'6a','650':'6b','651':'6b','652':'6b','653':'6b','654':'6b','655':'6b','656':'6b','657':'6b','658':'6b','500':'5b','501':'5b','502':'5b','503':'5b','504':'5b','505':'5b','506':'5a','507':'5a','508':'5a','510':'5a','511':'5a','512':'5b','513':'5b','514':'5b','515':'5b','516':'5b','520':'5b','521':'5b','522':'5b','523':'5b','524':'5b','525':'5b','526':'5b','527':'5b','528':'5b','550':'4b','551':'4b','553':'4b','554':'4b','555':'4b','556':'4a','557':'4a','558':'4a','559':'4b','560':'4b','561':'4b','562':'4b','563':'4b','564':'4a','565':'4a','566':'4a','567':'4a','580':'4a','581':'4a','582':'4a','583':'4a','584':'3b','585':'4a','586':'4a','587':'3b','588':'3b','570':'4b','571':'4b','572':'4b','573':'4b','574':'4b','575':'4b','576':'4b','577':'4b','680':'5b','681':'5b','683':'5b','684':'5b','685':'5b','686':'5a','687':'5a','688':'4b','689':'4b','690':'5a','691':'5a','692':'5a','693':'5a','660':'6a','661':'6a','662':'6a','664':'6a','665':'6a','666':'6a','667':'6a','668':'5b','669':'5b','670':'6a','671':'6a','672':'6a','673':'6a','674':'6a','675':'6a','676':'6a','677':'6a','678':'6a','679':'6a','716':'7b','717':'7b','718':'7b','719':'7b','720':'7b','721':'7b','722':'7b','723':'7a','724':'7a','725':'7a','726':'7a','727':'7a','728':'7a','729':'7b','700':'9a','701':'9a','703':'9a','704':'8b','705':'8b','706':'8b','707':'9a','708':'9a','710':'8b','711':'8b','712':'8b','713':'8b','714':'8b','730':'7a','731':'7a','733':'7a','734':'7a','735':'7a','736':'7a','737':'7a','738':'7a','739':'7a','740':'7a','741':'7a','743':'7a','744':'7a','745':'7a','746':'7a','747':'7a','748':'7a','749':'7a','750':'8a','751':'8a','752':'8a','753':'8a','754':'8a','755':'8a','756':'8a','757':'8a','758':'7b','759':'7b','760':'8a','761':'8a','762':'8a','763':'8a','764':'8a','765':'8a','766':'8a','767':'8a','768':'8a','769':'8a','770':'9a','771':'9a','772':'9a','773':'9a','774':'9a','775':'9a','776':'9a','777':'9a','778':'9a','779':'9a','780':'8b','781':'8b','782':'8b','783':'8b','784':'9a','785':'8a','786':'8b','787':'8b','788':'8b','789':'8b','790':'7a','791':'7a','792':'7a','793':'7a','794':'7a','795':'7a','796':'7a','797':'7a','798':'8a','799':'8a','800':'5b','801':'5b','802':'5b','803':'5b','804':'5b','805':'5b','806':'5b','807':'5b','808':'4b','809':'5a','810':'6a','811':'6a','812':'6a','813':'5b','814':'5b','815':'5a','816':'5b','820':'4b','821':'4b','822':'4b','823':'4b','824':'4b','825':'4b','826':'4b','827':'4b','828':'5a','829':'5a','830':'5a','831':'5a','590':'4b','591':'4b','592':'4b','593':'4b','594':'4b','595':'4b','596':'4b','597':'4b','598':'4b','599':'5a','832':'6a','833':'6a','834':'5b','835':'6a','836':'6a','837':'6a','838':'5b','840':'6b','841':'6b','842':'6b','843':'5b','844':'5b','845':'5b','846':'6a','847':'6a','889':'8b','890':'9a','891':'8b','893':'6b','894':'7a','895':'8a','897':'7a','898':'6a','850':'9b','851':'9b','852':'9b','853':'9b','855':'9b','856':'8b','857':'8b','859':'9b','860':'7a','862':'5b','863':'8a','864':'5b','865':'7a','870':'7b','871':'7b','872':'7b','873':'6b','874':'7a','875':'7b','877':'6a','878':'7a','879':'7a','880':'7b','881':'7b','882':'7b','883':'6b','884':'6b','900':'10b','901':'10b','902':'10a','903':'10a','904':'10a','905':'10b','906':'10a','907':'10a','908':'10b','910':'10a','911':'10a','912':'10a','913':'10a','914':'10a','915':'10a','916':'9b','917':'9b','918':'9b','919':'10a','920':'10a','921':'10a','922':'10a','923':'10a','924':'10a','925':'10a','926':'10a','927':'10a','928':'10a','930':'9b','931':'9b','932':'9b','933':'9b','934':'9b','935':'9b','936':'9b','937':'9b','938':'9b','939':'9b','940':'9b','941':'9b','942':'9b','943':'9a','944':'9a','945':'9b','946':'9b','947':'9b','948':'9b','949':'9b','950':'9b','951':'9b','952':'9b','953':'9a','954':'9b','955':'9a','956':'9b','957':'9b','958':'9b','959':'9a','960':'8a','961':'8a','970':'8b','971':'8b','972':'8b','973':'8a','974':'8a','975':'8a','976':'8a','977':'8a','978':'7b','979':'8b','980':'8b','981':'8b','982':'8b','983':'8a','984':'8a','985':'8a','986':'8b','988':'6a','989':'6a','990':'6a','991':'6a','992':'6a','993':'6a','994':'5b','995':'4a','996':'4a','997':'3b','998':'3a','999':'2b','967':'12','968':'12'};
 const ZONE_FROST={'2b':{lf:'Jun 15',ff:'Aug 15'},'3a':{lf:'Jun 1',ff:'Sep 1'},'3b':{lf:'May 15',ff:'Sep 15'},'4a':{lf:'May 15',ff:'Sep 15'},'4b':{lf:'May 1',ff:'Oct 1'},'5a':{lf:'Apr 15',ff:'Oct 15'},'5b':{lf:'Apr 1',ff:'Oct 31'},'6a':{lf:'Apr 1',ff:'Oct 31'},'6b':{lf:'Mar 15',ff:'Nov 15'},'7a':{lf:'Mar 15',ff:'Nov 15'},'7b':{lf:'Mar 1',ff:'Nov 30'},'8a':{lf:'Feb 15',ff:'Dec 1'},'8b':{lf:'Feb 1',ff:'Dec 15'},'9a':{lf:'Jan 30',ff:'Dec 15'},'9b':{lf:'Jan 15',ff:'Dec 31'},'10a':{lf:'Jan 1',ff:'Dec 31'},'10b':{lf:'Jan 1',ff:'Dec 31'},'12':{lf:'Jan 1',ff:'Dec 31'}};
@@ -1451,7 +1553,8 @@ function renderMyPlants(){
 }
 
 var libFilters={cat:'all',plantNow:false,beginner:false};
-var CAT_ICONS_MAP={'Vegetables':'ti-plant-2','Greens':'ti-leaf','Root veg':'ti-arrow-down','Legumes':'ti-seeding','Herbs':'ti-herb','Flowers':'ti-flower','Custom':'ti-star'};
+var libCollapsed={};var libCollapseInit=false;
+var CAT_ICONS_MAP={'Tomatoes & nightshades':'ti-plant-2','Brassicas':'ti-plant','Squash & cucurbits':'ti-leaf-2','Leafy greens':'ti-salad','Legumes':'ti-seeding','Roots':'ti-carrot','Alliums':'ti-bulb','Herbs':'ti-herb','Other veg':'ti-soup','Flowers':'ti-flower','Custom':'ti-star'};
 
 function renderLibCatFilters(){
   var el=document.getElementById('lib-cat-filters');
@@ -1469,6 +1572,8 @@ function toggleLibFilter(key){
   if(b)b.classList.toggle('active',libFilters[key]);
   renderLibrary();
 }
+function toggleLibCat(cat){libCollapsed[cat]=!libCollapsed[cat];renderLibrary();}
+function setAllLibCollapsed(v){CAT_ORDER.forEach(function(c){libCollapsed[c]=v;});renderLibrary();}
 
 function renderLibrary(){
   var el=document.getElementById('library-grid');
@@ -1485,15 +1590,28 @@ function renderLibrary(){
     if(libFilters.plantNow&&!isPlantNow(p))return false;
     return!search||p.name.toLowerCase().indexOf(search)>=0||p.cat.toLowerCase().indexOf(search)>=0;
   });
-  // Sort alphabetically in library
+  // Sort alphabetically within each family
   filtered.sort(function(a,b){return a.name.localeCompare(b.name);});
   var bycat={};
   filtered.forEach(function(p){if(!bycat[p.cat])bycat[p.cat]=[];bycat[p.cat].push(p);});
+  // First time through, start every family collapsed so the long list stays scannable
+  if(!libCollapseInit){CAT_ORDER.forEach(function(c){libCollapsed[c]=true;});libCollapseInit=true;}
+  // When the user is searching or filtering, force sections open so matches are visible
+  var sifting=!!search||libFilters.cat!=='all'||libFilters.plantNow||libFilters.beginner;
   var html='';
-  Object.keys(bycat).forEach(function(cat){
+  CAT_ORDER.forEach(function(cat){
+    var list=bycat[cat];if(!list||!list.length)return;
+    var collapsed=sifting?false:!!libCollapsed[cat];
     var icon=CAT_ICONS_MAP[cat]||'ti-category';
-    html+='<div class="lib-cat-label"><i class="ti '+icon+'"></i>'+cat+'</div><div class="lib-chips">';
-    bycat[cat].forEach(function(plant){
+    html+='<div onclick="toggleLibCat(\''+cat+'\')" style="display:flex;align-items:center;gap:7px;cursor:pointer;user-select:none;margin:.75rem 0 .4rem;font-family:var(--font-serif);font-size:16px;color:var(--text)">'+
+      '<i class="ti '+(collapsed?'ti-chevron-right':'ti-chevron-down')+'" style="font-size:14px;color:var(--text3)"></i>'+
+      '<i class="ti '+icon+'" style="color:var(--harvest);font-size:15px"></i>'+
+      '<span>'+cat+'</span>'+
+      '<span style="margin-left:auto;font-size:11px;font-weight:600;color:var(--text3);background:var(--surface2);border-radius:30px;padding:2px 9px;font-family:var(--font)">'+list.length+'</span>'+
+    '</div>';
+    if(collapsed)return;
+    html+='<div class="lib-chips">';
+    list.forEach(function(plant){
       var inList=inListIds.indexOf(plant.id)>=0;
       var dot='<span class="lib-dot" style="background:'+plant.color+'"></span>';
       var dots=(plant.seasons||[]).map(function(s){return'<span class="sdot" style="background:'+(SEASON_DOT_COLORS[s]||'#888')+'"></span>';}).join('');
@@ -2729,7 +2847,6 @@ function renderGuide(){
   }
 
   var SEASON_COLORS={'spring':'#185fa5','summer':'#C47A1E','fall':'#3A6B2A','year-round':'#9A8070'};
-  var CAT_ICONS={'Vegetables':'ti-plant-2','Greens':'ti-leaf','Root veg':'ti-arrow-down','Legumes':'ti-seeding','Herbs':'ti-herb','Flowers':'ti-flower'};
 
   var bycat={};
   filtered.forEach(function(p){
@@ -2738,8 +2855,9 @@ function renderGuide(){
   });
 
   var html='';
-  Object.keys(bycat).forEach(function(cat){
-    var icon=CAT_ICONS[cat]||'ti-category';
+  CAT_ORDER.forEach(function(cat){
+    if(!bycat[cat])return;
+    var icon=CAT_ICONS_MAP[cat]||'ti-category';
     html+='<div class="guide-cat-header"><i class="ti '+icon+'"></i>'+cat+'</div>';
     bycat[cat].forEach(function(plant){
       var dots=(plant.seasons||[]).map(function(s){
