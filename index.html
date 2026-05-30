@@ -1068,6 +1068,45 @@ select:focus,input:focus{outline:none;border-color:var(--leaf);box-shadow:0 0 0 
         <div style="font-size:13px;color:var(--text3);font-style:italic">No plants added yet — pick from the library below or add a custom plant.</div>
       </div>
     </div>
+    <div class="mode-toggle">
+      <button class="mode-btn active" id="mode-wiz" onclick="setMode('wizard')"><i class="ti ti-sparkles"></i> Recommend for me</button>
+      <button class="mode-btn" id="mode-chk" onclick="setMode('browse')"><i class="ti ti-books"></i> Browse library</button>
+    </div>
+    <div id="wizard-panel">
+      <div class="card">
+        <div class="card-title"><i class="ti ti-sparkles"></i>Tell us about your garden</div>
+        <div class="card-subtitle">Answer a few quick questions and we'll suggest a starter set you can adjust.</div>
+        <div class="wiz-q">
+          <div class="wiz-label">What are you growing for? <span style="color:var(--text3);font-weight:400;font-size:12px">— pick any</span></div>
+          <div class="wiz-opts" id="wg-goals">
+            <div class="wiz-opt" data-g="salads" onclick="wizToggle(this)">Salads</div>
+            <div class="wiz-opt" data-g="cooking" onclick="wizToggle(this)">Cooking</div>
+            <div class="wiz-opt" data-g="preserving" onclick="wizToggle(this)">Preserving</div>
+            <div class="wiz-opt" data-g="snacking" onclick="wizToggle(this)">Snacking</div>
+            <div class="wiz-opt" data-g="herbs" onclick="wizToggle(this)">Fresh herbs</div>
+          </div>
+        </div>
+        <div class="wiz-q">
+          <div class="wiz-label">How much time can you give it?</div>
+          <div class="wiz-opts" id="wg-time">
+            <div class="wiz-opt" data-g="low" onclick="wizSingle('wg-time',this)">A little</div>
+            <div class="wiz-opt sel" data-g="some" onclick="wizSingle('wg-time',this)">Some</div>
+            <div class="wiz-opt" data-g="lots" onclick="wizSingle('wg-time',this)">Lots</div>
+          </div>
+        </div>
+        <div class="wiz-q">
+          <div class="wiz-label">How's your gardening experience?</div>
+          <div class="wiz-opts" id="wg-exp">
+            <div class="wiz-opt sel" data-g="beginner" onclick="wizSingle('wg-exp',this)">Beginner</div>
+            <div class="wiz-opt" data-g="some" onclick="wizSingle('wg-exp',this)">Some</div>
+            <div class="wiz-opt" data-g="pro" onclick="wizSingle('wg-exp',this)">Pro</div>
+          </div>
+        </div>
+        <button class="btn btn-green" onclick="runWizard()"><i class="ti ti-sparkles"></i> Suggest plants</button>
+      </div>
+      <div id="wiz-results"></div>
+    </div>
+    <div id="library-panel" style="display:none">
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;cursor:pointer" onclick="toggleCustomForm()">
         <div class="card-title" style="margin-bottom:0"><i class="ti ti-plus"></i>Add a custom plant</div>
@@ -1105,11 +1144,17 @@ select:focus,input:focus{outline:none;border-color:var(--leaf);box-shadow:0 0 0 
     </div>
     <div class="card">
       <div class="card-title"><i class="ti ti-books"></i>Plant library</div>
-      <div style="position:relative;margin-bottom:.875rem">
+      <div style="position:relative;margin-bottom:.75rem">
         <i class="ti ti-search" style="position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:14px;pointer-events:none"></i>
         <input type="text" id="lib-search" placeholder="Search library..." style="padding-left:32px" oninput="renderLibrary()">
       </div>
+      <div id="lib-cat-filters" style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:.5rem"></div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:.875rem">
+        <button class="guide-filter-btn" id="lib-f-now" onclick="toggleLibFilter('plantNow')"><i class="ti ti-clock-hour-4" style="font-size:12px"></i> Plant now</button>
+        <button class="guide-filter-btn" id="lib-f-beg" onclick="toggleLibFilter('beginner')"><i class="ti ti-mood-smile" style="font-size:12px"></i> Beginner-friendly</button>
+      </div>
       <div id="library-grid"></div>
+    </div>
     </div>
     <div class="nav-row">
       <button class="btn" onclick="goStep(0)"><i class="ti ti-arrow-left"></i> Back to setup</button>
@@ -1405,39 +1450,63 @@ function renderMyPlants(){
   }).join('');
 }
 
+var libFilters={cat:'all',plantNow:false,beginner:false};
+var CAT_ICONS_MAP={'Vegetables':'ti-plant-2','Greens':'ti-leaf','Root veg':'ti-arrow-down','Legumes':'ti-seeding','Herbs':'ti-herb','Flowers':'ti-flower','Custom':'ti-star'};
+
+function renderLibCatFilters(){
+  var el=document.getElementById('lib-cat-filters');
+  if(!el)return;
+  var html='<button class="guide-filter-btn'+(libFilters.cat==='all'?' active':'')+'" onclick="setLibCat(\'all\')">All</button>';
+  CATS.filter(function(c){return c!=='Custom';}).forEach(function(c){
+    html+='<button class="guide-filter-btn'+(libFilters.cat===c?' active':'')+'" onclick="setLibCat(\''+c+'\')"><i class="ti '+(CAT_ICONS_MAP[c]||'ti-category')+'" style="font-size:12px"></i> '+c+'</button>';
+  });
+  el.innerHTML=html;
+}
+function setLibCat(c){libFilters.cat=c;renderLibrary();}
+function toggleLibFilter(key){
+  libFilters[key]=!libFilters[key];
+  var b=document.getElementById(key==='plantNow'?'lib-f-now':'lib-f-beg');
+  if(b)b.classList.toggle('active',libFilters[key]);
+  renderLibrary();
+}
+
 function renderLibrary(){
   var el=document.getElementById('library-grid');
   if(!el)return;
+  renderLibCatFilters();
   var search=(document.getElementById('lib-search')||{}).value||'';
   search=search.toLowerCase().trim();
-  var CAT_ICONS={'Vegetables':'ti-plant-2','Greens':'ti-leaf','Root veg':'ti-arrow-down','Legumes':'ti-seeding','Herbs':'ti-herb','Flowers':'ti-flower','Custom':'ti-star'};
   var inListIds=myPlantList.map(function(e){return e.id;});
   var filtered=PLANTS.filter(function(p){
     if(p.cat==='Custom')return false;// custom plants shown in myplants only
+    if(!plantInSeason(p))return false;// respect the season pills above
+    if(libFilters.cat!=='all'&&p.cat!==libFilters.cat)return false;
+    if(libFilters.beginner&&(p.ease||1)>1)return false;
+    if(libFilters.plantNow&&!isPlantNow(p))return false;
     return!search||p.name.toLowerCase().indexOf(search)>=0||p.cat.toLowerCase().indexOf(search)>=0;
   });
   // Sort alphabetically in library
   filtered.sort(function(a,b){return a.name.localeCompare(b.name);});
   var bycat={};
   filtered.forEach(function(p){if(!bycat[p.cat])bycat[p.cat]=[];bycat[p.cat].push(p);});
-  var SEASON_COLORS_MAP={'spring':'#185fa5','summer':'#C47A1E','fall':'#3A6B2A','year-round':'#9A8070'};
   var html='';
   Object.keys(bycat).forEach(function(cat){
-    var icon=CAT_ICONS[cat]||'ti-category';
+    var icon=CAT_ICONS_MAP[cat]||'ti-category';
     html+='<div class="lib-cat-label"><i class="ti '+icon+'"></i>'+cat+'</div><div class="lib-chips">';
     bycat[cat].forEach(function(plant){
       var inList=inListIds.indexOf(plant.id)>=0;
       var dot='<span class="lib-dot" style="background:'+plant.color+'"></span>';
-      var seasonDots=(plant.seasons||[]).map(function(s){return'<span class="sdot" style="background:'+(SEASON_COLORS_MAP[s]||'#888')+'"></span>';}).join('');
+      var dots=(plant.seasons||[]).map(function(s){return'<span class="sdot" style="background:'+(SEASON_DOT_COLORS[s]||'#888')+'"></span>';}).join('');
+      var now=isPlantNow(plant)?'<span style="font-size:8px;font-weight:700;margin-left:3px;letter-spacing:.03em;color:'+(inList?'#dfe8d0':'#3A6B2A')+'">NOW</span>':'';
       var action=inList?'removeFromMyPlants':'addToMyPlants';
       html+='<button class="lib-chip'+(inList?' in-list':'')+'" data-id="'+plant.id+'" onclick="'+action+'(this.dataset.id)" title="'+plant.warmNote+'">'+
-        dot+plant.name+' '+seasonDots+
+        dot+plant.name+' '+dots+now+
         (inList?'<i class="ti ti-check" style="font-size:11px;margin-left:2px"></i>':'')+
       '</button>';
     });
     html+='</div>';
   });
-  if(!html)html='<div style="font-size:13px;color:var(--text3);font-style:italic">No plants match your search.</div>';
+  if(!html)html='<div style="font-size:13px;color:var(--text3);font-style:italic">No plants match your filters.</div>';
   el.innerHTML=html;
 }
 
@@ -1512,27 +1581,34 @@ function toggleSeason(btn){
   }
   autoAdjustDates();
   updateSeasonHint();
-  // Always re-render whichever plant view is active
-  if(document.getElementById('checklist-panel').style.display!=='none'){
-    renderChecklist();
-  } else {
-    // Re-run wizard if results are showing, otherwise do nothing
-    var wizRes=document.getElementById('wiz-results');
-    if(wizRes&&wizRes.children.length>0)runWizard();
-  }
+  // Season pills now scope both views: refilter the library...
+  renderLibrary();
+  // ...and re-run the wizard if it has already produced suggestions
+  var wizRes=document.getElementById('wiz-results');
+  if(plantMode==='wizard'&&wizRes&&wizRes.children.length>0)runWizard();
 }
 
-function plantNowBadge(plant){
+var SEASON_DOT_COLORS={'spring':'#185fa5','summer':'#C47A1E','fall':'#3A6B2A','year-round':'#9A8070'};
+function seasonDots(plant){
+  return'<span class="season-dots">'+(plant.seasons||[]).map(function(s){
+    return'<span class="sdot" style="background:'+(SEASON_DOT_COLORS[s]||'#888')+'" title="'+s+'"></span>';
+  }).join('')+'</span>';
+}
+
+function isPlantNow(plant){
   var today=new Date();
   var lfStr=document.getElementById('last-frost').value;
   var ffStr=document.getElementById('first-fall-frost').value;
-  if(!lfStr)return '';
+  if(!lfStr)return false;
   var yr=today.getFullYear();
   var lf=new Date(yr+'-'+lfStr.slice(5));
   var ff=ffStr?new Date(yr+'-'+ffStr.slice(5)):null;
   var firstPlant=new Date(lf);firstPlant.setDate(firstPlant.getDate()+plant.frostOffset);
   var lastPlant=ff?new Date(ff):new Date(lf);lastPlant.setDate(lastPlant.getDate()+(plant.harvest||30));
-  if(today>=firstPlant&&today<=lastPlant){
+  return today>=firstPlant&&today<=lastPlant;
+}
+function plantNowBadge(plant){
+  if(isPlantNow(plant)){
     return'<span style="display:inline-flex;align-items:center;font-size:9px;font-weight:600;padding:1px 6px;border-radius:20px;background:#3A6B2A;color:#c0dd97;margin-left:6px;letter-spacing:.03em">PLANT NOW</span>';
   }
   return '';
@@ -1764,11 +1840,12 @@ function runWizard(){
   var goals=[];
   document.querySelectorAll('#wg-goals .wiz-opt.sel').forEach(function(b){goals.push(b.getAttribute('data-g'));});
   var timeEl=document.querySelector('#wg-time .wiz-opt.sel');
+  var timeVal=timeEl?timeEl.getAttribute('data-g'):'some';
   var expEl=document.querySelector('#wg-exp .wiz-opt.sel');
   var expVal=expEl?expEl.getAttribute('data-g'):'some';
   var hh=getHH();
   var totalSqFt=beds.reduce(function(s,b){return s+b.L*b.W;},0);
-  var scored=PLANTS.filter(function(plant){return plantInSeason(plant);}).map(function(plant){
+  var scored=PLANTS.filter(function(plant){return plant.cat!=='Custom'&&plantInSeason(plant);}).map(function(plant){
     var score=0;
     if(goals.length===0||plant.goals.some(function(g){return goals.indexOf(g)>=0;}))score+=3;
     if(expVal==='beginner'&&plant.ease>1)score-=2;
@@ -1776,32 +1853,37 @@ function runWizard(){
     score+=plant.recSq[hh]||1;
     return{plant:plant,score:score};
   }).filter(function(x){return x.score>0;}).sort(function(a,b){return b.score-a.score;});
-  var sqLeft=Math.floor(totalSqFt*0.85);
+  // How much of the garden to fill scales with how much time they have
+  var fillFactor=timeVal==='lots'?0.95:timeVal==='low'?0.55:0.8;
+  var sqLeft=Math.floor(totalSqFt*fillFactor);
   var suggested=[];
   for(var i=0;i<scored.length;i++){
     var item=scored[i];var sq=item.plant.recSq[hh]||1;
     if(sq<=sqLeft){suggested.push(item.plant.id);sqLeft-=sq;}
     if(sqLeft<=0)break;
   }
-  suggested.forEach(function(id){if(!selPlants[id])selPlants[id]={waves:pl(id).waves};});
-  var html='<div class="card"><div class="card-title"><i class="ti ti-sparkles" aria-hidden="true"></i> Suggested plants</div>';
+  // Add suggestions to the shared My Plants list (skips any already there)
+  suggested.forEach(function(id){addToMyPlants(id);});
+  var html='<div class="card"><div class="card-title"><i class="ti ti-sparkles" aria-hidden="true"></i> Suggested plants</div>'+
+    '<div class="card-subtitle">Added to your list — untick any you don\'t want, then tweak waves up in My Plants.</div>';
+  if(!suggested.length){
+    html+='<div style="font-size:13px;color:var(--text3);font-style:italic">No matches for those answers in the selected seasons — try toggling more seasons or goals.</div>';
+  }
   suggested.forEach(function(id){
-    var plant=pl(id);var waves=selPlants[id]?selPlants[id].waves:plant.waves;
+    var plant=pl(id);if(!plant)return;
     html+='<div class="plant-check-row">'+
-      '<input type="checkbox" checked id="wr-'+id+'" onchange="toggleSel(\''+id+'\',this.checked)">'+
-      '<label for="wr-'+id+'" class="pcr-name">'+plant.name+seasonDots(plant)+'</label>'+
+      '<input type="checkbox" checked id="wr-'+id+'" onchange="wizSelToggle(\''+id+'\',this.checked)">'+
+      '<label for="wr-'+id+'" class="pcr-name">'+plant.name+seasonDots(plant)+plantNowBadge(plant)+'</label>'+
       '<span class="pcr-meta">'+plant.perSqFt+'/ft² · '+plant.cat+' · '+plant.warmNote+'</span>'+
       (plant.sizeWarn?'<span class="pcr-meta" style="display:block;margin-top:1px;color:var(--harvest)"><i class="ti ti-alert-triangle" style="font-size:10px"></i> '+plant.sizeWarn+'</span>':'')+
-      '<div class="qty-ctrl">'+
-        '<button class="qbtn" onclick="adjSelWaves(\''+id+'\',-1,\'wv\')">−</button>'+
-        '<span class="qty-val" id="wv-'+id+'">'+waves+'</span>'+
-        '<button class="qbtn" onclick="adjSelWaves(\''+id+'\',1,\'wv\')">+</button>'+
-        '<span style="font-size:10px;color:var(--text3);margin-left:3px">waves</span>'+
-      '</div></div>';
+    '</div>';
   });
   html+='</div>';
   document.getElementById('wiz-results').innerHTML=html;
-  updateSelSummary();
+}
+
+function wizSelToggle(id,checked){
+  if(checked)addToMyPlants(id);else removeFromMyPlants(id);
 }
 
 function renderChecklist(){
@@ -1857,19 +1939,24 @@ function updateSelSummary(){
     ?ids.map(function(id){var plant=pl(id);return'<span class="sel-chip"><span class="sel-chip-dot" style="background:'+plant.color+'"></span>'+plant.name+'</span>';}).join('')
     :'<span>No plants selected yet — use the wizard or checklist above.</span>';
 }
+var plantMode=null;
 function setMode(m){
-  document.getElementById('wizard-panel').style.display=m==='wizard'?'block':'none';
-  document.getElementById('checklist-panel').style.display=m==='checklist'?'block':'none';
-  document.getElementById('mode-wiz').classList.toggle('active',m==='wizard');
-  document.getElementById('mode-chk').classList.toggle('active',m==='checklist');
-  if(m==='checklist')renderChecklist();
+  plantMode=m;
+  var wp=document.getElementById('wizard-panel');
+  var lp=document.getElementById('library-panel');
+  if(wp)wp.style.display=m==='wizard'?'block':'none';
+  if(lp)lp.style.display=m==='browse'?'block':'none';
+  var mw=document.getElementById('mode-wiz'),mc=document.getElementById('mode-chk');
+  if(mw)mw.classList.toggle('active',m==='wizard');
+  if(mc)mc.classList.toggle('active',m==='browse');
+  if(m==='browse')renderLibrary();
   // Update season hint whenever switching modes
   updateSeasonHint();
 }
 
 function goStep(s){
   if(s===0){buildHero();}
-  if(s===1){applySeasonDetection();renderMyPlants();renderLibrary();}
+  if(s===1){applySeasonDetection();renderMyPlants();renderLibrary();setMode(plantMode||(myPlantList.length?'browse':'wizard'));}
   buildBottomBar();
   if(s===2){beds.forEach(function(b){if(!b.grid||b.grid.length!==b.L*b.W)b.grid=Array(b.L*b.W).fill(null);});renderBedTabs();setTimeout(function(){renderActiveBed();renderPlantSelector();},50);}
   if(s===3)buildCalendar();
